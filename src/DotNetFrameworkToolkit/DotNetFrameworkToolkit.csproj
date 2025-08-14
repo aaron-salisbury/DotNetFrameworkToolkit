@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C4A2BE97-2CA0-4DA5-ACF7-AA4896715926}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DotNetFrameworkToolkit</RootNamespace>
+    <AssemblyName>DotNetFrameworkToolkit</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Logging.2.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Logging, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Logging.2.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Security.Cryptography, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Cryptography.2.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Security.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Security.Cryptography.Configuration.Design, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Cryptography.2.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Security.Cryptography.Configuration.Design.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ObjectBuilder2, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.ObjectBuilder2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.Unity.Interception.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception.Configuration, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.Unity.Interception.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.StaticFactory, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PatternsAndPractices.Unity.1.2.0\lib\Microsoft.Practices.Unity.StaticFactory.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>packages\System.Data.SqlServerCe_unofficial.4.0.8482.1\lib\net20\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\ExtensionAttribute.cs" />
+    <Compile Include="Core\Extensions\DateTimeExtensions.cs" />
+    <Compile Include="Core\Extensions\StringExtensions.cs" />
+    <Compile Include="Core\ProcessResult.cs" />
+    <Compile Include="Core\ValidationResult.cs" />
+    <Compile Include="Modules\ComponentModel\ObservableObject.cs" />
+    <Compile Include="Modules\ComponentModel\ObservableValidator.cs" />
+    <Compile Include="Modules\ComponentModel\Validation\DataErrorsChangedEventArgs.cs" />
+    <Compile Include="Modules\ComponentModel\Validation\INotifyDataErrorInfo.cs" />
+    <Compile Include="Modules\DataAccess\Database\Migrations\IMigration.cs" />
+    <Compile Include="Modules\DataAccess\Database\Migrations\SQLServerCEMigration.cs" />
+    <Compile Include="Modules\DataAccess\Database\IDataEntity.cs" />
+    <Compile Include="Modules\DataAccess\Database\Initialization\IDatabaseInitializer.cs" />
+    <Compile Include="Modules\DataAccess\Database\Initialization\SqlServerCEDatabaseInitializer.cs" />
+    <Compile Include="Modules\DataAccess\FileSystem\FileSystemAccess.cs" />
+    <Compile Include="Modules\DataAccess\FileSystem\IFileSystemAccess.cs" />
+    <Compile Include="Modules\Logging\EventId.cs" />
+    <Compile Include="Modules\Logging\FormattedLogValues.cs" />
+    <Compile Include="Modules\Logging\ILogger.cs" />
+    <Compile Include="Modules\Logging\Implementation\InMemorySinkPNP.cs" />
+    <Compile Include="Modules\Logging\Implementation\LogEntryException.cs" />
+    <Compile Include="Modules\Logging\Implementation\LoggerPNP.cs" />
+    <Compile Include="Modules\Logging\Implementation\LoggerPNPScope.cs" />
+    <Compile Include="Modules\Logging\LogEvent.cs" />
+    <Compile Include="Modules\Logging\LoggerExtensions.cs" />
+    <Compile Include="Modules\Logging\LoggerState.cs" />
+    <Compile Include="Modules\Logging\LogLevel.cs" />
+    <Compile Include="Modules\UserAccess\Authentication\IUserAuthenticator.cs" />
+    <Compile Include="Modules\UserAccess\Authentication\UserAuthenticator.cs" />
+    <Compile Include="Modules\UserAccess\CryptographyConfig.cs" />
+    <Compile Include="Modules\UserAccess\CryptographyCredential.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
