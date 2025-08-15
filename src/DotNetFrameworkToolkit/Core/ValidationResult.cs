@@ -21,8 +21,8 @@ namespace DotNetFrameworkToolkit.Core
         public bool IsValid
         {
             get
-            { 
-                return (_validationMessages != null ? _validationMessages.Count : 0) == 0 
+            {
+                return (_validationMessages != null ? _validationMessages.Count : 0) == 0
                     && (_generalMessages != null ? _generalMessages.Count : 0) == 0;
             }
         }

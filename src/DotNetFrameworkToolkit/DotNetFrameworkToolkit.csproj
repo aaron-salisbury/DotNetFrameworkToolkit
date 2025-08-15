@@ -14,6 +14,20 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
+  <PropertyGroup>
+	<PackageId>AaronSalisbury.DotNetFrameworkToolkit</PackageId>
+	<Version>0.1.0</Version>
+	<Authors>Aaron Salisbury</Authors>
+	<Owners>Aaron Salisbury</Owners>
+	<Description>Common C# app development and shim code for legacy .Net Framework 2.0 projects.</Description>
+	<Copyright>Copyright © 2025</Copyright>
+	<Tags>app helpers legacy netframework</Tags>
+	<ProjectUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit</ProjectUrl>
+	<LicenseUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit/blob/master/license.txt</LicenseUrl>
+	<IconUrl>https://raw.githubusercontent.com/Runneth-Over-Studio/AppToolkit/refs/heads/main/content/nuget-package-icon.png</IconUrl>
+	<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+	<ReleaseNotes>In-development / pre-alpha.</ReleaseNotes>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>

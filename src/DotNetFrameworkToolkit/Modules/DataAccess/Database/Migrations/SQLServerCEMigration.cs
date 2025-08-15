@@ -39,7 +39,7 @@ public abstract class SQLServerCEMigration : IMigration
             if (count > 0)
             {
                 throw new InvalidOperationException($"Migration number {this.Number} has already been applied.");
-            } 
+            }
         }
 
         // Begin transaction, execute migration, update table, commit.

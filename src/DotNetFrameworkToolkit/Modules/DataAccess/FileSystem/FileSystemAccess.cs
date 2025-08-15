@@ -63,9 +63,9 @@ public sealed class FileSystemAccess : IFileSystemAccess
             else
             {
                 return ProcessResult<bool>.LogAndForwardException(
-                    "Nothing to delete.", 
-                    new FileNotFoundException("Attempted to delete a file that does not exist.", fullFilePath), 
-                    _logger, 
+                    "Nothing to delete.",
+                    new FileNotFoundException("Attempted to delete a file that does not exist.", fullFilePath),
+                    _logger,
                     LogLevel.Warning);
             }
         }

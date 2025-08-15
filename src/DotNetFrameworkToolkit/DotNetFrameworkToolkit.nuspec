@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>AaronSalisbury.DotNetFrameworkToolkit</id>
+    <version>0.1.0</version>
+    <authors>Aaron Salisbury</authors>
+    <owners>Aaron Salisbury</owners>
+    <description>Common C# app development and shim code for legacy .Net Framework 2.0 projects.</description>
+    <copyright>Copyright © 2025</copyright>
+    <tags>app helpers legacy netframework</tags>
+    <projectUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit</projectUrl>
+    <licenseUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit/blob/master/license.txt</licenseUrl>
+    <iconUrl>https://raw.githubusercontent.com/Runneth-Over-Studio/AppToolkit/refs/heads/main/content/nuget-package-icon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <releaseNotes>In-development / pre-alpha.</releaseNotes>
+  </metadata>
+</package>
