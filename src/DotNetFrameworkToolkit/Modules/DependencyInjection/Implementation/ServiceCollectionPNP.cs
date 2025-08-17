@@ -13,6 +13,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// </remarks>
 public class ServiceCollectionPNP : IServiceCollection
 {
+    private readonly object _syncRoot = new();
     private readonly List<ServiceDescriptor> _descriptors;
 
     /// <summary>
@@ -69,21 +70,24 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns>The <see cref="IServiceProvider"/>.</returns>
     public IServiceProvider BuildServiceProvider()
     {
-        IUnityContainer container = new UnityContainer();
-
-        foreach (ServiceDescriptor descriptor in _descriptors)
+        lock (_syncRoot)
         {
-            if (descriptor.ImplementationInstance != null)
-            {
-                container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance);
-            }
-            else
-            {
-                container.RegisterType(descriptor.ServiceType, descriptor.ImplementationType, LifetimeManagerForServiceLifetime(descriptor.Lifetime));
-            }
-        }
+            IUnityContainer container = new UnityContainer();
 
-        return new ServiceProviderPNP(container);
+            foreach (ServiceDescriptor descriptor in _descriptors)
+            {
+                if (descriptor.ImplementationInstance != null)
+                {
+                    container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance);
+                }
+                else
+                {
+                    container.RegisterType(descriptor.ServiceType, descriptor.ImplementationType, LifetimeManagerForServiceLifetime(descriptor.Lifetime));
+                }
+            }
+
+            return new ServiceProviderPNP(container);
+        }
     }
 
     #region IList Members
@@ -131,28 +135,31 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="item">The service descriptor to insert.</param>
     public void Insert(int index, ServiceDescriptor item)
     {
-        // Subsequent attempts to add the same type replaces the previous addition.
-        // Could possibly enhance by letting more than one of a type in the collection, 
-        // but would need to keep track of names. Would then need to update the
-        // equality overrides of ServiceDescriptor as well.
-        int existingIndex = IndexOf(item);
-        if (existingIndex >= 0)
+        lock (_syncRoot)
         {
-            RemoveAt(existingIndex);
-
-            if (existingIndex < index)
+            // Subsequent attempts to add the same type replaces the previous addition.
+            // Could possibly enhance by letting more than one of a type in the collection, 
+            // but would need to keep track of names. Would then need to update the
+            // equality overrides of ServiceDescriptor as well.
+            int existingIndex = IndexOf(item);
+            if (existingIndex >= 0)
             {
-                --index;
-            }
-        }
+                RemoveAt(existingIndex);
 
-        if (index < 0 || index > _descriptors.Count - 1)
-        {
-            _descriptors.Add(item);
-        }
-        else
-        {
-            _descriptors.Insert(index, item);
+                if (existingIndex < index)
+                {
+                    --index;
+                }
+            }
+
+            if (index < 0 || index > _descriptors.Count - 1)
+            {
+                _descriptors.Add(item);
+            }
+            else
+            {
+                _descriptors.Insert(index, item);
+            }
         }
     }
 
@@ -162,7 +169,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="index">The zero-based index of the item to remove.</param>
     public void RemoveAt(int index)
     {
-        _descriptors.RemoveAt(index);
+        lock (_syncRoot)
+        {
+            _descriptors.RemoveAt(index);
+        }
     }
 
     /// <summary>
@@ -171,7 +181,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="item">The service descriptor to add.</param>
     public void Add(ServiceDescriptor item)
     {
-        Insert(_descriptors.Count, item);
+        lock (_syncRoot)
+        {
+            Insert(_descriptors.Count, item);
+        }
     }
 
     /// <summary>
@@ -179,7 +192,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// </summary>
     public void Clear()
     {
-        _descriptors.Clear();
+        lock (_syncRoot)
+        {
+            _descriptors.Clear();
+        }
     }
 
     /// <summary>
@@ -209,7 +225,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns><c>true</c> if the item was successfully removed; otherwise, <c>false</c>.</returns>
     public bool Remove(ServiceDescriptor item)
     {
-        return _descriptors.Remove(item);
+        lock (_syncRoot)
+        {
+            return _descriptors.Remove(item);
+        }
     }
 
     /// <summary>
