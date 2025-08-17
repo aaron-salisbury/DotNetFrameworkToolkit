@@ -10,9 +10,9 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 /// within an application. Provided methods to write log entries to configured sinks,
 /// check if a log level is enabled, and create logical operation scopes for grouping related log entries.
 /// </summary>
-/// <summary>
+/// <remarks>
 /// This implementation uses the Patterns & Practices Enterprise Library.
-/// </summary>
+/// </remarks>
 public class LoggerPNP : ILogger, IDisposable
 {
     /// <summary>
