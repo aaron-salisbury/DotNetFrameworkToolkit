@@ -54,7 +54,7 @@ public sealed class BuildContext : FrostingContext
         {
             Name = projectName,
             DirectoryPathAbsolute = projectDirectoryPath,
-            FilePathAbsolute = csprojPath,
+            CsprojFilePathAbsolute = csprojPath,
             OutputDirectoryPathAbsolute = DetermineAbsoluteOutputPath(csprojPath, isSdkStyleProject, context.Config, context),
             IsSdkStyleProject = isSdkStyleProject
         };

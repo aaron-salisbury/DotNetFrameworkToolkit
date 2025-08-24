@@ -31,7 +31,7 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
 
             if (project.IsSdkStyleProject)
             {
-                context.DotNetPack(project.FilePathAbsolute, new DotNetPackSettings
+                context.DotNetPack(project.CsprojFilePathAbsolute, new DotNetPackSettings
                 {
                     OutputDirectory = nuGetOutputPath,
                     Configuration = context.Config.ToString(),
@@ -45,7 +45,7 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
                 // For legacy projects, use NuGet.
                 string toolsDirectory = System.IO.Path.Combine(context.AbsolutePathToRepo, "tools");
                 string nugetExePath = await VerifyNuGetTool(context, toolsDirectory);
-                string nuspecPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(project.FilePathAbsolute)!, $"{project.Name}.nuspec");
+                string nuspecPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(project.CsprojFilePathAbsolute)!, $"{project.Name}.nuspec");
 
                 if (!System.IO.File.Exists(nuspecPath))
                 {

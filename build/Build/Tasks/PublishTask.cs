@@ -24,14 +24,14 @@ public sealed class PublishTask : FrostingTask<BuildContext>
         {
             if (project.IsSdkStyleProject)
             {
-                context.DotNetPublish(project.FilePathAbsolute, new DotNetPublishSettings
+                context.DotNetPublish(project.CsprojFilePathAbsolute, new DotNetPublishSettings
                 {
                     Configuration = context.Config.ToString()
                 });
             }
             else
             {
-                context.MSBuild(project.FilePathAbsolute, new MSBuildSettings
+                context.MSBuild(project.CsprojFilePathAbsolute, new MSBuildSettings
                 {
                     Target = "Publish",
                     Configuration = context.Config.ToString()
