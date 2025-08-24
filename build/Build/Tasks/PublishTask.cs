@@ -8,7 +8,9 @@ namespace Build.Tasks;
 
 [TaskName("Publish")]
 [IsDependentOn(typeof(CompileProjectsTask))]
-[TaskDescription("Publishes projects using the Release configuration, applying publish settings defined in their .csproj files.")]
+[TaskDescription("Generates the NuGet packages. " +
+    "SDK-style projects should have package attributes set in the .csproj. " +
+    "Legacy projects should have a nuspec file, named after and next to the .csproj, to use as a template.")]
 public sealed class PublishTask : FrostingTask<BuildContext>
 {
     public override bool ShouldRun(BuildContext context)

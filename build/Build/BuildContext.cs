@@ -14,7 +14,7 @@ namespace Build;
 
 public sealed class BuildContext : FrostingContext
 {
-    internal const string REPO_AND_SOLUTION_NAME = "DotNetFrameworkToolkit";
+    internal const string REPO_NAME = "DotNetFrameworkToolkit";
     internal const string LOGO_SVG_FILENAME = "logo.svg";
 
     private static readonly string[] RELEASE_PROJECT_NAMES = [ "DotNetFrameworkToolkit" ];
@@ -40,7 +40,7 @@ public sealed class BuildContext : FrostingContext
         };
 
         SerializerOptions = new() { PropertyNameCaseInsensitive = true };
-        AbsolutePathToRepo = GetRepoAbsolutePath(REPO_AND_SOLUTION_NAME, this);
+        AbsolutePathToRepo = GetRepoAbsolutePath(REPO_NAME, this);
         ReleaseProjects = [.. RELEASE_PROJECT_NAMES.Select(name => CreateReleaseProject(this, name))];
     }
 
@@ -77,40 +77,6 @@ public sealed class BuildContext : FrostingContext
         }
 
         return dir.FullPath;
-    }
-
-    private static string DetermineAbsoluteOutputPath(string csprojPath, bool isSdkStyleProject, BuildConfigurations config, ICakeContext context)
-    {
-        // Get the project root directory (directory containing the .csproj).
-        var projectRoot = context.Directory(System.IO.Path.GetDirectoryName(csprojPath) ?? ".");
-
-        // 1. Check for custom OutputPath.
-        ConvertableDirectoryPath? customOutputPath = GetConfiguredOutputPath(csprojPath, config, context);
-        if (customOutputPath != null)
-        {
-            // If the path is already absolute, return as is.
-            if (System.IO.Path.IsPathRooted(customOutputPath.Path.FullPath))
-            {
-                return customOutputPath.Path.FullPath;
-            }
-
-            // Otherwise combine with project root.
-            return (projectRoot + customOutputPath).Path.FullPath;
-        }
-
-        // 2. Default output path logic.
-        string outputRelative;
-        if (isSdkStyleProject)
-        {
-            string targetVersion = GetTargetFramework(csprojPath, true, context);
-            outputRelative = $"bin/{config}/{targetVersion}";
-        }
-        else
-        {
-            outputRelative = $"bin/{config}";
-        }
-
-        return (projectRoot + context.Directory(outputRelative)).Path.FullPath;
     }
 
     private static ConvertableDirectoryPath? GetConfiguredOutputPath(string csprojPath, BuildConfigurations config, ICakeContext context)
@@ -169,4 +135,39 @@ public sealed class BuildContext : FrostingContext
 
         return projectElement?.Attribute("Sdk") != null;
     }
+
+    internal static string DetermineAbsoluteOutputPath(string csprojPath, bool isSdkStyleProject, BuildConfigurations config, ICakeContext context)
+    {
+        // Get the project root directory (directory containing the .csproj).
+        var projectRoot = context.Directory(System.IO.Path.GetDirectoryName(csprojPath) ?? ".");
+
+        // 1. Check for custom OutputPath.
+        ConvertableDirectoryPath? customOutputPath = GetConfiguredOutputPath(csprojPath, config, context);
+        if (customOutputPath != null)
+        {
+            // If the path is already absolute, return as is.
+            if (System.IO.Path.IsPathRooted(customOutputPath.Path.FullPath))
+            {
+                return customOutputPath.Path.FullPath;
+            }
+
+            // Otherwise combine with project root.
+            return (projectRoot + customOutputPath).Path.FullPath;
+        }
+
+        // 2. Default output path logic.
+        string outputRelative;
+        if (isSdkStyleProject)
+        {
+            string targetVersion = GetTargetFramework(csprojPath, true, context);
+            outputRelative = $"bin/{config}/{targetVersion}";
+        }
+        else
+        {
+            outputRelative = $"bin/{config}";
+        }
+
+        return (projectRoot + context.Directory(outputRelative)).Path.FullPath;
+    }
+
 }
