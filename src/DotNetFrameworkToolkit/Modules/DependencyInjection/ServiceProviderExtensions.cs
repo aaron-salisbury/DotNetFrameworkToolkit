@@ -12,7 +12,7 @@ public static class ServiceProviderExtensions
     /// </summary>
     /// <typeparam name="T">The type of service object to get.</typeparam>
     /// <returns>A service object of type <typeparamref name="T"/> or null if there is no such service.</returns>
-    public static T GetService<T>(this IServiceProvider serviceProvider)
+    public static T GetService<T>(IServiceProvider serviceProvider)
     {
         return (T)serviceProvider.GetService(typeof(T));
     }
@@ -23,9 +23,9 @@ public static class ServiceProviderExtensions
     /// <typeparam name="T">The type of service object to get.</typeparam>
     /// <returns>A service object of type <typeparamref name="T"/>.</returns>
     /// <exception cref="System.InvalidOperationException">There is no service of type <typeparamref name="T"/>.</exception>
-    public static T GetRequiredService<T>(this IServiceProvider serviceProvider) where T : notnull
+    public static T GetRequiredService<T>(IServiceProvider serviceProvider) where T : notnull
     {
-        T service = serviceProvider.GetService<T>();
+        T service = GetService<T>(serviceProvider);
 
         if (service == null)
         {

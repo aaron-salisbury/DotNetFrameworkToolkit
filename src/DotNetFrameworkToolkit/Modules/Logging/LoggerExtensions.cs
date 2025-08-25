@@ -24,9 +24,9 @@ public static class LoggerExtensions
     /// logger.LogDebug(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogDebug(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogDebug(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Debug, eventId, exception, message, args);
+        Log(logger, LogLevel.Debug, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -41,9 +41,9 @@ public static class LoggerExtensions
     /// logger.LogDebug(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogDebug(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogDebug(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Debug, eventId, message, args);
+        Log(logger, LogLevel.Debug, eventId, message, args);
     }
 
     /// <summary>
@@ -58,9 +58,9 @@ public static class LoggerExtensions
     /// logger.LogDebug(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogDebug(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogDebug(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Debug, exception, message, args);
+        Log(logger, LogLevel.Debug, exception, message, args);
     }
 
     /// <summary>
@@ -74,9 +74,9 @@ public static class LoggerExtensions
     /// logger.LogDebug("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogDebug(this ILogger logger, string message, params object[] args)
+    public static void LogDebug(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Debug, message, args);
+        Log(logger, LogLevel.Debug, message, args);
     }
 
     //------------------------------------------TRACE------------------------------------------//
@@ -94,9 +94,9 @@ public static class LoggerExtensions
     /// logger.LogTrace(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogTrace(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogTrace(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Trace, eventId, exception, message, args);
+        Log(logger, LogLevel.Trace, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -111,9 +111,9 @@ public static class LoggerExtensions
     /// logger.LogTrace(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogTrace(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogTrace(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Trace, eventId, message, args);
+        Log(logger, LogLevel.Trace, eventId, message, args);
     }
 
     /// <summary>
@@ -128,9 +128,9 @@ public static class LoggerExtensions
     /// logger.LogTrace(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogTrace(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogTrace(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Trace, exception, message, args);
+        Log(logger, LogLevel.Trace, exception, message, args);
     }
 
     /// <summary>
@@ -144,9 +144,9 @@ public static class LoggerExtensions
     /// logger.LogTrace("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogTrace(this ILogger logger, string message, params object[] args)
+    public static void LogTrace(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Trace, message, args);
+        Log(logger, LogLevel.Trace, message, args);
     }
 
     //------------------------------------------INFORMATION------------------------------------------//
@@ -164,9 +164,9 @@ public static class LoggerExtensions
     /// logger.LogInformation(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogInformation(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogInformation(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Information, eventId, exception, message, args);
+        Log(logger, LogLevel.Information, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -181,9 +181,9 @@ public static class LoggerExtensions
     /// logger.LogInformation(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogInformation(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogInformation(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Information, eventId, message, args);
+        Log(logger, LogLevel.Information, eventId, message, args);
     }
 
     /// <summary>
@@ -198,9 +198,9 @@ public static class LoggerExtensions
     /// logger.LogInformation(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogInformation(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogInformation(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Information, exception, message, args);
+        Log(logger, LogLevel.Information, exception, message, args);
     }
 
     /// <summary>
@@ -214,9 +214,9 @@ public static class LoggerExtensions
     /// logger.LogInformation("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogInformation(this ILogger logger, string message, params object[] args)
+    public static void LogInformation(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Information, message, args);
+        Log(logger, LogLevel.Information, message, args);
     }
 
     //------------------------------------------WARNING------------------------------------------//
@@ -234,9 +234,9 @@ public static class LoggerExtensions
     /// logger.LogWarning(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogWarning(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogWarning(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Warning, eventId, exception, message, args);
+        Log(logger, LogLevel.Warning, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -251,9 +251,9 @@ public static class LoggerExtensions
     /// logger.LogWarning(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogWarning(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogWarning(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Warning, eventId, message, args);
+        Log(logger, LogLevel.Warning, eventId, message, args);
     }
 
     /// <summary>
@@ -268,9 +268,9 @@ public static class LoggerExtensions
     /// logger.LogWarning(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogWarning(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogWarning(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Warning, exception, message, args);
+        Log(logger, LogLevel.Warning, exception, message, args);
     }
 
     /// <summary>
@@ -284,9 +284,9 @@ public static class LoggerExtensions
     /// logger.LogWarning("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogWarning(this ILogger logger, string message, params object[] args)
+    public static void LogWarning(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Warning, message, args);
+        Log(logger, LogLevel.Warning, message, args);
     }
 
     //------------------------------------------ERROR------------------------------------------//
@@ -304,9 +304,9 @@ public static class LoggerExtensions
     /// logger.LogError(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogError(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogError(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Error, eventId, exception, message, args);
+        Log(logger, LogLevel.Error, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -321,9 +321,9 @@ public static class LoggerExtensions
     /// logger.LogError(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogError(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogError(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Error, eventId, message, args);
+        Log(logger, LogLevel.Error, eventId, message, args);
     }
 
     /// <summary>
@@ -338,9 +338,9 @@ public static class LoggerExtensions
     /// logger.LogError(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogError(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogError(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Error, exception, message, args);
+        Log(logger, LogLevel.Error, exception, message, args);
     }
 
     /// <summary>
@@ -354,9 +354,9 @@ public static class LoggerExtensions
     /// logger.LogError("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogError(this ILogger logger, string message, params object[] args)
+    public static void LogError(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Error, message, args);
+        Log(logger, LogLevel.Error, message, args);
     }
 
     //------------------------------------------CRITICAL------------------------------------------//
@@ -374,9 +374,9 @@ public static class LoggerExtensions
     /// logger.LogCritical(0, exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogCritical(this ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
+    public static void LogCritical(ILogger logger, EventId eventId, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Critical, eventId, exception, message, args);
+        Log(logger, LogLevel.Critical, eventId, exception, message, args);
     }
 
     /// <summary>
@@ -391,9 +391,9 @@ public static class LoggerExtensions
     /// logger.LogCritical(0, "Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogCritical(this ILogger logger, EventId eventId, string message, params object[] args)
+    public static void LogCritical(ILogger logger, EventId eventId, string message, params object[] args)
     {
-        logger.Log(LogLevel.Critical, eventId, message, args);
+        Log(logger, LogLevel.Critical, eventId, message, args);
     }
 
     /// <summary>
@@ -408,9 +408,9 @@ public static class LoggerExtensions
     /// logger.LogCritical(exception, "Error while processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogCritical(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void LogCritical(ILogger logger, Exception exception, string message, params object[] args)
     {
-        logger.Log(LogLevel.Critical, exception, message, args);
+        Log(logger, LogLevel.Critical, exception, message, args);
     }
 
     /// <summary>
@@ -424,9 +424,9 @@ public static class LoggerExtensions
     /// logger.LogCritical("Processing request from {Address}", address)
     /// </code>
     /// </example>
-    public static void LogCritical(this ILogger logger, string message, params object[] args)
+    public static void LogCritical(ILogger logger, string message, params object[] args)
     {
-        logger.Log(LogLevel.Critical, message, args);
+        Log(logger, LogLevel.Critical, message, args);
     }
 
     /// <summary>
@@ -436,9 +436,9 @@ public static class LoggerExtensions
     /// <param name="logLevel">Entry will be written on this level.</param>
     /// <param name="message">Format string of the log message.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
-    public static void Log(this ILogger logger, LogLevel logLevel, string message, params object[] args)
+    public static void Log(ILogger logger, LogLevel logLevel, string message, params object[] args)
     {
-        logger.Log(logLevel, 0, null, message, args);
+        Log(logger, logLevel, 0, null, message, args);
     }
 
     /// <summary>
@@ -449,9 +449,9 @@ public static class LoggerExtensions
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
-    public static void Log(this ILogger logger, LogLevel logLevel, EventId eventId, string message, params object[] args)
+    public static void Log(ILogger logger, LogLevel logLevel, EventId eventId, string message, params object[] args)
     {
-        logger.Log(logLevel, eventId, null, message, args);
+        Log(logger, logLevel, eventId, null, message, args);
     }
 
     /// <summary>
@@ -462,12 +462,12 @@ public static class LoggerExtensions
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
-    public static void Log(this ILogger logger, LogLevel logLevel, Exception exception, string message, params object[] args)
+    public static void Log(ILogger logger, LogLevel logLevel, Exception exception, string message, params object[] args)
     {
-        logger.Log(logLevel, 0, exception, message, args);
+        Log(logger, logLevel, 0, exception, message, args);
     }
 
-    public static void Log(this ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
+    public static void Log(ILogger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
     {
         if (logger == null)
         {
@@ -493,7 +493,7 @@ public static class LoggerExtensions
     /// using(logger.BeginScope("Processing request from {Address}", address)) { }
     /// </code>
     /// </example>
-    public static IDisposable BeginScope(this ILogger logger, string messageFormat, params object[] args)
+    public static IDisposable BeginScope(ILogger logger, string messageFormat, params object[] args)
     {
         if (logger == null)
         {

@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceType">The type of the service to register.</param>
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddTransient(this IServiceCollection services, Type serviceType, Type implementationType)
+    public static IServiceCollection AddTransient(IServiceCollection services, Type serviceType, Type implementationType)
     {
         if (services == null)
         {
@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TImplementation">The type of the implementation to use.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddTransient<TService, TImplementation>(this IServiceCollection services)
+    public static IServiceCollection AddTransient<TService, TImplementation>(IServiceCollection services)
         where TService : class
         where TImplementation : class, TService
     {
@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddTransient(typeof(TService), typeof(TImplementation));
+        return AddTransient(services, typeof(TService), typeof(TImplementation));
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddTransient(this IServiceCollection services, Type serviceType)
+    public static IServiceCollection AddTransient(IServiceCollection services, Type serviceType)
     {
         if (services == null)
         {
@@ -76,7 +76,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        return services.AddTransient(serviceType, serviceType);
+        return AddTransient(services, serviceType, serviceType);
     }
 
     /// <summary>
@@ -85,7 +85,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TService">The type of the service to add.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddTransient<TService>(this IServiceCollection services)
+    public static IServiceCollection AddTransient<TService>(IServiceCollection services)
         where TService : class
     {
         if (services == null)
@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddTransient(typeof(TService));
+        return AddTransient(services, typeof(TService));
     }
 
     //-----------------------------------------Scoped------------------------------------------//
@@ -106,7 +106,7 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceType">The type of the service to register.</param>
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddScoped(this IServiceCollection services, Type serviceType, Type implementationType)
+    public static IServiceCollection AddScoped(IServiceCollection services, Type serviceType, Type implementationType)
     {
         if (services == null)
         {
@@ -134,7 +134,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TImplementation">The type of the implementation to use.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddScoped<TService, TImplementation>(this IServiceCollection services)
+    public static IServiceCollection AddScoped<TService, TImplementation>(IServiceCollection services)
         where TService : class
         where TImplementation : class, TService
     {
@@ -143,7 +143,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddScoped(typeof(TService), typeof(TImplementation));
+        return AddScoped(services, typeof(TService), typeof(TImplementation));
     }
 
     /// <summary>
@@ -152,7 +152,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddScoped(this IServiceCollection services, Type serviceType)
+    public static IServiceCollection AddScoped(IServiceCollection services, Type serviceType)
     {
         if (services == null)
         {
@@ -164,7 +164,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        return services.AddScoped(serviceType, serviceType);
+        return AddScoped(services, serviceType, serviceType);
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TService">The type of the service to add.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddScoped<TService>(this IServiceCollection services)
+    public static IServiceCollection AddScoped<TService>(IServiceCollection services)
         where TService : class
     {
         if (services == null)
@@ -181,7 +181,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddScoped(typeof(TService));
+        return AddScoped(services, typeof(TService));
     }
 
     //----------------------------------------Singleton----------------------------------------//
@@ -194,7 +194,7 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceType">The type of the service to register.</param>
     /// <param name="implementationType">The implementation type of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton(this IServiceCollection services, Type serviceType, Type implementationType)
+    public static IServiceCollection AddSingleton(IServiceCollection services, Type serviceType, Type implementationType)
     {
         if (services == null)
         {
@@ -222,7 +222,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TImplementation">The type of the implementation to use.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton<TService, TImplementation>(this IServiceCollection services)
+    public static IServiceCollection AddSingleton<TService, TImplementation>(IServiceCollection services)
         where TService : class
         where TImplementation : class, TService
     {
@@ -231,7 +231,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddSingleton(typeof(TService), typeof(TImplementation));
+        return AddSingleton(services, typeof(TService), typeof(TImplementation));
     }
 
     /// <summary>
@@ -240,7 +240,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="serviceType">The type of the service to register and the implementation to use.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton(this IServiceCollection services, Type serviceType)
+    public static IServiceCollection AddSingleton(IServiceCollection services, Type serviceType)
     {
         if (services == null)
         {
@@ -252,7 +252,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        return services.AddSingleton(serviceType, serviceType);
+        return AddSingleton(services, serviceType, serviceType);
     }
 
     /// <summary>
@@ -261,7 +261,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TService">The type of the service to add.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton<TService>(this IServiceCollection services)
+    public static IServiceCollection AddSingleton<TService>(IServiceCollection services)
         where TService : class
     {
         if (services == null)
@@ -269,7 +269,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        return services.AddSingleton(typeof(TService));
+        return AddSingleton(services, typeof(TService));
     }
 
     /// <summary>
@@ -280,7 +280,7 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceType">The type of the service to register.</param>
     /// <param name="implementationInstance">The instance of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton(this IServiceCollection services, Type serviceType, object implementationInstance)
+    public static IServiceCollection AddSingleton(IServiceCollection services, Type serviceType, object implementationInstance)
     {
         if (services == null)
         {
@@ -307,7 +307,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="implementationInstance">The instance of the service.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static IServiceCollection AddSingleton<TService>(this IServiceCollection services, TService implementationInstance)
+    public static IServiceCollection AddSingleton<TService>(IServiceCollection services, TService implementationInstance)
         where TService : class
     {
         if (services == null)
@@ -320,6 +320,6 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(implementationInstance));
         }
 
-        return services.AddSingleton(typeof(TService), implementationInstance);
+        return AddSingleton(services, typeof(TService), implementationInstance);
     }
 }
