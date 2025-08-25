@@ -12,7 +12,7 @@ public static class DateTimeExtensions
     /// </summary>
     /// <param name="dateTime">The <see cref="DateTime"/> to convert.</param>
     /// <returns>A string representation of the timestamp.</returns>
-    public static string ToTimeStamp(DateTime dateTime)
+    public static string ToTimeStamp(this DateTime dateTime)
     {
         return dateTime.ToString("yyyy.MM.dd.mm.ss");
     }

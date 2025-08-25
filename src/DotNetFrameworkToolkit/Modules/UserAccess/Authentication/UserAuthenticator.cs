@@ -35,7 +35,7 @@ internal class UserAuthenticator : HashAlgorithmProvider, IUserAuthenticator
     public CryptographyCredential CreateUserCredentials(string password)
     {
         byte[] loginSalt = GenerateSalt();
-        byte[] pBytes = StringExtensions.ToBytes(password);
+        byte[] pBytes = password.ToBytes();
 
         try
         {
@@ -55,7 +55,7 @@ internal class UserAuthenticator : HashAlgorithmProvider, IUserAuthenticator
     /// <inheritdoc/>
     public bool VerifyCredentials(CryptographyCredential credential, string password)
     {
-        byte[] pBytes = StringExtensions.ToBytes(password);
+        byte[] pBytes = password.ToBytes();
 
         try
         {
