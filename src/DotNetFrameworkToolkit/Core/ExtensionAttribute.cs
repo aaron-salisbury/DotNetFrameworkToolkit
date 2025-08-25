@@ -13,3 +13,6 @@ namespace System.Runtime.CompilerServices;
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class ExtensionAttribute : Attribute { }
+
+//TODO: This works but for parjects that target a version of .NET Framework higher than 2.0, this causes a compiler warning:
+// The predefined type 'ExtensionAttribute' is defined in multiple assemblies in the global alias; using definition from 'DotNetFrameworkToolkit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
