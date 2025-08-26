@@ -54,7 +54,7 @@ public sealed class FileSystemAccess : IFileSystemAccess
                 {
                     // Remove read-only attribute before deleting.
                     File.SetAttributes(fullFilePath, attributes & ~FileAttributes.ReadOnly);
-                    LoggerExtensions.LogInformation(_logger, "Removed read-only attribute from file: {FilePath}", fullFilePath);
+                    _logger.LogInformation("Removed read-only attribute from file: {FilePath}", fullFilePath);
                 }
 
                 File.Delete(fullFilePath);

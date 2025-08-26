@@ -27,11 +27,6 @@ public static class ServiceProviderExtensions
     {
         T service = GetService<T>(serviceProvider);
 
-        if (service == null)
-        {
-            throw new InvalidOperationException($"There is no service of type {typeof(T)}");
-        }
-
-        return service;
+        return service == null ? throw new InvalidOperationException($"There is no service of type {typeof(T)}") : service;
     }
 }

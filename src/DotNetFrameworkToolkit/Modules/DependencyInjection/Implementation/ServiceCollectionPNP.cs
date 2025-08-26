@@ -24,13 +24,7 @@ public class ServiceCollectionPNP : IServiceCollection
         _descriptors = [];
     }
 
-    /// <summary>
-    /// Adds a service descriptor with the specified service type, implementation type, and lifetime.
-    /// </summary>
-    /// <param name="serviceType">The type of the service to register.</param>
-    /// <param name="implementationType">The implementation type of the service.</param>
-    /// <param name="lifetime">The lifetime of the service.</param>
-    /// <returns>A reference to this instance after the operation has completed.</returns>
+    /// <inheritdoc/>
     public IServiceCollection Add(Type serviceType, Type implementationType, ServiceLifetime lifetime)
     {
         Add(new ServiceDescriptor()
@@ -44,13 +38,7 @@ public class ServiceCollectionPNP : IServiceCollection
         return this;
     }
 
-    /// <summary>
-    /// Adds a service descriptor with the specified service type, implementation instance, and lifetime.
-    /// </summary>
-    /// <param name="serviceType">The type of the service to register.</param>
-    /// <param name="implementationInstance">The instance of the service.</param>
-    /// <param name="lifetime">The lifetime of the service.</param>
-    /// <returns>A reference to this instance after the operation has completed.</returns>
+    /// <inheritdoc/>
     public IServiceCollection AddInstance(Type serviceType, object implementationInstance, ServiceLifetime lifetime)
     {
         Add(new ServiceDescriptor()
@@ -64,10 +52,7 @@ public class ServiceCollectionPNP : IServiceCollection
         return this;
     }
 
-    /// <summary>
-    /// Creates an <see cref="IServiceProvider"/> containing services from the current collection.
-    /// </summary>
-    /// <returns>The <see cref="IServiceProvider"/>.</returns>
+    /// <inheritdoc/>
     public IServiceProvider BuildServiceProvider()
     {
         lock (_syncRoot)
@@ -89,6 +74,158 @@ public class ServiceCollectionPNP : IServiceCollection
             return new ServiceProviderPNP(container);
         }
     }
+
+    #region Explicit Interface Implementation of Generic Overloads
+    //----------------------------------------Transient----------------------------------------//
+
+    /// <inheritdoc/>
+    public IServiceCollection AddTransient(Type serviceType, Type implementationType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType == null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
+        return Add(serviceType, implementationType, ServiceLifetime.Transient);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddTransient<TService, TImplementation>() where TService : class where TImplementation : class, TService
+    {
+        return AddTransient(typeof(TService), typeof(TImplementation));
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddTransient(Type serviceType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        return AddTransient(serviceType, serviceType);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddTransient<TService>() where TService : class
+    {
+        return AddTransient(typeof(TService));
+    }
+
+    //-----------------------------------------Scoped------------------------------------------//
+
+    /// <inheritdoc/>
+    public IServiceCollection AddScoped(Type serviceType, Type implementationType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType == null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
+        return Add(serviceType, implementationType, ServiceLifetime.Scoped);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddScoped<TService, TImplementation>() where TService : class where TImplementation : class, TService
+    {
+        return AddScoped(typeof(TService), typeof(TImplementation));
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddScoped(Type serviceType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        return AddScoped(serviceType, serviceType);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddScoped<TService>() where TService : class
+    {
+        return AddScoped(typeof(TService));
+    }
+
+    //----------------------------------------Singleton----------------------------------------//
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton(Type serviceType, Type implementationType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType == null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
+        return Add(serviceType, implementationType, ServiceLifetime.Singleton);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton<TService, TImplementation>() where TService : class where TImplementation : class, TService
+    {
+        return AddSingleton(typeof(TService), typeof(TImplementation));
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton(Type serviceType)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        return AddSingleton(serviceType, serviceType);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton<TService>() where TService : class
+    {
+        return AddSingleton(typeof(TService));
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton(Type serviceType, object implementationInstance)
+    {
+        if (serviceType == null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationInstance == null)
+        {
+            throw new ArgumentNullException(nameof(implementationInstance));
+        }
+
+        return AddInstance(serviceType, implementationInstance, ServiceLifetime.Singleton);
+    }
+
+    /// <inheritdoc/>
+    public IServiceCollection AddSingleton<TService>(TService implementationInstance) where TService : class
+    {
+        if (implementationInstance == null)
+        {
+            throw new ArgumentNullException(nameof(implementationInstance));
+        }
+
+        return AddSingleton(typeof(TService), implementationInstance);
+    }
+    #endregion
 
     #region IList Members
     /// <summary>

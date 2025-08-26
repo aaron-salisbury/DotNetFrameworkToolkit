@@ -77,7 +77,7 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
         ProcessResult<string> appDirectoryResult = _fileSystemAccess.GetAppDirectoryPath();
         if (!appDirectoryResult.IsSuccessful)
         {
-            LoggerExtensions.LogError(_logger, "Failed to retrieve path to the application's database file.");
+            _logger.LogError("Failed to retrieve path to the application's database file.");
             return appDirectoryResult;
         }
 
@@ -90,7 +90,7 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
         }
         catch (Exception ex)
         {
-            LoggerExtensions.LogError(_logger, ex, "Failed to retrieve path to the application's database file.");
+            _logger.LogError(ex, "Failed to retrieve path to the application's database file.");
             return ProcessResult<string>.Failure(ex);
         }
     }

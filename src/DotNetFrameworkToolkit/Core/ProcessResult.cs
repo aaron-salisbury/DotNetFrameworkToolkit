@@ -113,7 +113,7 @@ public class ProcessResult<T>
     /// </returns>
     public static ProcessResult<T> LogAndForwardException(string message, Exception error, ILogger logger, LogLevel logLevel = LogLevel.Error)
     {
-        LoggerExtensions.Log(logger, logLevel, message);
+        logger.Log(logLevel, message);
 
         return Failure(new Exception(message, innerException: error));
     }

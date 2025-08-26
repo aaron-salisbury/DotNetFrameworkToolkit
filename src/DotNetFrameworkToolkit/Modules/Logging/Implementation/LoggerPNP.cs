@@ -141,4 +141,207 @@ public class LoggerPNP : ILogger, IDisposable
             _ => TraceEventType.Verbose,
         };
     }
+
+    #region Explicit Interface Implementation of Convenience Methods
+    private static readonly Func<FormattedLogValues, Exception, string> _messageFormatter = MessageFormatter;
+
+    //------------------------------------------DEBUG------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogDebug(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Debug, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogDebug(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Debug, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogDebug(Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Debug, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogDebug(string message, params object[] args)
+    {
+        Log(LogLevel.Debug, message, args);
+    }
+
+    //------------------------------------------TRACE------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogTrace(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Trace, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogTrace(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Trace, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogTrace(Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Trace, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogTrace(string message, params object[] args)
+    {
+        Log(LogLevel.Trace, message, args);
+    }
+
+    //------------------------------------------INFORMATION------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogInformation(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Information, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogInformation(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Information, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogInformation(Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Information, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogInformation(string message, params object[] args)
+    {
+        Log(LogLevel.Information, message, args);
+    }
+
+    //------------------------------------------WARNING------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogWarning(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Warning, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogWarning(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Warning, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogWarning(Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Warning, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogWarning(string message, params object[] args)
+    {
+        Log(LogLevel.Warning, message, args);
+    }
+
+    //------------------------------------------ERROR------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogError(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Error, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogError(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Error, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogError(Exception exception, string message, params object[] args)
+    {
+        Log( LogLevel.Error, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogError(string message, params object[] args)
+    {
+        Log(LogLevel.Error, message, args);
+    }
+
+    //------------------------------------------CRITICAL------------------------------------------//
+
+    /// <inheritdoc/>
+    public void LogCritical(EventId eventId, Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Critical, eventId, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogCritical(EventId eventId, string message, params object[] args)
+    {
+        Log(LogLevel.Critical, eventId, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogCritical(Exception exception, string message, params object[] args)
+    {
+        Log(LogLevel.Critical, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void LogCritical(string message, params object[] args)
+    {
+        Log(LogLevel.Critical, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void Log(LogLevel logLevel, string message, params object[] args)
+    {
+        Log(logLevel, 0, null, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void Log(LogLevel logLevel, EventId eventId, string message, params object[] args)
+    {
+        Log(logLevel, eventId, null, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void Log(LogLevel logLevel, Exception exception, string message, params object[] args)
+    {
+        Log(logLevel, 0, exception, message, args);
+    }
+
+    /// <inheritdoc/>
+    public void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
+    {
+        FormattedLogValues state = new(message, args);
+
+        Log(logLevel, eventId, state, exception, _messageFormatter);
+    }
+
+    //------------------------------------------Scope------------------------------------------//
+
+    /// <inheritdoc/>
+    public IDisposable BeginScope(string messageFormat, params object[] args)
+    {
+        return BeginScope(new FormattedLogValues(messageFormat, args));
+    }
+
+    //------------------------------------------HELPERS------------------------------------------//
+
+    private static string MessageFormatter(FormattedLogValues state, Exception error)
+    {
+        string formattedMessage = state.ToString();
+
+        return formattedMessage;
+    }
+    #endregion
 }
