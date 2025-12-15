@@ -266,7 +266,7 @@ public class LoggerPNP : ILogger, IDisposable
     /// <inheritdoc/>
     public void LogError(Exception exception, string message, params object[] args)
     {
-        Log( LogLevel.Error, exception, message, args);
+        Log(LogLevel.Error, exception, message, args);
     }
 
     /// <inheritdoc/>

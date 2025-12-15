@@ -6,7 +6,7 @@
     <authors>Aaron Salisbury</authors>
     <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <icon>nuget-package-icon.png</icon>
+    <icon>package-icon.png</icon>
     <readme>readme.md</readme>
     <projectUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit</projectUrl>
     <description>Common C# app development and shim code for legacy .Net Framework 2.0 projects.</description>
@@ -25,7 +25,7 @@
   </metadata>
   <files>
     <file src="..\..\readme.md" target="" />
-    <file src="..\..\content\nuget-package-icon.png" target="" />
+    <file src="..\..\content\package-icon.png" target="" />
     <file src="**\DotNetFrameworkToolkit.dll" target="lib\net20" />
     <file src="**\DotNetFrameworkToolkit.pdb" target="lib\net20" />
     <file src="**\DotNetFrameworkToolkit.xml" target="lib\net20" />
