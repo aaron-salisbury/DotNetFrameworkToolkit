@@ -83,6 +83,7 @@
     <Compile Include="Modules\DataAccess\Database\Initialization\SqlServerCEDatabaseInitializer.cs" />
     <Compile Include="Modules\DataAccess\FileSystem\FileSystemAccess.cs" />
     <Compile Include="Modules\DataAccess\FileSystem\IFileSystemAccess.cs" />
+    <Compile Include="Modules\DependencyInjection\Implementation\Ioc.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceCollectionPNP.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceProviderPNP.cs" />
     <Compile Include="Modules\DependencyInjection\IServiceCollection.cs" />
