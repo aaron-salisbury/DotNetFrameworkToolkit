@@ -98,7 +98,6 @@ public sealed class BuildContext : FrostingContext
             return context.XmlPeek(csprojPath, "/Project/PropertyGroup/TargetFramework");
         }
 
-        // For legacy projects with namespace, use XmlPeekFromFile with namespace settings
         XDocument doc = XDocument.Load(csprojPath);
         XNamespace ns = doc.Root?.Name.Namespace ?? XNamespace.None;
 
