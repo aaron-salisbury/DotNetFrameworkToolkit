@@ -43,8 +43,7 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
                 OutputDirectory = nuGetOutputPath,
                 Configuration = context.Config.ToString(),
                 NoRestore = true,
-                NoBuild = true,
-
+                NoBuild = true
             });
         }
         else
@@ -66,7 +65,8 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
                 Properties = new Dictionary<string, string> { { "Configuration", context.Config.ToString() } },
                 NoPackageAnalysis = true,
                 IncludeReferencedProjects = true,
-                Symbols = false
+                Symbols = true,
+                SymbolPackageFormat = "snupkg"
             });
         }
     }
