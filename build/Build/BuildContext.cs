@@ -98,6 +98,18 @@ public sealed class BuildContext : FrostingContext
             return context.XmlPeek(csprojPath, "/Project/PropertyGroup/TargetFramework");
         }
 
-        return context.XmlPeek(csprojPath, "/Project/PropertyGroup/TargetFrameworkVersion");
+        // For legacy projects with namespace, use XmlPeekFromFile with namespace settings
+        XDocument doc = XDocument.Load(csprojPath);
+        XNamespace ns = doc.Root?.Name.Namespace ?? XNamespace.None;
+
+        string? targetFrameworkVersion = doc.Descendants(ns + "TargetFrameworkVersion").FirstOrDefault()?.Value;
+
+        if (string.IsNullOrEmpty(targetFrameworkVersion))
+        {
+            throw new InvalidOperationException($"Could not find TargetFrameworkVersion in {csprojPath}");
+        }
+
+        // Convert "v2.0" to "net20" format
+        return targetFrameworkVersion.Replace("v", "net").Replace(".", string.Empty);
     }
 }

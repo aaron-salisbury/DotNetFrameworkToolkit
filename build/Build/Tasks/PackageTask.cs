@@ -8,8 +8,6 @@ using Cake.Frosting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using static Build.BuildContext;
@@ -67,13 +65,9 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
                 Properties = new Dictionary<string, string> { { "Configuration", context.Config.ToString() } },
                 NoPackageAnalysis = true,
                 IncludeReferencedProjects = true,
-                //Symbols = false  // nuget.exe pack does not support generating portable PDBs for legacy (non-SDK style) projects
                 Symbols = true,
                 SymbolPackageFormat = "snupkg"
             });
-
-            // Manually create the .snupkg symbol package
-            //await CreateSymbolPackageAsync(context, project, nuGetOutputPath);
         }
     }
 
@@ -99,73 +93,5 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
         }
 
         return nugetExePath;
-    }
-
-    private static async Task CreateSymbolPackageAsync(BuildContext context, ReleaseProject project, string nuGetOutputPath)
-    {
-        // Find the generated .nupkg file
-        var nupkgFiles = System.IO.Directory.GetFiles(nuGetOutputPath, "*.nupkg")
-            .Where(f => !f.EndsWith(".snupkg", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(f => System.IO.File.GetLastWriteTime(f))
-            .ToArray();
-
-        if (nupkgFiles.Length == 0)
-        {
-            context.Log.Warning($"No .nupkg file found in {nuGetOutputPath}. Skipping symbol package creation.");
-            return;
-        }
-
-        string nupkgPath = nupkgFiles[0];
-        string snupkgPath = System.IO.Path.ChangeExtension(nupkgPath, ".snupkg");
-
-        context.Log.Information($"Creating symbol package: {System.IO.Path.GetFileName(snupkgPath)}");
-
-        string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString());
-        System.IO.Directory.CreateDirectory(tempDir);
-
-        try
-        {
-            string pdbSourceDir = project.OutputDirectoryPathAbsolute;
-
-            if (!System.IO.Directory.Exists(pdbSourceDir))
-            {
-                context.Log.Warning($"PDB source directory not found: {pdbSourceDir}");
-                return;
-            }
-
-            var pdbFiles = System.IO.Directory.GetFiles(pdbSourceDir, "*.pdb");
-
-            if (pdbFiles.Length == 0)
-            {
-                context.Log.Warning($"No PDB files found in {pdbSourceDir}");
-                return;
-            }
-
-            string symbolLibDir = System.IO.Path.Combine(tempDir, "lib", "net20");
-            System.IO.Directory.CreateDirectory(symbolLibDir);
-
-            foreach (string pdbFile in pdbFiles)
-            {
-                string destPath = System.IO.Path.Combine(symbolLibDir, System.IO.Path.GetFileName(pdbFile));
-                System.IO.File.Copy(pdbFile, destPath, overwrite: true);
-                context.Log.Information($"  Added: lib/net20/{System.IO.Path.GetFileName(pdbFile)}");
-            }
-
-            if (System.IO.File.Exists(snupkgPath))
-            {
-                System.IO.File.Delete(snupkgPath);
-            }
-
-            System.IO.Compression.ZipFile.CreateFromDirectory(tempDir, snupkgPath, System.IO.Compression.CompressionLevel.Optimal, includeBaseDirectory: false);
-
-            context.Log.Information($"Successfully created symbol package: {System.IO.Path.GetFileName(snupkgPath)}");
-        }
-        finally
-        {
-            if (System.IO.Directory.Exists(tempDir))
-            {
-                System.IO.Directory.Delete(tempDir, recursive: true);
-            }
-        }
     }
 }
