@@ -70,13 +70,14 @@ public sealed class BuildContext : FrostingContext
         ConvertableDirectoryPath baseProjectDirectory = context.SourceDirectory + context.Directory(projectName);
         string csprojPath = baseProjectDirectory + context.File($"{projectName}.csproj");
         bool isSdkStyleProject = IsSdkStyleProject(csprojPath);
+        string targetVersion = GetTargetFramework(csprojPath, isSdkStyleProject, context);
 
         return new ReleaseProject
         {
             Name = projectName,
             DirectoryPathAbsolute = baseProjectDirectory,
             CsprojFilePathAbsolute = csprojPath,
-            OutputDirectoryPathAbsolute = DetermineAbsoluteOutputPath(csprojPath, isSdkStyleProject, context.Config, context),
+            OutputDirectoryPathAbsolute = baseProjectDirectory + context.Directory($"bin/{context.Config}/{targetVersion}"),
             IsSdkStyleProject = isSdkStyleProject
         };
     }
@@ -87,78 +88,6 @@ public sealed class BuildContext : FrostingContext
         XElement? projectElement = doc.Root;
 
         return projectElement?.Attribute("Sdk") != null;
-    }
-
-    private static string DetermineAbsoluteOutputPath(string csprojPath, bool isSdkStyleProject, BuildConfigurations config, ICakeContext context)
-    {
-        // Get the project root directory (directory containing the .csproj).
-        var projectRoot = context.Directory(System.IO.Path.GetDirectoryName(csprojPath) ?? ".");
-
-        // 1. Check for custom OutputPath.
-        ConvertableDirectoryPath? customOutputPath = GetConfiguredOutputPath(csprojPath, config, context);
-        if (customOutputPath != null)
-        {
-            // If the path is already absolute, return as is.
-            if (System.IO.Path.IsPathRooted(customOutputPath.Path.FullPath))
-            {
-                return customOutputPath.Path.FullPath;
-            }
-
-            // Otherwise combine with project root.
-            return (projectRoot + customOutputPath).Path.FullPath;
-        }
-
-        // 2. Default output path logic.
-        string outputRelative;
-        if (isSdkStyleProject)
-        {
-            string targetVersion = GetTargetFramework(csprojPath, true, context);
-            outputRelative = $"bin/{config}/{targetVersion}";
-        }
-        else
-        {
-            outputRelative = $"bin/{config}";
-        }
-
-        return (projectRoot + context.Directory(outputRelative)).Path.FullPath;
-    }
-
-    private static ConvertableDirectoryPath? GetConfiguredOutputPath(string csprojPath, BuildConfigurations config, ICakeContext context)
-    {
-        XDocument doc = XDocument.Load(csprojPath);
-        XNamespace? ns = doc.Root?.Name.Namespace ?? XNamespace.None;
-        string configString = config.ToString();
-
-        // 1. Look for OutputPath in PropertyGroup with a matching Condition.
-        foreach (XElement pg in doc.Descendants(ns + "PropertyGroup"))
-        {
-            string? condition = (string?)pg.Attribute("Condition");
-            if (!string.IsNullOrWhiteSpace(condition)
-                && condition.Contains("'$(Configuration)'", StringComparison.OrdinalIgnoreCase)
-                && condition.Contains(configString, StringComparison.OrdinalIgnoreCase))
-            {
-                XElement? outputPathElem = pg.Element(ns + "OutputPath");
-                if (outputPathElem != null && !string.IsNullOrWhiteSpace(outputPathElem.Value))
-                {
-                    var normalized = outputPathElem.Value.Replace('\\', '/').TrimEnd('/', '\\');
-                    return context.Directory(normalized);
-                }
-            }
-        }
-
-        // 2. Fallback: Look for OutputPath in any PropertyGroup (global).
-        foreach (XElement pg in doc.Descendants(ns + "PropertyGroup"))
-        {
-            XElement? outputPathElem = pg.Element(ns + "OutputPath");
-            if (outputPathElem != null && !string.IsNullOrWhiteSpace(outputPathElem.Value))
-            {
-                var normalized = outputPathElem.Value.Replace('\\', '/').TrimEnd('/', '\\');
-                return context.Directory(normalized);
-            }
-        }
-
-        // 3. Not found / no override.
-        return null;
     }
 
     private static string GetTargetFramework(string csprojPath, bool isSdkStyleProject, ICakeContext context)
