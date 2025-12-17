@@ -108,7 +108,6 @@ public sealed class Ioc : IServiceProvider
     /// <summary>
     /// Throws an <see cref="InvalidOperationException"/> when the <see cref="IServiceProvider"/> property is missing a type registration.
     /// </summary>
-    [DoesNotReturn]
     private static void ThrowInvalidOperationExceptionForUnregisteredType()
     {
         throw new InvalidOperationException("The requested service type was not registered.");
