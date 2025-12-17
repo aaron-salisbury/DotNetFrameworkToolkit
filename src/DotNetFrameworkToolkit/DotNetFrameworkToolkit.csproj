@@ -90,7 +90,6 @@
     <Compile Include="Modules\DependencyInjection\IServiceCollection.cs" />
     <Compile Include="Modules\DependencyInjection\ServiceDescriptor.cs" />
     <Compile Include="Modules\DependencyInjection\ServiceLifetime.cs" />
-    <Compile Include="Modules\DependencyInjection\ServiceProviderExtensions.cs" />
     <Compile Include="Modules\Logging\EventId.cs" />
     <Compile Include="Modules\Logging\FormattedLogValues.cs" />
     <Compile Include="Modules\Logging\ILogger.cs" />

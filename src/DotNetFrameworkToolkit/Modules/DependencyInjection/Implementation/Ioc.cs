@@ -43,6 +43,41 @@ public sealed class Ioc : IServiceProvider
     }
 
     /// <summary>
+    /// Get service of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of service object to get.</typeparam>
+    /// <returns>A service object of type <typeparamref name="T"/> or null if there is no such service.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
+    public T GetService<T>()
+    {
+        if (this.serviceProvider is null)
+        {
+            ThrowInvalidOperationExceptionForMissingInitialization();
+        }
+
+        return (T)this.serviceProvider.GetService(typeof(T));
+    }
+
+    /// <summary>
+    /// Get service of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of service object to get.</typeparam>
+    /// <returns>A service object of type <typeparamref name="T"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
+    /// <exception cref="System.InvalidOperationException">There is no service of type <typeparamref name="T"/>.</exception>
+    public T GetRequiredService<T>() where T : notnull
+    {
+        T service = GetService<T>();
+
+        if (service is null)
+        {
+            ThrowInvalidOperationExceptionForUnregisteredType();
+        }
+
+        return service;
+    }
+
+    /// <summary>
     /// Initializes the shared <see cref="IServiceProvider"/> instance.
     /// </summary>
     /// <param name="serviceProvider">The input <see cref="IServiceProvider"/> instance to use.</param>
@@ -68,6 +103,15 @@ public sealed class Ioc : IServiceProvider
     private static void ThrowInvalidOperationExceptionForMissingInitialization()
     {
         throw new InvalidOperationException("The service provider has not been configured yet.");
+    }
+
+    /// <summary>
+    /// Throws an <see cref="InvalidOperationException"/> when the <see cref="IServiceProvider"/> property is missing a type registration.
+    /// </summary>
+    [DoesNotReturn]
+    private static void ThrowInvalidOperationExceptionForUnregisteredType()
+    {
+        throw new InvalidOperationException("The requested service type was not registered.");
     }
 
     /// <summary>
