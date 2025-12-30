@@ -63,8 +63,10 @@ public sealed class Ioc : IServiceProvider
     /// </summary>
     /// <typeparam name="T">The type of service object to get.</typeparam>
     /// <returns>A service object of type <typeparamref name="T"/>.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
-    /// <exception cref="System.InvalidOperationException">There is no service of type <typeparamref name="T"/>.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the current <see cref="Ioc"/> instance has not been initialized, or if the
+    /// requested service type was not registered in the service provider currently in use.
+    /// </exception>
     public T GetRequiredService<T>() where T : notnull
     {
         T service = GetService<T>();
