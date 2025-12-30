@@ -8,6 +8,10 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// The <see cref="Ioc"/> provides the ability to configure services in a singleton, thread-safe
 /// service provider instance, which can then be used to resolve service instances.
 /// </summary>
+/// <remarks>
+/// Modeled after the CommunityToolkit offering 
+/// <see href="https://github.com/CommunityToolkit/dotnet/blob/main/src/CommunityToolkit.Mvvm/DependencyInjection/Ioc.cs">here</see>.
+/// </remarks>
 public sealed class Ioc : IServiceProvider
 {
     /// <summary>
