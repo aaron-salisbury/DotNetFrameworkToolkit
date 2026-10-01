@@ -42,7 +42,7 @@ public sealed class BuildContext : FrostingContext
 
         SerializerOptions = new() { PropertyNameCaseInsensitive = true };
         AbsolutePathToRepo = GetRepoAbsolutePath(REPO_NAME, this);
-        SourceDirectory = System.IO.Path.Combine(AbsolutePathToRepo, "src");
+        SourceDirectory = this.Directory(System.IO.Path.Combine(AbsolutePathToRepo, "src"));
         ReleaseProjects = [.. RELEASE_PROJECT_NAMES.Select(name => CreateReleaseProject(this, name))];
     }
 
@@ -51,7 +51,7 @@ public sealed class BuildContext : FrostingContext
         // Start from the working directory.
         DirectoryPath dir = context.Environment.WorkingDirectory;
 
-        // Traverse up until we find the directory named after the repository name.
+        // Find the source solution even when the checkout directory has a different name.
         while (dir != null && !System.IO.File.Exists(System.IO.Path.Combine(dir.FullPath, "src", "DotNetFrameworkToolkit.sln")))
         {
             dir = dir.GetParent();

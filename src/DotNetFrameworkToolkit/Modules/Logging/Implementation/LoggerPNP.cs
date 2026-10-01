@@ -353,6 +353,7 @@ public class LoggerPNP : ILogger, IDisposable
     /// <inheritdoc/>
     public void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
     {
+        if (!IsEnabled(logLevel)) return;
         FormattedLogValues state = new(message, args);
 
         Log(logLevel, eventId, state, exception, _messageFormatter);
