@@ -1,5 +1,7 @@
 ﻿using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Utility;
 using System;
+using System.Collections.Generic;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
@@ -9,19 +11,28 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// <remarks>
 /// This implementation uses the Patterns & Practices Enterprise Library.
 /// </remarks>
-public class ServiceProviderPNP : IServiceProvider
+public class ServiceProviderPNP : IServiceProvider, IDisposable
 {
     private readonly IUnityContainer _unityProvider;
+    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServiceProviderPNP"/> class and registers itself as an <see cref="IServiceProvider"/> in the Unity container.
     /// </summary>
     /// <param name="services">The Unity container to use for service resolution.</param>
-    public ServiceProviderPNP(IUnityContainer services)
+    public ServiceProviderPNP(IUnityContainer services) : this(services, [])
     {
+    }
+
+    internal ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> scopedServiceDescriptors)
+    {
+        Guard.ArgumentNotNull(services, nameof(services));
+        Guard.ArgumentNotNull(scopedServiceDescriptors, nameof(scopedServiceDescriptors));
+
+        List<ServiceDescriptor> scopedDescriptors = [.. scopedServiceDescriptors];
+
         services.RegisterInstance<IServiceProvider>(this);
-        //TODO: Register a IServiceScopeFactory that creates a IServiceScope, which has this IServiceProvider and is disposable.
-        //      Which once dispose is called, any scoped services that have been resolved will be disposed.
+        services.RegisterInstance<IServiceScopeFactory>(new ServiceScopeFactoryPNP(services, scopedDescriptors));
 
         _unityProvider = services;
     }
@@ -37,5 +48,20 @@ public class ServiceProviderPNP : IServiceProvider
     public object GetService(Type serviceType)
     {
         return _unityProvider.Resolve(serviceType);
+    }
+
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+
+        _unityProvider.Dispose();
     }
 }

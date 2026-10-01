@@ -70,7 +70,7 @@ public class LoggerPNP : ILogger, IDisposable
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="LoggerPNP"/> instance.
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
     /// </summary>
     public void Dispose()
     {

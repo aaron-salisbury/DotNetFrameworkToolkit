@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AggregateException.cs" />
     <Compile Include="Core\ExtensionAttribute.cs" />
     <Compile Include="Core\Extensions\DateTimeExtensions.cs" />
     <Compile Include="Core\Extensions\StringExtensions.cs" />
@@ -84,6 +85,10 @@
     <Compile Include="Modules\DataAccess\FileSystem\FileSystemAccess.cs" />
     <Compile Include="Modules\DataAccess\FileSystem\IFileSystemAccess.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\Ioc.cs" />
+    <Compile Include="Modules\DependencyInjection\Implementation\ServiceScopePNP.cs" />
+    <Compile Include="Modules\DependencyInjection\Implementation\ServiceScopeFactoryPNP.cs" />
+    <Compile Include="Modules\DependencyInjection\IServiceScope.cs" />
+    <Compile Include="Modules\DependencyInjection\IServiceScopeFactory.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceCollectionPNP.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceProviderPNP.cs" />
     <Compile Include="Modules\DependencyInjection\IServiceCollection.cs" />

@@ -12,7 +12,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// Modeled after the CommunityToolkit offering 
 /// <see href="https://github.com/CommunityToolkit/dotnet/blob/main/src/CommunityToolkit.Mvvm/DependencyInjection/Ioc.cs">here</see>.
 /// </remarks>
-public sealed class Ioc : IServiceProvider
+public sealed class Ioc : IServiceProvider, IDisposable
 {
     /// <summary>
     /// Gets the default <see cref="Ioc"/> instance.
@@ -100,6 +100,20 @@ public sealed class Ioc : IServiceProvider
         if (oldServices is not null)
         {
             ThrowInvalidOperationExceptionForRepeatedConfiguration();
+        }
+    }
+
+    /// <summary>
+    /// Disposes the configured <see cref="IServiceProvider"/> instance when it is disposable,
+    /// then clears all internal references.
+    /// </summary>
+    public void Dispose()
+    {
+        IServiceProvider currentServiceProvider = Interlocked.Exchange(ref this.serviceProvider, null);
+
+        if (currentServiceProvider is IDisposable disposableServiceProvider)
+        {
+            disposableServiceProvider.Dispose();
         }
     }
 

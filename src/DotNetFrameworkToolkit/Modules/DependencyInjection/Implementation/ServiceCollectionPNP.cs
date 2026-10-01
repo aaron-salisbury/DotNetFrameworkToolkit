@@ -1,4 +1,5 @@
 ﻿using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,9 +59,15 @@ public class ServiceCollectionPNP : IServiceCollection
         lock (_syncRoot)
         {
             IUnityContainer container = new UnityContainer();
+            List<ServiceDescriptor> scopedDescriptors = [];
 
             foreach (ServiceDescriptor descriptor in _descriptors)
             {
+                if (descriptor.Lifetime == ServiceLifetime.Scoped)
+                {
+                    scopedDescriptors.Add(descriptor);
+                }
+
                 if (descriptor.ImplementationInstance != null)
                 {
                     container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance);
@@ -71,7 +78,7 @@ public class ServiceCollectionPNP : IServiceCollection
                 }
             }
 
-            return new ServiceProviderPNP(container);
+            return new ServiceProviderPNP(container, scopedDescriptors);
         }
     }
 
@@ -81,15 +88,8 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddTransient(Type serviceType, Type implementationType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
-
-        if (implementationType == null)
-        {
-            throw new ArgumentNullException(nameof(implementationType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
+        Guard.ArgumentNotNull(implementationType, nameof(implementationType));
 
         return Add(serviceType, implementationType, ServiceLifetime.Transient);
     }
@@ -103,10 +103,7 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddTransient(Type serviceType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         return AddTransient(serviceType, serviceType);
     }
@@ -122,15 +119,8 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddScoped(Type serviceType, Type implementationType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
-
-        if (implementationType == null)
-        {
-            throw new ArgumentNullException(nameof(implementationType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
+        Guard.ArgumentNotNull(implementationType, nameof(implementationType));
 
         return Add(serviceType, implementationType, ServiceLifetime.Scoped);
     }
@@ -144,10 +134,7 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddScoped(Type serviceType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         return AddScoped(serviceType, serviceType);
     }
@@ -163,15 +150,8 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddSingleton(Type serviceType, Type implementationType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
-
-        if (implementationType == null)
-        {
-            throw new ArgumentNullException(nameof(implementationType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
+        Guard.ArgumentNotNull(implementationType, nameof(implementationType));
 
         return Add(serviceType, implementationType, ServiceLifetime.Singleton);
     }
@@ -185,10 +165,7 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddSingleton(Type serviceType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         return AddSingleton(serviceType, serviceType);
     }
@@ -202,15 +179,8 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddSingleton(Type serviceType, object implementationInstance)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
-
-        if (implementationInstance == null)
-        {
-            throw new ArgumentNullException(nameof(implementationInstance));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
+        Guard.ArgumentNotNull(implementationInstance, nameof(implementationInstance));
 
         return AddInstance(serviceType, implementationInstance, ServiceLifetime.Singleton);
     }
@@ -218,10 +188,7 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceCollection AddSingleton<TService>(TService implementationInstance) where TService : class
     {
-        if (implementationInstance == null)
-        {
-            throw new ArgumentNullException(nameof(implementationInstance));
-        }
+        Guard.ArgumentNotNull(implementationInstance, nameof(implementationInstance));
 
         return AddSingleton(typeof(TService), implementationInstance);
     }
@@ -392,7 +359,7 @@ public class ServiceCollectionPNP : IServiceCollection
         return lifetime switch
         {
             ServiceLifetime.Transient => new TransientLifetimeManager(),
-            ServiceLifetime.Scoped => new PerThreadLifetimeManager(),
+            ServiceLifetime.Scoped => new ContainerControlledLifetimeManager(),
             ServiceLifetime.Singleton => new ContainerControlledLifetimeManager(),
             _ => new TransientLifetimeManager(),
         };
