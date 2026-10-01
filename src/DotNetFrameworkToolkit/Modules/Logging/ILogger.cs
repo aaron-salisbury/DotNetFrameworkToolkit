@@ -50,7 +50,6 @@ public interface ILogger
     /// <summary>
     /// Formats and writes a debug log message.
     /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -65,7 +64,6 @@ public interface ILogger
     /// <summary>
     /// Formats and writes a debug log message.
     /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -79,7 +77,6 @@ public interface ILogger
     /// <summary>
     /// Formats and writes a debug log message.
     /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -93,7 +90,6 @@ public interface ILogger
     /// <summary>
     /// Formats and writes a debug log message.
     /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
