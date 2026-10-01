@@ -1,3 +1,4 @@
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Threading;
 
@@ -34,10 +35,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
     public object GetService(Type serviceType)
     {
-        if (serviceType is null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         using (lifetime.Enter())
         {
@@ -86,10 +84,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
     public void ConfigureServices(IServiceProvider serviceProvider)
     {
-        if (serviceProvider is null)
-        {
-            throw new ArgumentNullException(nameof(serviceProvider));
-        }
+        Guard.ArgumentNotNull(serviceProvider, nameof(serviceProvider));
 
         using IDisposable operation = lifetime.Enter();
         IServiceProvider oldServices = Interlocked.CompareExchange(ref this.serviceProvider, serviceProvider, null);

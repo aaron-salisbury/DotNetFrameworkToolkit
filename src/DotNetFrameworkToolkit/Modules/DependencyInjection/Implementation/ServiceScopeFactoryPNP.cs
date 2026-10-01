@@ -1,6 +1,7 @@
 using Microsoft.Practices.Unity;
-using System;
+using Microsoft.Practices.Unity.Utility;
 using System.Collections.Generic;
+
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
 /// <inheritdoc/>
@@ -25,10 +26,7 @@ public class ServiceScopeFactoryPNP : IServiceScopeFactory
     /// </remarks>
     public ServiceScopeFactoryPNP(IUnityContainer unityProvider, IEnumerable<ServiceDescriptor> scopedServiceDescriptors)
     {
-        if (scopedServiceDescriptors == null)
-        {
-            throw new ArgumentNullException(nameof(scopedServiceDescriptors));
-        }
+        Guard.ArgumentNotNull(scopedServiceDescriptors, nameof(scopedServiceDescriptors));
 
         _root = new ServiceProviderPNP(unityProvider, scopedServiceDescriptors);
     }

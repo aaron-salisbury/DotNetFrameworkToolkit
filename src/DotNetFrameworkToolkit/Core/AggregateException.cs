@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Practices.Unity.Utility;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
@@ -78,10 +79,7 @@ public class AggregateException : Exception
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="info"/> is <see langword="null"/>.</exception>
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        if (info is null)
-        {
-            throw new ArgumentNullException(nameof(info));
-        }
+        Guard.ArgumentNotNull(info, nameof(info));
 
         base.GetObjectData(info, context);
 
@@ -112,20 +110,14 @@ public class AggregateException : Exception
 
     private static List<Exception> CreateSingleInnerExceptionList(Exception innerException)
     {
-        if (innerException is null)
-        {
-            throw new ArgumentNullException(nameof(innerException));
-        }
+        Guard.ArgumentNotNull(innerException, nameof(innerException));
 
         return [innerException];
     }
 
     private static List<Exception> ValidateAndCopyInnerExceptions(IEnumerable<Exception> innerExceptions)
     {
-        if (innerExceptions is null)
-        {
-            throw new ArgumentNullException(nameof(innerExceptions));
-        }
+        Guard.ArgumentNotNull(innerExceptions, nameof(innerExceptions));
 
         List<Exception> list = [];
         foreach (Exception ex in innerExceptions)
@@ -197,10 +189,7 @@ public class AggregateException : Exception
     /// <param name="predicate">The predicate to execute for each exception.</param>
     public void Handle(Predicate<Exception> predicate)
     {
-        if (predicate is null)
-        {
-            throw new ArgumentNullException(nameof(predicate));
-        }
+        Guard.ArgumentNotNull(predicate, nameof(predicate));
 
         List<Exception> unhandled = [];
         foreach (var inner in this.InnerExceptions)

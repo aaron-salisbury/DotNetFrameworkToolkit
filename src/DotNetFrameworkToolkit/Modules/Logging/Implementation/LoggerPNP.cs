@@ -36,10 +36,8 @@ public class LoggerPNP : ILogger, IDisposable
         }
         set 
         { 
-            if (scopes == null) 
-            { 
-                scopes = new Dictionary<LoggerPNP, LoggerPNPScope>(); 
-            } 
+            scopes ??= [];
+
             if (value == null) 
             { 
                 scopes.Remove(this); 

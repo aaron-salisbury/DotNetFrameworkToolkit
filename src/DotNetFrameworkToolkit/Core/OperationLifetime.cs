@@ -10,7 +10,7 @@ internal delegate void DisposalAction();
 internal sealed class OperationLifetime
 {
     private readonly object sync = new();
-    private readonly Dictionary<int, int> threads = new();
+    private readonly Dictionary<int, int> threads = [];
     private int active;
     private bool closing;
     internal IDisposable Enter()

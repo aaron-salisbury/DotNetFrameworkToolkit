@@ -1,7 +1,10 @@
 using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.Logging;
+using Microsoft.Practices.EnterpriseLibrary.Logging;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Reflection;
 
@@ -20,7 +23,9 @@ public sealed class FileSystemAccess : IFileSystemAccess
     /// <param name="logger">The logger used to record informational messages, warnings, and errors related to file system operations.</param>
     public FileSystemAccess(ILogger logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        Guard.ArgumentNotNull(logger, nameof(logger));
+
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -80,12 +85,10 @@ public sealed class FileSystemAccess : IFileSystemAccess
     /// <inheritdoc/>
     public ProcessResult<bool> WriteFile(IEnumerable<string> contentLines, string fileName, string directoryPath = null)
     {
-        if (contentLines == null)
-        {
-            throw new ArgumentNullException(nameof(contentLines));
-        }
+        Guard.ArgumentNotNull(contentLines, nameof(contentLines));
+        Guard.ArgumentNotNullOrEmpty(fileName, nameof(fileName));
 
-        if (string.IsNullOrEmpty(fileName) || fileName != Path.GetFileName(fileName))
+        if (fileName != Path.GetFileName(fileName))
         {
             throw new ArgumentException("A simple file name is required.", nameof(fileName));
         }
@@ -152,15 +155,8 @@ public sealed class FileSystemAccess : IFileSystemAccess
     /// <inheritdoc/>
     public ProcessResult<string> GetEmbeddedResourceText(Assembly assemblyEmbeddedIn, string filePath)
     {
-        if (assemblyEmbeddedIn == null)
-        {
-            throw new ArgumentNullException(nameof(assemblyEmbeddedIn));
-        }
-
-        if (string.IsNullOrEmpty(filePath))
-        {
-            throw new ArgumentException("A resource name is required.", nameof(filePath));
-        }
+        Guard.ArgumentNotNull(assemblyEmbeddedIn, nameof(assemblyEmbeddedIn));
+        Guard.ArgumentNotNullOrEmpty(filePath, nameof(filePath));
 
         try
         {

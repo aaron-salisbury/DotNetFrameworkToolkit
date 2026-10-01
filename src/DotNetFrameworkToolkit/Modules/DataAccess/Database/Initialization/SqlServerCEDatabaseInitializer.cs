@@ -1,6 +1,7 @@
 using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.DataAccess.FileSystem;
 using DotNetFrameworkToolkit.Modules.Logging;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -62,8 +63,11 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
     /// <param name="fileSystemAccess">The utility for interacting with the operating system's files and directories.</param>
     public SqlServerCEDatabaseInitializer(ILogger logger, IFileSystemAccess fileSystemAccess)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _fileSystemAccess = fileSystemAccess ?? throw new ArgumentNullException(nameof(fileSystemAccess));
+        Guard.ArgumentNotNull(logger, nameof(logger));
+        Guard.ArgumentNotNull(fileSystemAccess, nameof(fileSystemAccess));
+
+        _logger = logger;
+        _fileSystemAccess = fileSystemAccess;
     }
 
     /// <inheritdoc/>

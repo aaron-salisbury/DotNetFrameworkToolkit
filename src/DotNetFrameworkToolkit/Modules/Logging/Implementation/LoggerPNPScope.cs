@@ -1,3 +1,4 @@
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Threading;
 namespace DotNetFrameworkToolkit.Modules.Logging;
@@ -19,16 +20,23 @@ public class LoggerPNPScope : IDisposable
     private readonly LoggerPNP _provider;
     private readonly int _threadId;
 
-    /// <summary>Creates a scope for this thread.</summary>
+    /// <summary>
+    /// Creates a scope for this thread.
+    /// </summary>
     public LoggerPNPScope(LoggerPNP provider, object state)
     {
-        this._provider = provider ?? throw new ArgumentNullException(nameof(provider));
+        Guard.ArgumentNotNull(provider, nameof(provider));
+
+        this._provider = provider;
 
         State = state; _threadId = Thread.CurrentThread.ManagedThreadId;
         Parent = provider.CurrentScope; 
         provider.CurrentScope = this;
     }
-    /// <summary>Marks this scope complete without resurrecting already disposed parents.</summary>
+
+    /// <summary>
+    /// Marks this scope complete without resurrecting already disposed parents.
+    /// </summary>
     public void Dispose()
     {
         if (Thread.CurrentThread.ManagedThreadId != _threadId)

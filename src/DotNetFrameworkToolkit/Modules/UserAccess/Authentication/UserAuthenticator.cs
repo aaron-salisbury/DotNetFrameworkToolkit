@@ -1,5 +1,7 @@
 using Microsoft.Practices.EnterpriseLibrary.Security.Cryptography;
+using Microsoft.Practices.Unity.Utility;
 using System;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -55,10 +57,7 @@ public sealed class UserAuthenticator : IUserAuthenticator
     /// <inheritdoc/>
     public CryptographyCredential CreateUserCredentials(string password)
     {
-        if (password == null)
-        {
-            throw new ArgumentNullException(nameof(password));
-        }
+        Guard.ArgumentNotNull(password, nameof(password));
 
         byte[] salt = CryptographyUtility.GetRandomBytes(_saltLength);
         byte[] bytes = Encoding.UTF8.GetBytes(password);
@@ -83,15 +82,8 @@ public sealed class UserAuthenticator : IUserAuthenticator
     /// <inheritdoc/>
     public bool VerifyCredentials(CryptographyCredential credential, string password)
     {
-        if (credential == null)
-        {
-            throw new ArgumentNullException(nameof(credential));
-        }
-
-        if (password == null)
-        {
-            throw new ArgumentNullException(nameof(password));
-        }
+        Guard.ArgumentNotNull(credential, nameof(credential));
+        Guard.ArgumentNotNull(password, nameof(password));
 
         int iterations = credential.LoginWorkFactor;
         byte[] sourceSalt = credential.LoginSalt;

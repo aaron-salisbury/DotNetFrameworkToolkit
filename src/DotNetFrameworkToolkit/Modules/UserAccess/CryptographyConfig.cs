@@ -1,5 +1,4 @@
 using Microsoft.Practices.EnterpriseLibrary.Security.Cryptography;
-using System.Security.Cryptography;
 
 namespace DotNetFrameworkToolkit.Modules.UserAccess;
 

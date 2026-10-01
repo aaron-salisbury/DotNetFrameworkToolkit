@@ -1,4 +1,5 @@
 using DotNetFrameworkToolkit.Modules.Logging;
+using Microsoft.Practices.Unity.Utility;
 using System;
 
 namespace DotNetFrameworkToolkit.Core;
@@ -36,7 +37,9 @@ public class ProcessResult<T>
     /// <param name="error">The exception representing error. Cannot be null.</param>
     public ProcessResult(Exception error)
     {
-        _exception = error ?? throw new ArgumentNullException("error");
+        Guard.ArgumentNotNull(error, nameof(error));
+
+        _exception = error;
         _hasError = true;
         _value = default;
     }
@@ -122,8 +125,9 @@ public class ProcessResult<T>
     /// </returns>
     public static ProcessResult<T> LogAndForwardException(string message, Exception error, ILogger logger, LogLevel logLevel = LogLevel.Error)
     {
-        if (error == null) { throw new ArgumentNullException(nameof(error)); }
-        if (logger == null) { throw new ArgumentNullException(nameof(logger)); }
+        Guard.ArgumentNotNull(error, nameof(error));
+        Guard.ArgumentNotNull(logger, nameof(logger));
+
         Exception forwarded = new(message, error);
         try
         {

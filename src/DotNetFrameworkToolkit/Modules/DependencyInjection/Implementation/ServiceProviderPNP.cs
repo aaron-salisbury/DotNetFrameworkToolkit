@@ -2,6 +2,7 @@ using Microsoft.Practices.Unity;
 using DotNetFrameworkToolkit.Core;
 using System;
 using System.Collections.Generic;
+using Microsoft.Practices.Unity.Utility;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
@@ -38,9 +39,11 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     internal ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister) : this(services, servicesToRegister, null, false) { }
     private ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister, ServiceProviderPNP root, bool external)
     {
-        container = services ?? throw new ArgumentNullException(nameof(services));
+        Guard.ArgumentNotNull(services, nameof(services));
+
+        container = services;
         this.root = root ?? this; externalContainer = external;
-        descriptors = new List<ServiceDescriptor>();
+        descriptors = [];
 
         foreach (ServiceDescriptor descriptor in servicesToRegister)
         {
@@ -99,10 +102,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// </returns>
     public object GetService(Type serviceType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         using (root.lifetime.Enter())
         using (ReferenceEquals(root, this) ? null : lifetime.Enter())

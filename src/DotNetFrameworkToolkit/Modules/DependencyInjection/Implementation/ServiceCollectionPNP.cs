@@ -71,10 +71,7 @@ public class ServiceCollectionPNP : IServiceCollection
 
     internal static ServiceDescriptor Copy(ServiceDescriptor item)
     {
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+        Guard.ArgumentNotNull(item, nameof(item));
 
         ServiceDescriptor copy = new()
         { 

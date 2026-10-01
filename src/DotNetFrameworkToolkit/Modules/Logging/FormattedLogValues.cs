@@ -18,7 +18,7 @@ internal sealed class FormattedLogValues
     {
         OriginalMessage = message ?? string.Empty;
         MessageArguments = args == null 
-            ? new object[0] 
+            ? [] 
             : (object[])args.Clone();
 
         Properties["{OriginalFormat}"] = OriginalMessage;
@@ -64,8 +64,7 @@ internal sealed class FormattedLogValues
                 throw new FormatException("Invalid log placeholder."); 
             }
 
-            int index;
-            if (!int.TryParse(name, NumberStyles.None, CultureInfo.InvariantCulture, out index))
+            if (!int.TryParse(name, NumberStyles.None, CultureInfo.InvariantCulture, out int index))
             {
                 if (!names.TryGetValue(name, out index))
                 {

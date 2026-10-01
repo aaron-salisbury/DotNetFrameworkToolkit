@@ -129,8 +129,10 @@ public class InMemorySinkPNP : CustomTraceListener
         }
 
         // Callbacks execute outside the buffer lock. A failing observer must not abort the application operation.
-        foreach (EventHandler<LogEmitEventArgs> handler in handlers.GetInvocationList())
+        Delegate[] array = handlers.GetInvocationList();
+        for (int i = 0; i < array.Length; i++)
         {
+            EventHandler<LogEmitEventArgs> handler = (EventHandler<LogEmitEventArgs>)array[i];
             try
             { 
                 handler(this, new LogEmitEventArgs { LogEvent = new LogEvent { TimeStamp = timeStamp, Message = message, Level = level, Exception = exception } });
