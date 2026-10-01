@@ -31,26 +31,22 @@ public sealed class UserAuthenticator : IUserAuthenticator
     /// </remarks>
     public UserAuthenticator(CryptographyConfig config = null)
     {
-        if (config is not null)
-        {
-            if (config.SaltLength < 8 || config.SaltLength > 1024)
-            {
-                throw new ArgumentOutOfRangeException(nameof(config.SaltLength));
-            }
+        config ??= new CryptographyConfig();
 
-            if (config.MaxVerificationWorkFactor < 1 || config.NewUserWorkFactor < 1 || config.NewUserWorkFactor > config.MaxVerificationWorkFactor)
-            {
-                throw new ArgumentOutOfRangeException(nameof(config.NewUserWorkFactor));
-            }
-        }
-        else
-        {
-            config = new CryptographyConfig();
-        }
-
+        // Validate the values we retain, rather than rereading mutable configuration after validation.
         _saltLength = config.SaltLength;
         _workFactor = config.NewUserWorkFactor;
         _maxWorkFactor = config.MaxVerificationWorkFactor;
+
+        if (_saltLength < 8 || _saltLength > 1024)
+        {
+            throw new ArgumentOutOfRangeException(nameof(config.SaltLength));
+        }
+
+        if (_maxWorkFactor < 1 || _workFactor < 1 || _workFactor > _maxWorkFactor)
+        {
+            throw new ArgumentOutOfRangeException(nameof(config.NewUserWorkFactor));
+        }
     }
 
     /// <inheritdoc/>
