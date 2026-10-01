@@ -223,7 +223,13 @@ public class ServiceCollectionPNP : IServiceCollection
         set
         {
             ServiceDescriptor snapshot = Copy(value);
-            lock (_syncRoot) _descriptors[index] = snapshot;
+            lock (_syncRoot)
+            {
+                if (index < 0 || index >= _descriptors.Count) throw new ArgumentOutOfRangeException(nameof(index));
+                int existingIndex = _descriptors.IndexOf(snapshot);
+                if (existingIndex >= 0 && existingIndex != index) throw new ArgumentException("A service type may appear only once.", nameof(value));
+                _descriptors[index] = snapshot;
+            }
         }
     }
 
@@ -247,6 +253,7 @@ public class ServiceCollectionPNP : IServiceCollection
         item = Copy(item);
         lock (_syncRoot)
         {
+            if (index < 0 || index > _descriptors.Count) throw new ArgumentOutOfRangeException(nameof(index));
             // Subsequent attempts to add the same type replaces the previous addition.
             // Could possibly enhance by letting more than one of a type in the collection, 
             // but would need to keep track of names. Would then need to update the
@@ -325,8 +332,11 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="arrayIndex">The zero-based index in the array at which copying begins.</param>
     public void CopyTo(ServiceDescriptor[] array, int arrayIndex)
     {
+        if (array == null) throw new ArgumentNullException(nameof(array));
+        if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
         lock (_syncRoot)
         {
+            if (arrayIndex > array.Length || _descriptors.Count > array.Length - arrayIndex) throw new ArgumentException("Insufficient array capacity.", nameof(array));
             for (int i = 0; i < _descriptors.Count; i++) array[arrayIndex + i] = Copy(_descriptors[i]);
         }
     }

@@ -19,7 +19,9 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     private readonly bool externalContainer;
     private readonly ServiceScopeFactoryPNP scopeFactory;
 
-    /// <summary>Wraps an externally configured Unity container. This provider owns the container.</summary>
+    /// <summary>Wraps an externally configured Unity container, retaining native Unity auto-construction
+    /// and ownership semantics. For registration-aware null results and tracked transients, use ServiceCollectionPNP.
+    /// This provider owns the supplied container; do not modify it after wrapping.</summary>
     public ServiceProviderPNP(IUnityContainer services) : this(services, new List<ServiceDescriptor>(), null, true) { }
     internal ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister)
         : this(services, servicesToRegister, null, false) { }
@@ -47,7 +49,8 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         }
         catch { container.Dispose(); throw; }
     }
-    /// <summary>Returns null for an unregistered service; registered construction failures propagate.</summary>
+    /// <summary>For collection-built providers, returns null for an unregistered service;
+    /// registered construction failures propagate. Raw-container wrappers retain native Unity resolution.</summary>
     public object GetService(Type serviceType)
     {
         if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
@@ -86,12 +89,20 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// Do not dispose from a constructor or synchronously wait for disposal from an active resolution.</summary>
     public void Dispose()
     {
+        if (ReferenceEquals(root, this)) { DisposeCore(); return; }
+        IDisposable rootOperation;
+        try { rootOperation = root.lifetime.Enter(); }
+        catch (ObjectDisposedException) { return; } // Root shutdown owns disposal of every remaining child.
+        using (rootOperation) DisposeCore();
+    }
+    private void DisposeCore()
+    {
         lifetime.Dispose(() =>
         {
             List<Exception> errors = new();
             ServiceProviderPNP[] scopes;
             lock (sync) scopes = children.ToArray();
-            foreach (ServiceProviderPNP child in scopes) try { child.Dispose(); } catch (Exception e) { errors.Add(e); }
+            foreach (ServiceProviderPNP child in scopes) try { child.DisposeCore(); } catch (Exception e) { errors.Add(e); }
             IDisposable[] instances;
             lock (sync) { instances = owned.ToArray(); owned.Clear(); children.Clear(); }
             for (int i = instances.Length - 1; i >= 0; --i) try { instances[i].Dispose(); } catch (Exception e) { errors.Add(e); }

@@ -11,8 +11,8 @@ internal sealed class OperationLifetime
 {
     private readonly object sync = new();
     private readonly Dictionary<int, int> threads = new();
-    private int active, disposingThread;
-    private bool closing, closed;
+    private int active;
+    private bool closing;
     internal IDisposable Enter()
     {
         lock (sync)
@@ -29,17 +29,12 @@ internal sealed class OperationLifetime
         lock (sync)
         {
             if (threads.ContainsKey(id)) throw new InvalidOperationException("Cannot dispose a lifetime from one of its active operations.");
-            if (closing)
-            {
-                if (disposingThread == id) return;
-                while (!closed) Monitor.Wait(sync);
-                return;
-            }
-            closing = true; disposingThread = id;
+            // Repeated concurrent disposal is a no-op, not another blocking dependency.
+            if (closing) return;
+            closing = true;
             while (active != 0) Monitor.Wait(sync);
         }
-        try { dispose(); }
-        finally { lock (sync) { closed = true; Monitor.PulseAll(sync); } }
+        dispose();
     }
     private sealed class Lease : IDisposable
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
@@ -49,6 +49,6 @@ public class ServiceDescriptor : IEquatable<ServiceDescriptor>
     /// <returns>A hash code for the current object.</returns>
     public override int GetHashCode()
     {
-        return ServiceType.GetHashCode();
+        return ServiceType == null ? 0 : ServiceType.GetHashCode();
     }
 }

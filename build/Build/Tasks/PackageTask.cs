@@ -74,7 +74,7 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
 
     private static async Task<string> VerifyNuGetToolAsync(BuildContext context, string toolsDirectory)
     {
-        string nugetExePath = System.IO.Path.Combine(toolsDirectory, "nuget.exe");
+        string nugetExePath = System.IO.Path.Combine(toolsDirectory, "nuget-6.14.0.exe");
 
         if (!System.IO.File.Exists(nugetExePath))
         {
@@ -85,8 +85,17 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
             using var httpClient = new HttpClient();
             using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/v6.14.0/nuget.exe");
             response.EnsureSuccessStatusCode();
-            using var fs = new System.IO.FileStream(nugetExePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None);
-            await response.Content.CopyToAsync(fs);
+            string temporaryPath = nugetExePath + "." + Guid.NewGuid().ToString("N") + ".download";
+            try
+            {
+                using (var fs = new System.IO.FileStream(temporaryPath, System.IO.FileMode.CreateNew, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                    await response.Content.CopyToAsync(fs);
+                System.IO.File.Move(temporaryPath, nugetExePath);
+            }
+            finally
+            {
+                if (System.IO.File.Exists(temporaryPath)) System.IO.File.Delete(temporaryPath);
+            }
 
             stopwatch.Stop();
             double completionTime = Math.Round(stopwatch.Elapsed.TotalSeconds, 1);
