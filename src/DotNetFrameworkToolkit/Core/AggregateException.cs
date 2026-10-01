@@ -6,7 +6,7 @@ using System.Text;
 
 namespace DotNetFrameworkToolkit.Core;
 
- [Serializable]
+[Serializable]
 /// <summary>
 /// Represents one or more errors that occur during application execution.
 /// </summary>
@@ -208,12 +208,12 @@ public class AggregateException : Exception
             if (!predicate(inner))
             {
                 unhandled.Add(inner);
-            } 
+            }
         }
 
         if (unhandled.Count > 0)
         {
             throw new AggregateException(this.Message, unhandled);
-        }   
+        }
     }
 }
