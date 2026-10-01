@@ -2,18 +2,37 @@ using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
-/// <summary>Creates independent scopes from a root provider.</summary>
+
+/// <inheritdoc/>
 public class ServiceScopeFactoryPNP : IServiceScopeFactory
 {
-    private readonly ServiceProviderPNP root;
-    internal ServiceScopeFactoryPNP(ServiceProviderPNP root) { this.root = root; }
-    /// <summary>Creates a factory owning a provider over the supplied container and registrations.
-    /// Prefer resolving this factory from a ServiceCollectionPNP-built provider.</summary>
+    private readonly ServiceProviderPNP _root;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class from an existing root provider.
+    /// </summary>
+    /// <param name="root">The root service provider.</param>
+    internal ServiceScopeFactoryPNP(ServiceProviderPNP root) { this._root = root; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class,
+    /// owning a provider over the supplied container and registrations.
+    /// </summary>
+    /// <param name="unityProvider">The Unity container used to resolve services.</param>
+    /// <param name="scopedServiceDescriptors">The scoped service descriptors used to create the root provider.</param>
+    /// <remarks>
+    /// Prefer resolving this factory from a ServiceCollectionPNP-built provider.
+    /// </remarks>
     public ServiceScopeFactoryPNP(IUnityContainer unityProvider, IEnumerable<ServiceDescriptor> scopedServiceDescriptors)
     {
-        if (scopedServiceDescriptors == null) throw new ArgumentNullException(nameof(scopedServiceDescriptors));
-        root = new ServiceProviderPNP(unityProvider, scopedServiceDescriptors);
+        if (scopedServiceDescriptors == null)
+        {
+            throw new ArgumentNullException(nameof(scopedServiceDescriptors));
+        }
+
+        _root = new ServiceProviderPNP(unityProvider, scopedServiceDescriptors);
     }
+
     /// <inheritdoc/>
-    public IServiceScope CreateScope() => root.CreateScope();
+    public IServiceScope CreateScope() => _root.CreateScope();
 }

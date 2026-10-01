@@ -17,7 +17,11 @@ internal sealed class OperationLifetime
     {
         lock (sync)
         {
-            if (closing) throw new ObjectDisposedException("Service lifetime");
+            if (closing)
+            {
+                throw new ObjectDisposedException("Service lifetime");
+            }
+
             int id = Thread.CurrentThread.ManagedThreadId;
             threads.TryGetValue(id, out int count); threads[id] = count + 1; active++;
             return new Lease(this, id);
@@ -28,11 +32,23 @@ internal sealed class OperationLifetime
         int id = Thread.CurrentThread.ManagedThreadId;
         lock (sync)
         {
-            if (threads.ContainsKey(id)) throw new InvalidOperationException("Cannot dispose a lifetime from one of its active operations.");
+            if (threads.ContainsKey(id))
+            {
+                throw new InvalidOperationException("Cannot dispose a lifetime from one of its active operations.");
+            }
+
             // Repeated concurrent disposal is a no-op, not another blocking dependency.
-            if (closing) return;
+            if (closing)
+            {
+                return;
+            }
+
             closing = true;
-            while (active != 0) Monitor.Wait(sync);
+
+            while (active != 0)
+            {
+                Monitor.Wait(sync);
+            }
         }
         dispose();
     }
@@ -44,11 +60,20 @@ internal sealed class OperationLifetime
         public void Dispose()
         {
             OperationLifetime current = Interlocked.Exchange(ref owner, null);
-            if (current == null) return;
+            if (current == null)
+            {
+                return;
+            }
+
             lock (current.sync)
             {
-                if (--current.threads[id] == 0) current.threads.Remove(id);
-                current.active--; Monitor.PulseAll(current.sync);
+                if (--current.threads[id] == 0)
+                {
+                    current.threads.Remove(id);
+                }
+
+                current.active--; 
+                Monitor.PulseAll(current.sync);
             }
         }
     }

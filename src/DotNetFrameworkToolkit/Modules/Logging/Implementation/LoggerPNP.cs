@@ -15,6 +15,8 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 /// </remarks>
 public class LoggerPNP : ILogger, IDisposable
 {
+    private readonly LogWriter _writer;
+
     /// <summary>
     /// Gets the minimum <see cref="LogLevel"/> that will be logged by this logger.
     /// </summary>
@@ -24,11 +26,30 @@ public class LoggerPNP : ILogger, IDisposable
     private readonly Core.OperationLifetime lifetime = new();
     internal LoggerPNPScope CurrentScope
     {
-        get { if (scopes != null && scopes.TryGetValue(this, out LoggerPNPScope scope)) return scope; return null; }
-        set { if (scopes == null) scopes = new Dictionary<LoggerPNP, LoggerPNPScope>(); if (value == null) scopes.Remove(this); else scopes[this] = value; }
+        get 
+        { 
+            if (scopes != null && scopes.TryGetValue(this, out LoggerPNPScope scope)) 
+            { 
+                return scope;
+            } 
+            return null;
+        }
+        set 
+        { 
+            if (scopes == null) 
+            { 
+                scopes = new Dictionary<LoggerPNP, LoggerPNPScope>(); 
+            } 
+            if (value == null) 
+            { 
+                scopes.Remove(this); 
+            } 
+            else 
+            {
+                scopes[this] = value; 
+            } 
+        }
     }
-
-    private readonly LogWriter _writer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoggerPNP"/> class with the specified minimum log level and sinks.
@@ -37,7 +58,11 @@ public class LoggerPNP : ILogger, IDisposable
     /// <param name="sinks">Optional trace listeners to receive log output. If none are provided, a <see cref="ConsoleTraceListener"/> is used.</param>
     public LoggerPNP(LogLevel minimumLevel = LogLevel.Information, params TraceListener[] sinks)
     {
-        if (!Enum.IsDefined(typeof(LogLevel), minimumLevel)) throw new ArgumentOutOfRangeException(nameof(minimumLevel));
+        if (!Enum.IsDefined(typeof(LogLevel), minimumLevel))
+        {
+            throw new ArgumentOutOfRangeException(nameof(minimumLevel));
+        }
+
         MinimumLevel = minimumLevel;
 
         _writer = ConfigureLogWriter(sinks);
@@ -46,7 +71,10 @@ public class LoggerPNP : ILogger, IDisposable
     /// <inheritdoc />
     public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
-        using (lifetime.Enter()) return new LoggerPNPScope(this, state);
+        using (lifetime.Enter())
+        {
+            return new LoggerPNPScope(this, state);
+        }
     }
 
     /// <inheritdoc />
@@ -76,11 +104,29 @@ public class LoggerPNP : ILogger, IDisposable
 
         LogEntry entry = BuildLogEntry(logLevel, eventId, formattedMessage, exception);
         List<LoggerPNPScope> chain = new();
-        for (LoggerPNPScope scope = CurrentScope; scope != null; scope = scope.Parent) if (!scope.IsDisposed) chain.Add(scope);
+
+        for (LoggerPNPScope scope = CurrentScope; scope != null; scope = scope.Parent)
+        {
+            if (!scope.IsDisposed)
+            {
+                chain.Add(scope);
+            }
+        }
+
         List<string> scopeMessages = new();
         for (int i = chain.Count - 1; i >= 0; i--)
-        { AddProperties(entry, chain[i].State); scopeMessages.Add(chain[i].State == null ? string.Empty : chain[i].State.ToString()); }
-        if (scopeMessages.Count != 0) entry.ExtendedProperties["Scopes"] = scopeMessages.ToArray();
+        { 
+            AddProperties(entry, chain[i].State); 
+            scopeMessages.Add(chain[i].State == null 
+                ? string.Empty 
+                : chain[i].State.ToString()); 
+        }
+
+        if (scopeMessages.Count != 0)
+        {
+            entry.ExtendedProperties["Scopes"] = scopeMessages.ToArray();
+        }
+
         AddProperties(entry, state);
         _writer.Write(entry);
     }
@@ -148,15 +194,30 @@ public class LoggerPNP : ILogger, IDisposable
     private static void AddProperties(LogEntry entry, object state)
     {
         if (state is FormattedLogValues formatted)
+        {
             foreach (KeyValuePair<string, object> property in formatted.Properties) entry.ExtendedProperties[property.Key] = property.Value;
+        }
         else if (state is LoggerState loggerState)
         {
-            if (loggerState.SinglePropertyName != null) entry.ExtendedProperties[loggerState.SinglePropertyName] = loggerState.SinglePropertyValue;
+            if (loggerState.SinglePropertyName != null)
+            {
+                entry.ExtendedProperties[loggerState.SinglePropertyName] = loggerState.SinglePropertyValue;
+            }
             if (loggerState.PropertyValuesByNames != null)
-                foreach (KeyValuePair<string, object> property in loggerState.PropertyValuesByNames) entry.ExtendedProperties[property.Key] = property.Value;
+            {
+                foreach (KeyValuePair<string, object> property in loggerState.PropertyValuesByNames)
+                {
+                    entry.ExtendedProperties[property.Key] = property.Value;
+                }
+            }
         }
         else if (state is IEnumerable<KeyValuePair<string, object>> properties)
-            foreach (KeyValuePair<string, object> property in properties) entry.ExtendedProperties[property.Key] = property.Value;
+        {
+            foreach (KeyValuePair<string, object> property in properties)
+            {
+                entry.ExtendedProperties[property.Key] = property.Value;
+            }
+        }
     }
 
     private static TraceEventType MapLogLevelToTraceEventType(LogLevel logLevel)
@@ -353,7 +414,11 @@ public class LoggerPNP : ILogger, IDisposable
     /// <inheritdoc/>
     public void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args)
     {
-        if (!IsEnabled(logLevel)) return;
+        if (!IsEnabled(logLevel))
+        {
+            return;
+        }
+
         FormattedLogValues state = new(message, args);
 
         Log(logLevel, eventId, state, exception, _messageFormatter);

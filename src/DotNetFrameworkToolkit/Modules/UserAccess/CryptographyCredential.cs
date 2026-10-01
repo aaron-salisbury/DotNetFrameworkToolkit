@@ -7,11 +7,6 @@ namespace DotNetFrameworkToolkit.Modules.UserAccess;
 /// </summary>
 public class CryptographyCredential
 {
-    /// <summary>Zero denotes the legacy ASCII format; one denotes UTF-8 PBKDF2.</summary>
-    public int FormatVersion { get; set; }
-    /// <summary>Persisted algorithm identifier. Null is permitted only for legacy credentials.</summary>
-    public string AlgorithmName { get; set; }
-
     /// <summary>
     /// Cryptographic salt used for hashing the user's login credentials.
     /// </summary>

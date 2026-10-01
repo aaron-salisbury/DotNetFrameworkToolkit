@@ -45,7 +45,11 @@ public sealed class FileSystemAccess : IFileSystemAccess
     /// <inheritdoc/>
     public ProcessResult<bool> DeleteFile(string fullFilePath)
     {
-        if (string.IsNullOrEmpty(fullFilePath)) throw new ArgumentException("A file path is required.", nameof(fullFilePath));
+        if (string.IsNullOrEmpty(fullFilePath))
+        {
+            throw new ArgumentException("A file path is required.", nameof(fullFilePath));
+        }
+
         try
         {
             if (File.Exists(fullFilePath))
@@ -76,8 +80,16 @@ public sealed class FileSystemAccess : IFileSystemAccess
     /// <inheritdoc/>
     public ProcessResult<bool> WriteFile(IEnumerable<string> contentLines, string fileName, string directoryPath = null)
     {
-        if (contentLines == null) throw new ArgumentNullException(nameof(contentLines));
-        if (string.IsNullOrEmpty(fileName) || fileName != Path.GetFileName(fileName)) throw new ArgumentException("A simple file name is required.", nameof(fileName));
+        if (contentLines == null)
+        {
+            throw new ArgumentNullException(nameof(contentLines));
+        }
+
+        if (string.IsNullOrEmpty(fileName) || fileName != Path.GetFileName(fileName))
+        {
+            throw new ArgumentException("A simple file name is required.", nameof(fileName));
+        }
+
         string temporaryPath = null;
         try
         {
@@ -100,9 +112,22 @@ public sealed class FileSystemAccess : IFileSystemAccess
 
             temporaryPath = Path.Combine(directoryPath, Guid.NewGuid().ToString("N") + ".tmp");
             using (StreamWriter outputFile = new(temporaryPath))
-                foreach (string line in contentLines) outputFile.WriteLine(line);
-            if (File.Exists(fullPath)) File.Replace(temporaryPath, fullPath, null);
-            else File.Move(temporaryPath, fullPath);
+            {
+                foreach (string line in contentLines)
+                {
+                    outputFile.WriteLine(line);
+                }
+            }
+
+            if (File.Exists(fullPath))
+            {
+                File.Replace(temporaryPath, fullPath, null);
+            }
+            else
+            {
+                File.Move(temporaryPath, fullPath);
+            }
+
             temporaryPath = null;
 
             return ProcessResult<bool>.Success(true);
@@ -113,15 +138,30 @@ public sealed class FileSystemAccess : IFileSystemAccess
         }
         finally
         {
-            if (temporaryPath != null) try { File.Delete(temporaryPath); } catch (Exception) { /* Preserve the write failure. */ }
+            if (temporaryPath != null)
+            {
+                try
+                { 
+                    File.Delete(temporaryPath);
+                } 
+                catch (Exception) { /* Preserve the write failure. */ }
+            }
         }
     }
 
     /// <inheritdoc/>
     public ProcessResult<string> GetEmbeddedResourceText(Assembly assemblyEmbeddedIn, string filePath)
     {
-        if (assemblyEmbeddedIn == null) throw new ArgumentNullException(nameof(assemblyEmbeddedIn));
-        if (string.IsNullOrEmpty(filePath)) throw new ArgumentException("A resource name is required.", nameof(filePath));
+        if (assemblyEmbeddedIn == null)
+        {
+            throw new ArgumentNullException(nameof(assemblyEmbeddedIn));
+        }
+
+        if (string.IsNullOrEmpty(filePath))
+        {
+            throw new ArgumentException("A resource name is required.", nameof(filePath));
+        }
+
         try
         {
             using Stream stream = assemblyEmbeddedIn.GetManifestResourceStream(filePath);

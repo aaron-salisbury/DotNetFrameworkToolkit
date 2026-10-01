@@ -28,7 +28,6 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\net20\</OutputPath>
     <DocumentationFile>bin\Release\net20\DotNetFrameworkToolkit.xml</DocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

@@ -60,29 +60,63 @@ public class ServiceCollectionPNP : IServiceCollection
         lock (_syncRoot)
         {
             snapshot = new List<ServiceDescriptor>();
-            foreach (ServiceDescriptor descriptor in _descriptors) snapshot.Add(Copy(descriptor));
+            foreach (ServiceDescriptor descriptor in _descriptors)
+            {
+                snapshot.Add(Copy(descriptor));
+            }
         }
+
         return new ServiceProviderPNP(new UnityContainer(), snapshot);
     }
 
     internal static ServiceDescriptor Copy(ServiceDescriptor item)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
-        ServiceDescriptor copy = new() { ServiceType = item.ServiceType, ImplementationType = item.ImplementationType,
-            ImplementationInstance = item.ImplementationInstance, Lifetime = item.Lifetime };
-        if (copy.ServiceType == null) throw new ArgumentException("A service type is required.", nameof(item));
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
+
+        ServiceDescriptor copy = new()
+        { 
+            ServiceType = item.ServiceType, 
+            ImplementationType = item.ImplementationType,
+            ImplementationInstance = item.ImplementationInstance, 
+            Lifetime = item.Lifetime
+        };
+
+        if (copy.ServiceType == null)
+        {
+            throw new ArgumentException("A service type is required.", nameof(item));
+        }
+
         if (copy.ServiceType.ContainsGenericParameters || (copy.ImplementationType != null && copy.ImplementationType.ContainsGenericParameters))
+        {
             throw new NotSupportedException("This Unity 1.2 adapter requires closed service types; register each required closed generic explicitly.");
-        if (!Enum.IsDefined(typeof(ServiceLifetime), copy.Lifetime)) throw new ArgumentException("Unknown lifetime.", nameof(item));
+        }
+
+        if (!Enum.IsDefined(typeof(ServiceLifetime), copy.Lifetime))
+        {
+            throw new ArgumentException("Unknown lifetime.", nameof(item));
+        }
+
         if (copy.ImplementationInstance != null)
         {
             if (copy.ImplementationType != null || !copy.ServiceType.IsInstanceOfType(copy.ImplementationInstance))
+            {
                 throw new ArgumentException("The instance must implement the service type.", nameof(item));
-            if (copy.Lifetime != ServiceLifetime.Singleton) throw new ArgumentException("Supplied instances must be singletons and remain caller-owned.", nameof(item));
+            }
+
+            if (copy.Lifetime != ServiceLifetime.Singleton)
+            {
+                throw new ArgumentException("Supplied instances must be singletons and remain caller-owned.", nameof(item));
+            }
         }
         else if (copy.ImplementationType == null || copy.ImplementationType.IsAbstract || copy.ImplementationType.IsInterface ||
             (!copy.ServiceType.IsGenericTypeDefinition && !copy.ServiceType.IsAssignableFrom(copy.ImplementationType)))
+        {
             throw new ArgumentException("A concrete compatible implementation type is required.", nameof(item));
+        }
+
         return copy;
     }
 
@@ -332,12 +366,24 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="arrayIndex">The zero-based index in the array at which copying begins.</param>
     public void CopyTo(ServiceDescriptor[] array, int arrayIndex)
     {
-        if (array == null) throw new ArgumentNullException(nameof(array));
-        if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+        Guard.ArgumentNotNull(array, nameof(array));
+
+        if (arrayIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+        }
+
         lock (_syncRoot)
         {
-            if (arrayIndex > array.Length || _descriptors.Count > array.Length - arrayIndex) throw new ArgumentException("Insufficient array capacity.", nameof(array));
-            for (int i = 0; i < _descriptors.Count; i++) array[arrayIndex + i] = Copy(_descriptors[i]);
+            if (arrayIndex > array.Length || _descriptors.Count > array.Length - arrayIndex)
+            {
+                throw new ArgumentException("Insufficient array capacity.", nameof(array));
+            }
+
+            for (int i = 0; i < _descriptors.Count; i++)
+            {
+                array[arrayIndex + i] = Copy(_descriptors[i]);
+            }
         }
     }
 
@@ -377,5 +423,4 @@ public class ServiceCollectionPNP : IServiceCollection
         return GetEnumerator();
     }
     #endregion
-
 }

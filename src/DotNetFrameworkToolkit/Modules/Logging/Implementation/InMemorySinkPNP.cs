@@ -22,12 +22,22 @@ public class InMemorySinkPNP : CustomTraceListener
     public event EventHandler<LogEmitEventArgs> LogEmitted;
 
     private readonly List<string> _logs;
-    private readonly object sync = new();
-    private int maxLogsCount;
+    private readonly object _sync = new();
+    private int _maxLogsCount;
+
     /// <summary>
     /// Gets the collection of log messages currently stored in memory.
     /// </summary>
-    public IList<string> Logs { get { lock (sync) return new List<string>(_logs).AsReadOnly(); } }
+    public IList<string> Logs
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return new List<string>(_logs).AsReadOnly();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the maximum number of log messages to retain in memory.
@@ -35,10 +45,12 @@ public class InMemorySinkPNP : CustomTraceListener
     /// </summary>
     public int MaxLogsCount
     {
-        get { lock (sync) return maxLogsCount; }
-        set { if (value < 0) throw new ArgumentOutOfRangeException(nameof(value)); lock (sync) { maxLogsCount = value; Trim(); } }
+        get { lock (_sync) { return _maxLogsCount; } }
+        set { if (value < 0) { throw new ArgumentOutOfRangeException(nameof(value)); } lock (_sync) { _maxLogsCount = value; Trim(); } }
     }
-    private void Trim() { while (maxLogsCount > 0 && _logs.Count > maxLogsCount) _logs.RemoveAt(0); }
+
+    private void Trim() { while (_maxLogsCount > 0 && _logs.Count > _maxLogsCount) _logs.RemoveAt(0); }
+    
     /// <inheritdoc/>
     public override bool IsThreadSafe => true;
 
@@ -61,7 +73,10 @@ public class InMemorySinkPNP : CustomTraceListener
     /// <param name="message">The log message to write.</param>
     public override void Write(string message)
     {
-        lock (sync) { _logs.Add(message); Trim(); }
+        lock (_sync) 
+        { 
+            _logs.Add(message); Trim(); 
+        }
     }
 
     /// <summary>
@@ -108,11 +123,18 @@ public class InMemorySinkPNP : CustomTraceListener
         WriteLine(message);
 
         EventHandler<LogEmitEventArgs> handlers = LogEmitted;
-        if (handlers == null) return;
+        if (handlers == null)
+        {
+            return;
+        }
+
         // Callbacks execute outside the buffer lock. A failing observer must not abort the application operation.
         foreach (EventHandler<LogEmitEventArgs> handler in handlers.GetInvocationList())
         {
-            try { handler(this, new LogEmitEventArgs { LogEvent = new LogEvent { TimeStamp = timeStamp, Message = message, Level = level, Exception = exception } }); }
+            try
+            { 
+                handler(this, new LogEmitEventArgs { LogEvent = new LogEvent { TimeStamp = timeStamp, Message = message, Level = level, Exception = exception } });
+            }
             catch (Exception) { /* Observational notifications are best-effort. */ }
         }
     }

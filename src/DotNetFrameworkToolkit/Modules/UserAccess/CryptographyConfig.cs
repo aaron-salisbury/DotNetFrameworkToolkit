@@ -22,10 +22,8 @@ public class CryptographyConfig
     /// </remarks>
     public int NewUserWorkFactor { get; set; } = 10000;
 
-    /// <summary>Upper bound on iterations accepted from stored credential data.</summary>
+    /// <summary>
+    /// Upper bound on iterations accepted from stored credential data.
+    /// </summary>
     public int MaxVerificationWorkFactor { get; set; } = 1000000;
-
-    /// <summary>The algorithm used only to verify unversioned legacy credentials.</summary>
-    /// <remarks>New credentials use .NET 2.0 PBKDF2-HMAC-SHA1 and persist that algorithm name.</remarks>
-    public HashAlgorithm HashAlgorithm { get; set; } = new SHA256Managed();
 }
