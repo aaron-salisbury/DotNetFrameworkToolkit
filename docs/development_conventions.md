@@ -2,8 +2,7 @@
 
 ## Purpose and scope
 
-These conventions apply to human contributors and AI coding assistants. They adapt
-Helm's development conventions to a reusable compatibility library. Prefer clear,
+These conventions apply to human contributors and AI coding assistants. Prefer clear,
 simple implementations and deliberate contracts over speculative abstractions.
 
 DotNetFrameworkToolkit helps legacy applications use familiar dependency injection,
@@ -37,8 +36,6 @@ Business/Data/Presentation layers, UI framework, persistence model, or compositi
 - Preserve existing namespaces deliberately. Implementation subfolders need not
   introduce another namespace; do not move public types just to match folders.
 - Do not add repositories, mappings, layers, or interfaces solely for symmetry.
-- Limit database work to necessary corrections. Keep explicit TODOs for unresolved
-  recovery, discovery, and locking assumptions while database retirement is planned.
 
 ## Results, exceptions, and validation
 
