@@ -1,4 +1,4 @@
-﻿using DotNetFrameworkToolkit.Modules.ComponentModel.Validation;
+using DotNetFrameworkToolkit.Modules.ComponentModel.Validation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ namespace DotNetFrameworkToolkit.Modules.ComponentModel;
 /// Implements <see cref="INotifyDataErrorInfo"/> and <see cref="IDataErrorInfo"/> for data validation scenarios.
 /// </summary>
 /// <remarks>
+/// Instances belong to their UI thread. Marshal mutations and notifications to that thread.
 /// <list type="bullet">
 /// <item>WinForms needs an ErrorProvider to be created and passed the control and its message via .UpdateError().</item>
 /// <item>WPF uses IDataErrorInfo when ValidatesOnDataErrors is set to true and the REAL INotifyDataErrorInfo when ValidatesOnNotifyDataErrors is set to true.</item>
@@ -47,7 +48,7 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     public List<string> GetErrorsForProperty(string propertyName)
     {
         return ErrorsByPropertyNames.ContainsKey(propertyName)
-            ? ErrorsByPropertyNames[propertyName]
+            ? new List<string>(ErrorsByPropertyNames[propertyName])
             : [];
     }
 
@@ -58,13 +59,15 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     /// <param name="errors">The list of validation errors for the property.</param>
     protected void SetErrorsForProperty(string propertyName, List<string> errors)
     {
+        if (string.IsNullOrEmpty(propertyName)) { throw new ArgumentException("A property name is required.", nameof(propertyName)); }
+        if (errors == null) { throw new ArgumentNullException(nameof(errors)); }
         List<string> startingErrorsForProperty = ErrorsByPropertyNames.ContainsKey(propertyName)
             ? ErrorsByPropertyNames[propertyName]
             : [];
 
         if (errors.Count > 0)
         {
-            ErrorsByPropertyNames[propertyName] = errors;
+            ErrorsByPropertyNames[propertyName] = new List<string>(errors);
         }
         else
         {
@@ -77,7 +80,21 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
         if (!ErrorsHaventChanged(startingErrorsForProperty, errors, null))
         {
             OnErrorsChanged(this, propertyName);
+            RaisePropertyChanged(nameof(HasErrors));
         }
+    }
+
+    /// <summary>Replaces entity-level errors and notifies observers when they change.</summary>
+    protected void SetEntityLevelErrors(IEnumerable<string> errors)
+    {
+        if (errors == null) { throw new ArgumentNullException(nameof(errors)); }
+        List<string> snapshot = new(errors);
+        if (ErrorsHaventChanged(EntityLevelErrors, snapshot, null)) { return; }
+        EntityLevelErrors.Clear();
+        EntityLevelErrors.AddRange(snapshot);
+        OnErrorsChanged(this, string.Empty);
+        RaisePropertyChanged(nameof(Error));
+        RaisePropertyChanged(nameof(HasErrors));
     }
 
     /// <summary>
@@ -170,7 +187,7 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     /// <returns>An <see cref="IEnumerable"/> of errors for the specified property.</returns>
     public IEnumerable GetErrors(string propertyName)
     {
-        return GetErrorsForProperty(propertyName);
+        return string.IsNullOrEmpty(propertyName) ? new List<string>(EntityLevelErrors) : GetErrorsForProperty(propertyName);
     }
 
     /// <summary>
@@ -178,7 +195,7 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     /// </summary>
     public bool HasErrors
     {
-        get { return ErrorsByPropertyNames.Values.Count > 0; }
+        get { return EntityLevelErrors.Count > 0 || ErrorsByPropertyNames.Count > 0; }
     }
     #endregion
 
@@ -190,7 +207,7 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     {
         foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(this))
         {
-            ValidateProperty(property);
+            SetErrorsForProperty(property.Name, ValidateProperty(property));
         }
 
         return !HasErrors;

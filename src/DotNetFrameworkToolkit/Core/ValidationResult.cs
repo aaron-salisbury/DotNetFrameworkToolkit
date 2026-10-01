@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DotNetFrameworkToolkit.Core
@@ -35,7 +35,15 @@ namespace DotNetFrameworkToolkit.Core
         /// </summary>
         public IEnumerable<KeyValuePair<string, string[]>> ValidationMessages
         {
-            get { return _validationMessages; }
+            get
+            {
+                Dictionary<string, string[]> snapshot = [];
+                foreach (KeyValuePair<string, string[]> pair in _validationMessages)
+                {
+                    snapshot.Add(pair.Key, (string[])pair.Value.Clone());
+                }
+                return snapshot;
+            }
         }
 
         /// <summary>
@@ -43,7 +51,7 @@ namespace DotNetFrameworkToolkit.Core
         /// </summary>
         public IEnumerable<string> GeneralMessages
         {
-            get { return _generalMessages; }
+            get { return _generalMessages.AsReadOnly(); }
         }
 
         /// <summary>
@@ -61,7 +69,17 @@ namespace DotNetFrameworkToolkit.Core
         public ValidationResult(T value, IDictionary<string, string[]> validationMessages, IList<string> generalMessages)
         {
             Value = value;
-            _validationMessages = validationMessages != null ? new Dictionary<string, string[]>(validationMessages) : [];
+            _validationMessages = [];
+            if (validationMessages != null)
+            {
+                foreach (KeyValuePair<string, string[]> pair in validationMessages)
+                {
+                    if (pair.Value != null && pair.Value.Length > 0)
+                    {
+                        _validationMessages.Add(pair.Key, (string[])pair.Value.Clone());
+                    }
+                }
+            }
             _generalMessages = generalMessages != null ? [.. generalMessages] : [];
         }
 

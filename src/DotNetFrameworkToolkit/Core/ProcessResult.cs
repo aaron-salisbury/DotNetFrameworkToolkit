@@ -1,10 +1,12 @@
-﻿using DotNetFrameworkToolkit.Modules.Logging;
+using DotNetFrameworkToolkit.Modules.Logging;
 using System;
 
 namespace DotNetFrameworkToolkit.Core;
 
 /// <summary>
-/// Represents a result of an operation which can be the actual result or exception.
+/// Represents a value or an exception deliberately captured at an application boundary.
+/// Use ProcessResult&lt;T, TError&gt; for expected enum-modeled failures. Unexpected exceptions
+/// should normally propagate unless the boundary has a reason to capture them.
 /// </summary>
 /// <typeparam name="T">The type of the value stored in the Result.</typeparam>
 /// <remarks>
@@ -100,6 +102,13 @@ public class ProcessResult<T>
         return new ProcessResult<T>(error);
     }
 
+    /// <summary>Attempts to extract the successful value without throwing.</summary>
+    public bool TryGet(out T value)
+    {
+        value = _value;
+        return IsSuccessful;
+    }
+
     /// <summary>
     /// Logs a failure message and exception using the specified logger and log level, then returns a failed <see cref="ProcessResult{T}"/>
     /// containing a new exception with the provided message and the original exception as its inner exception.
@@ -113,9 +122,22 @@ public class ProcessResult<T>
     /// </returns>
     public static ProcessResult<T> LogAndForwardException(string message, Exception error, ILogger logger, LogLevel logLevel = LogLevel.Error)
     {
-        logger.Log(logLevel, message);
-
-        return Failure(new Exception(message, innerException: error));
+        if (error == null) { throw new ArgumentNullException(nameof(error)); }
+        if (logger == null) { throw new ArgumentNullException(nameof(logger)); }
+        Exception forwarded = new(message, error);
+        try
+        {
+            if (logger.IsEnabled(logLevel))
+            {
+                logger.Log(logLevel, error, "{Message}", message);
+            }
+        }
+        catch (Exception loggingError)
+        {
+            // Failure reporting must not replace the operation's original diagnostic.
+            forwarded.Data["LoggingException"] = loggingError;
+        }
+        return Failure(forwarded);
     }
 
     /// <summary>
@@ -123,22 +145,16 @@ public class ProcessResult<T>
     /// </summary>
     public static implicit operator bool(ProcessResult<T> result)
     {
-        return result.IsSuccessful;
-    }
-
-    /// <summary>
-    /// Defines an explicit conversion from <see cref="ProcessResult{T}"/> to the underlying value of type <typeparamref name="T"/>.
-    /// </summary>
-    public static explicit operator T(ProcessResult<T> result)
-    {
-        return result.Value;
+        return result != null && result.IsSuccessful;
     }
 
     private void Validate()
     {
         if (_hasError)
         {
-            throw _exception;
+            // ExceptionDispatchInfo is unavailable on .NET 2.0. Wrapping preserves the
+            // original exception and its stack, including across repeated value reads.
+            throw new InvalidOperationException("The process result contains an exception rather than a value.", _exception);
         }
     }
 }

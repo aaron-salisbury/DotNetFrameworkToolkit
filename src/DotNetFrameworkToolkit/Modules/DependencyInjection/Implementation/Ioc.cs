@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
@@ -20,6 +20,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     public static Ioc Default { get; } = new();
 
     private volatile IServiceProvider serviceProvider;
+    private readonly Core.OperationLifetime lifetime = new();
 
     /// <summary>
     /// Gets the service object of the specified type from the service container.
@@ -38,12 +39,12 @@ public sealed class Ioc : IServiceProvider, IDisposable
             throw new ArgumentNullException(nameof(serviceType));
         }
 
-        if (this.serviceProvider is null)
+        using (lifetime.Enter())
         {
-            ThrowInvalidOperationExceptionForMissingInitialization();
+            IServiceProvider provider = serviceProvider;
+            if (provider == null) ThrowInvalidOperationExceptionForMissingInitialization();
+            return provider.GetService(serviceType);
         }
-
-        return this.serviceProvider.GetService(serviceType);
     }
 
     /// <summary>
@@ -54,12 +55,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
     public T GetService<T>()
     {
-        if (this.serviceProvider is null)
-        {
-            ThrowInvalidOperationExceptionForMissingInitialization();
-        }
-
-        return (T)this.serviceProvider.GetService(typeof(T));
+        return (T)GetService(typeof(T));
     }
 
     /// <summary>
@@ -95,6 +91,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
             throw new ArgumentNullException(nameof(serviceProvider));
         }
 
+        using IDisposable operation = lifetime.Enter();
         IServiceProvider oldServices = Interlocked.CompareExchange(ref this.serviceProvider, serviceProvider, null);
 
         if (oldServices is not null)
@@ -109,12 +106,11 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// </summary>
     public void Dispose()
     {
-        IServiceProvider currentServiceProvider = Interlocked.Exchange(ref this.serviceProvider, null);
-
-        if (currentServiceProvider is IDisposable disposableServiceProvider)
+        lifetime.Dispose(() =>
         {
-            disposableServiceProvider.Dispose();
-        }
+            IServiceProvider provider = Interlocked.Exchange(ref serviceProvider, null);
+            if (provider is IDisposable disposable) disposable.Dispose();
+        });
     }
 
     /// <summary>

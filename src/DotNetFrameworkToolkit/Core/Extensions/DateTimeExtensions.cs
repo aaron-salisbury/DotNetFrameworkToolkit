@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Globalization;
 
 namespace DotNetFrameworkToolkit.Core.Extensions;
 
@@ -8,12 +9,12 @@ namespace DotNetFrameworkToolkit.Core.Extensions;
 public static class DateTimeExtensions
 {
     /// <summary>
-    /// Converts the specified <see cref="DateTime"/> to a timestamp string in the format "yyyy.MM.dd.mm.ss".
+    /// Converts the specified <see cref="DateTime"/> to an invariant timestamp with seconds precision.
     /// </summary>
     /// <param name="dateTime">The <see cref="DateTime"/> to convert.</param>
     /// <returns>A string representation of the timestamp.</returns>
     public static string ToTimeStamp(DateTime dateTime)
     {
-        return dateTime.ToString("yyyy.MM.dd.mm.ss");
+        return dateTime.ToString("yyyy.MM.dd.HH.mm.ss", CultureInfo.InvariantCulture);
     }
 }

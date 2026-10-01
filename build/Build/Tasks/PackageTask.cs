@@ -1,4 +1,4 @@
-﻿using Build.Tasks.Standard;
+using Build.Tasks.Standard;
 using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Pack;
 using Cake.Common.Tools.NuGet;
@@ -16,6 +16,7 @@ namespace Build.Tasks;
 
 [TaskName("Package")]
 [IsDependentOn(typeof(PublishTask))]
+[IsDependentOn(typeof(ProcessImagesTask))]
 [TaskDescription("Generates the NuGet packages using previously processed images and project properties. Legacy projects should have a nuspec file, named after and next to the .csproj, to use as a template.")]
 public sealed class PackageTask : AsyncFrostingTask<BuildContext>
 {
@@ -78,11 +79,11 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
         if (!System.IO.File.Exists(nugetExePath))
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            context.Log.Information("NuGet tool not found. Downloading latest version...");
+            context.Log.Information("NuGet tool not found. Downloading NuGet 6.14.0...");
 
             System.IO.Directory.CreateDirectory(toolsDirectory);
             using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe");
+            using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/v6.14.0/nuget.exe");
             response.EnsureSuccessStatusCode();
             using var fs = new System.IO.FileStream(nugetExePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None);
             await response.Content.CopyToAsync(fs);

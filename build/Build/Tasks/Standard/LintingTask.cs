@@ -1,4 +1,4 @@
-﻿using Cake.Common;
+using Cake.Common;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using System;
@@ -8,7 +8,7 @@ namespace Build.Tasks.Standard;
 
 [TaskName("Linting")]
 [IsDependentOn(typeof(RestoreTask))]
-[TaskDescription("Applies style preferences and static analysis recommendations to projects.")]
+[TaskDescription("Verifies formatting without modifying source files.")]
 public sealed class LintingTask : FrostingTask<BuildContext>
 {
     // ref: https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-format
@@ -28,7 +28,8 @@ public sealed class LintingTask : FrostingTask<BuildContext>
             // Non-SDK-style projects will be skipped with a warning, but the process will continue for the rest.
             // If we ever want to ensure Non-SDK-style projects are formatted, consider using legacy tools.
             context.Log.Information($"Formatting solution: {solutionPath}");
-            context.StartProcess("dotnet", $"format \"{solutionPath}\" --no-restore");
+            if (context.StartProcess("dotnet", $"format \"{solutionPath}\" --no-restore --verify-no-changes") != 0)
+                throw new InvalidOperationException("Formatting verification failed.");
         }
 
         stopwatch.Stop();
