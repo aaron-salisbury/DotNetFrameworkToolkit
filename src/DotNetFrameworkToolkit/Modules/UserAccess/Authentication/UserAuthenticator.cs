@@ -11,9 +11,8 @@ namespace DotNetFrameworkToolkit.Modules.UserAccess;
 /// including secure credential creation and password verification.
 /// </summary>
 /// <remarks>
-/// Creates UTF-8 PBKDF2-HMAC-SHA1 credentials using
-/// Patterns & Practices Enterprise Library (.Net Framework 2.0).
-/// Inspired by this <see href="https://www.mking.net/blog/password-security-best-practices-with-examples-in-csharp">article</see> by Matthew King.
+/// This implementation uses Patterns & Practices Enterprise Library and is inspired by this 
+/// <see href="https://www.mking.net/blog/password-security-best-practices-with-examples-in-csharp">article</see> by Matthew King.
 /// </remarks>
 public sealed class UserAuthenticator : IUserAuthenticator
 {
