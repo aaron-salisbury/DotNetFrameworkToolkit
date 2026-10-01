@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Practices.Unity.Utility;
+using System;
 using System.Data.Common;
 
 namespace DotNetFrameworkToolkit.Modules.DataAccess;
@@ -77,8 +78,8 @@ public abstract class SQLServerCEMigration : IMigration
     /// </exception>
     protected void UpdateMigrationTable(DbConnection dbConnection, DbTransaction transaction)
     {
-        if (dbConnection == null) { throw new ArgumentNullException("dbConnection"); }
-        if (transaction == null) { throw new ArgumentNullException("transaction"); }
+        Guard.ArgumentNotNull(dbConnection, nameof(dbConnection));
+        Guard.ArgumentNotNull(transaction, nameof(transaction));
 
         using DbCommand insertCmd = dbConnection.CreateCommand();
         insertCmd.Transaction = transaction;
