@@ -68,7 +68,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\AggregateException.cs" />
-    <Compile Include="Core\ExtensionAttribute.cs" />
     <Compile Include="Core\Extensions\DateTimeExtensions.cs" />
     <Compile Include="Core\Extensions\StringExtensions.cs" />
     <Compile Include="Core\ProcessResult.cs" />
