@@ -1,8 +1,8 @@
-using Microsoft.Practices.Unity;
 using DotNetFrameworkToolkit.Core;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections.Generic;
-using Microsoft.Practices.Unity.Utility;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
@@ -28,21 +28,26 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     private readonly ServiceScopeFactoryPNP scopeFactory;
 
     /// <summary>
-    /// Wraps an externally configured Unity container, retaining native Unity auto-construction 
+    /// Wraps an externally configured Unity container, retaining native Unity auto-construction
     /// and ownership semantics. For registration-aware null results and tracked transients, use ServiceCollectionPNP.
     /// </summary>
     /// <remarks>
     /// This provider owns the supplied container; do not modify it after wrapping.
     /// </remarks>
     /// <param name="services">The Unity container to use for service resolution.</param>
-    public ServiceProviderPNP(IUnityContainer services) : this(services, new List<ServiceDescriptor>(), null, true) { }
-    internal ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister) : this(services, servicesToRegister, null, false) { }
+    public ServiceProviderPNP(IUnityContainer services) : this(services, new List<ServiceDescriptor>(), null, true)
+    {
+    }
+    internal ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister) : this(services, servicesToRegister, null, false)
+    {
+    }
     private ServiceProviderPNP(IUnityContainer services, IEnumerable<ServiceDescriptor> servicesToRegister, ServiceProviderPNP root, bool external)
     {
         Guard.ArgumentNotNull(services, nameof(services));
 
         container = services;
-        this.root = root ?? this; externalContainer = external;
+        this.root = root ?? this;
+        externalContainer = external;
         descriptors = [];
 
         foreach (ServiceDescriptor descriptor in servicesToRegister)
@@ -67,11 +72,11 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
                 else
                 {
                     container.RegisterType(
-                        descriptor.ServiceType, 
-                        descriptor.ImplementationType,
-                        descriptor.Lifetime == ServiceLifetime.Transient 
-                            ? (LifetimeManager)new OwnedTransient(this) 
-                            : new OwnedSingleton(this));
+                    descriptor.ServiceType,
+                    descriptor.ImplementationType,
+                    descriptor.Lifetime == ServiceLifetime.Transient
+                        ? (LifetimeManager)new OwnedTransient(this)
+                        : new OwnedSingleton(this));
                 }
             }
 
@@ -79,8 +84,8 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
             container.RegisterInstance<IServiceScopeFactory>(scopeFactory, new ExternallyControlledLifetimeManager());
         }
         catch
-        { 
-            container.Dispose(); 
+        {
+            container.Dispose();
             throw;
         }
     }
@@ -89,7 +94,6 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// Gets the service object of the specified type from the Unity container.
     /// </summary>
     /// <remarks>
-    /// Instances belong to their UI thread. Marshal mutations and notifications to that thread.
     /// <list type="bullet">
     /// <item>Registered construction failures propagate</item>
     /// <item>Raw-container wrappers retain native Unity resolution</item>
@@ -97,7 +101,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// </remarks>
     /// <param name="serviceType">The type of service object to get.</param>
     /// <returns>
-    /// A service object of type <paramref name="serviceType"/>. 
+    /// A service object of type <paramref name="serviceType"/>.
     /// For collection-built providers, returns <c>null</c> for an unregistered service
     /// </returns>
     public object GetService(Type serviceType)
@@ -105,14 +109,16 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
         using (root.lifetime.Enter())
-        using (ReferenceEquals(root, this) ? null : lifetime.Enter())
         {
-            if (serviceType != typeof(IServiceProvider) && serviceType != typeof(IServiceScopeFactory) && !externalContainer && !Registered(serviceType))
+            using (ReferenceEquals(root, this) ? null : lifetime.Enter())
             {
-                return null;
-            }
+                if (serviceType != typeof(IServiceProvider) && serviceType != typeof(IServiceScopeFactory) && !externalContainer && !Registered(serviceType))
+                {
+                    return null;
+                }
 
-            return container.Resolve(serviceType);
+                return container.Resolve(serviceType);
+            }
         }
     }
 
@@ -125,7 +131,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
                 return true;
             }
         }
-            
+
         return false;
     }
 
@@ -134,7 +140,10 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         using (root.lifetime.Enter())
         {
             ServiceProviderPNP child = new(root.container.CreateChildContainer(), root.descriptors, root, externalContainer);
-            lock (root.sync) root.children.Add(child);
+            lock (root.sync)
+            {
+                root.children.Add(child);
+            }
             return new ServiceScopePNP(child);
         }
     }
@@ -169,14 +178,14 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     public void Dispose()
     {
         if (ReferenceEquals(root, this))
-        { 
-            DisposeCore(); 
+        {
+            DisposeCore();
             return;
         }
 
         IDisposable rootOperation;
         try
-        { 
+        {
             rootOperation = root.lifetime.Enter();
         }
         catch (ObjectDisposedException)
@@ -197,51 +206,58 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         {
             List<Exception> errors = new();
             ServiceProviderPNP[] scopes;
-            lock (sync) scopes = children.ToArray();
+            lock (sync)
+            {
+                scopes = children.ToArray();
+            }
 
             foreach (ServiceProviderPNP child in scopes)
             {
-                try 
-                { 
+                try
+                {
                     child.DisposeCore();
-                } 
+                }
                 catch (Exception e)
-                { 
+                {
                     errors.Add(e);
                 }
             }
 
             IDisposable[] instances;
             lock (sync)
-            { 
-                instances = owned.ToArray(); 
-                owned.Clear(); 
+            {
+                instances = owned.ToArray();
+                owned.Clear();
                 children.Clear();
             }
 
             for (int i = instances.Length - 1; i >= 0; --i)
             {
                 try
-                { instances[i].Dispose();
-                } 
+                {
+                    instances[i].Dispose();
+                }
                 catch (Exception e)
-                { 
+                {
                     errors.Add(e);
                 }
             }
 
             try
-            { 
+            {
                 container.Dispose();
-            } 
+            }
             catch (Exception e)
-            { 
+            {
                 errors.Add(e);
             }
 
             if (!ReferenceEquals(root, this))
             {
-                lock (root.sync) root.children.Remove(this);
+                lock (root.sync)
+                {
+                    root.children.Remove(this);
+                }
             }
 
             if (errors.Count != 0)
@@ -254,28 +270,60 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     private sealed class OwnedTransient : LifetimeManager
     {
         private readonly ServiceProviderPNP owner;
-        public OwnedTransient(ServiceProviderPNP owner) { this.owner = owner; }
-        public override object GetValue() => null;
-        public override void SetValue(object value) => owner.Track(value);
-        public override void RemoveValue() { }
+        public OwnedTransient(ServiceProviderPNP owner)
+        {
+            this.owner = owner;
+        }
+        public override object GetValue()
+        {
+            return null;
+        }
+        public override void SetValue(object value)
+        {
+            owner.Track(value);
+        }
+        public override void RemoveValue()
+        {
+        }
     }
 
     private sealed class OwnedSingleton : SynchronizedLifetimeManager
     {
         private readonly ServiceProviderPNP owner;
         private object value;
-        public OwnedSingleton(ServiceProviderPNP owner) { this.owner = owner; }
-        protected override object SynchronizedGetValue() => value;
-        protected override void SynchronizedSetValue(object newValue) { value = newValue; owner.Track(newValue); }
+        public OwnedSingleton(ServiceProviderPNP owner)
+        {
+            this.owner = owner;
+        }
+        protected override object SynchronizedGetValue()
+        {
+            return value;
+        }
+        protected override void SynchronizedSetValue(object newValue)
+        {
+            value = newValue;
+            owner.Track(newValue);
+        }
     }
 
     private sealed class RootLifetime : LifetimeManager
     {
         private readonly ServiceProviderPNP root;
         private readonly Type type;
-        public RootLifetime(ServiceProviderPNP root, Type type) { this.root = root; this.type = type; }
-        public override object GetValue() => root.GetService(type);
-        public override void SetValue(object value) { }
-        public override void RemoveValue() { }
+        public RootLifetime(ServiceProviderPNP root, Type type)
+        {
+            this.root = root;
+            this.type = type;
+        }
+        public override object GetValue()
+        {
+            return root.GetService(type);
+        }
+        public override void SetValue(object value)
+        {
+        }
+        public override void RemoveValue()
+        {
+        }
     }
 }

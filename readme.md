@@ -16,6 +16,9 @@ This project uses [Semantic Versioning](https://semver.org/).
 - **PATCH** version: Backward-compatible bug fixes
 
 ## Build Requirements
+
+Contributor guidelines: [development conventions](docs/development_conventions.md).
+
 - The project targets .Net Framework 2.0 but is configured to use the latest language features as of the LTS version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download).
 - The Build project uses [Cake](https://cakebuild.net/) (C# Make) as the build orchestrator and can be launched from your IDE or via script.
 

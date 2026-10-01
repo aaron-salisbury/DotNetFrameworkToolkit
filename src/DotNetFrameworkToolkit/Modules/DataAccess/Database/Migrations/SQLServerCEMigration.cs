@@ -1,4 +1,3 @@
-using Microsoft.Practices.EnterpriseLibrary.Logging;
 using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Data.Common;
@@ -27,7 +26,10 @@ public abstract class SQLServerCEMigration : IMigration
     {
         Guard.ArgumentNotNull(dbConnection, nameof(dbConnection));
 
-        if (Number > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(Number), "SQL CE migration numbers must fit an Int32.");
+        if (Number > int.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(Number), "SQL CE migration numbers must fit an Int32.");
+        }
         // TODO(database retirement): Coordinate the existence check, execution and insert in one
         // transaction across processes; add a unique Number constraint and an upgrade path for old files.
         // Check if this migration number already exists.
@@ -57,7 +59,13 @@ public abstract class SQLServerCEMigration : IMigration
         }
         catch (Exception error)
         {
-            try { transaction.Rollback(); } catch (Exception rollbackError) { error.Data["RollbackException"] = rollbackError; }
+            try
+            {
+                transaction.Rollback();
+            } catch (Exception rollbackError)
+            {
+                error.Data["RollbackException"] = rollbackError;
+            }
             throw;
         }
     }

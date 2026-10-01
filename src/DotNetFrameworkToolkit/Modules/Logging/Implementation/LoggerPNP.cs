@@ -26,26 +26,26 @@ public class LoggerPNP : ILogger, IDisposable
     private readonly Core.OperationLifetime lifetime = new();
     internal LoggerPNPScope CurrentScope
     {
-        get 
-        { 
-            if (scopes != null && scopes.TryGetValue(this, out LoggerPNPScope scope)) 
-            { 
+        get
+        {
+            if (scopes != null && scopes.TryGetValue(this, out LoggerPNPScope scope))
+            {
                 return scope;
-            } 
+            }
             return null;
         }
-        set 
-        { 
+        set
+        {
             scopes ??= [];
 
-            if (value == null) 
-            { 
-                scopes.Remove(this); 
-            } 
-            else 
+            if (value == null)
             {
-                scopes[this] = value; 
-            } 
+                scopes.Remove(this);
+            }
+            else
+            {
+                scopes[this] = value;
+            }
         }
     }
 
@@ -113,11 +113,11 @@ public class LoggerPNP : ILogger, IDisposable
 
         List<string> scopeMessages = new();
         for (int i = chain.Count - 1; i >= 0; i--)
-        { 
-            AddProperties(entry, chain[i].State); 
-            scopeMessages.Add(chain[i].State == null 
-                ? string.Empty 
-                : chain[i].State.ToString()); 
+        {
+            AddProperties(entry, chain[i].State);
+            scopeMessages.Add(chain[i].State == null
+                ? string.Empty
+                : chain[i].State.ToString());
         }
 
         if (scopeMessages.Count != 0)
@@ -134,7 +134,11 @@ public class LoggerPNP : ILogger, IDisposable
     /// </summary>
     public void Dispose()
     {
-        lifetime.Dispose(() => { _writer.Dispose(); CurrentScope = null; });
+        lifetime.Dispose(() =>
+        {
+            _writer.Dispose();
+            CurrentScope = null;
+        });
     }
 
     private static LogWriter ConfigureLogWriter(params TraceListener[] sinks)
@@ -183,7 +187,10 @@ public class LoggerPNP : ILogger, IDisposable
         if (eventId != null)
         {
             logEntry.EventId = eventId.Id;
-            if (eventId.Name != null) logEntry.ExtendedProperties["EventName"] = eventId.Name;
+            if (eventId.Name != null)
+            {
+                logEntry.ExtendedProperties["EventName"] = eventId.Name;
+            }
         }
 
         return logEntry;
@@ -193,7 +200,10 @@ public class LoggerPNP : ILogger, IDisposable
     {
         if (state is FormattedLogValues formatted)
         {
-            foreach (KeyValuePair<string, object> property in formatted.Properties) entry.ExtendedProperties[property.Key] = property.Value;
+            foreach (KeyValuePair<string, object> property in formatted.Properties)
+            {
+                entry.ExtendedProperties[property.Key] = property.Value;
+            }
         }
         else if (state is LoggerState loggerState)
         {

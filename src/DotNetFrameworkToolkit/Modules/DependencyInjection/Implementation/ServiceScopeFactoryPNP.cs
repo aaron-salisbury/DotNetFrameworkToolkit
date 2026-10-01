@@ -13,7 +13,16 @@ public class ServiceScopeFactoryPNP : IServiceScopeFactory
     /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class from an existing root provider.
     /// </summary>
     /// <param name="root">The root service provider.</param>
-    internal ServiceScopeFactoryPNP(ServiceProviderPNP root) { this._root = root; }
+    /// <remarks>
+    /// The provider creates and registers this factory so scopes share its root lifetime.
+    /// Consumers should resolve IServiceScopeFactory from the provider.
+    /// </remarks>
+    internal ServiceScopeFactoryPNP(ServiceProviderPNP root)
+    {
+        Guard.ArgumentNotNull(root, nameof(root));
+
+        _root = root;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class,
@@ -32,5 +41,8 @@ public class ServiceScopeFactoryPNP : IServiceScopeFactory
     }
 
     /// <inheritdoc/>
-    public IServiceScope CreateScope() => _root.CreateScope();
+    public IServiceScope CreateScope()
+    {
+        return _root.CreateScope();
+    }
 }

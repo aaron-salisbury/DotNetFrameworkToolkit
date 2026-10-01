@@ -40,7 +40,10 @@ public sealed class BuildContext : FrostingContext
             _ => BuildConfigurations.Debug,
         };
 
-        SerializerOptions = new() { PropertyNameCaseInsensitive = true };
+        SerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
         AbsolutePathToRepo = GetRepoAbsolutePath(REPO_NAME, this);
         SourceDirectory = this.Directory(System.IO.Path.Combine(AbsolutePathToRepo, "src"));
         ReleaseProjects = [.. RELEASE_PROJECT_NAMES.Select(name => CreateReleaseProject(this, name))];

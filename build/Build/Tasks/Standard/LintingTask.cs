@@ -29,7 +29,9 @@ public sealed class LintingTask : FrostingTask<BuildContext>
             // If we ever want to ensure Non-SDK-style projects are formatted, consider using legacy tools.
             context.Log.Information($"Formatting solution: {solutionPath}");
             if (context.StartProcess("dotnet", $"format \"{solutionPath}\" --no-restore --verify-no-changes") != 0)
+            {
                 throw new InvalidOperationException("Formatting verification failed.");
+            }
         }
 
         stopwatch.Stop();

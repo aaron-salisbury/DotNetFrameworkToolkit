@@ -58,17 +58,19 @@ Observers must remain nonblocking. Validation objects belong to the UI thread; u
 
 ## Credentials
 
-`UserAuthenticator` is public and snapshots configuration. New credentials use UTF-8
-and .NET 2.0's PBKDF2-HMAC-SHA1 implementation with random salts. Persist **all five**
-credential fields: `FormatVersion`, `AlgorithmName`, `LoginSalt`, `LoginHash`, and
-`LoginWorkFactor`. Dropping version/algorithm fields would misclassify new records.
+`UserAuthenticator` is public and snapshots configuration. Credentials use UTF-8
+and .NET 2.0's PBKDF2-HMAC-SHA1 implementation with random salts. Persist all three
+credential fields: `LoginSalt`, `LoginHash`, and `LoginWorkFactor`.
 
-Version zero still verifies historical ASCII/repeated-salted-hash records using the
-configured legacy algorithm. That format retains its historical Unicode collisions;
-after successful verification, use `NeedsUpgrade` and persist freshly created
-credentials. Do not rewrite existing hashes or label them as version one. Calibrate
-work factors for deployment hardware; the compatibility default is not a security
-recommendation. Stored iterations are bounded by `MaxVerificationWorkFactor`.
+Legacy ASCII/repeated-salted-hash verification was deliberately removed during the
+version 0.x review. Previously stored legacy credentials cannot authenticate with
+this implementation; consuming applications must recreate credentials through their
+password reset/re-enrollment flow. `FormatVersion`, `AlgorithmName`, `NeedsUpgrade`,
+and configurable legacy hashing were removed. This is a breaking change, not an
+automatic data migration. Future algorithm/encoding changes must explicitly decide
+how stored credentials are identified and handled. Calibrate work factors for deployment
+hardware; the compatibility default is not a security recommendation. Stored iterations
+are bounded by `MaxVerificationWorkFactor`.
 
 ## Files and database
 

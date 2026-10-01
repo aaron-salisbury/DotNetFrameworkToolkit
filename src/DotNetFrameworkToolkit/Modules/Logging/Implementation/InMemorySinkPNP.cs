@@ -45,12 +45,35 @@ public class InMemorySinkPNP : CustomTraceListener
     /// </summary>
     public int MaxLogsCount
     {
-        get { lock (_sync) { return _maxLogsCount; } }
-        set { if (value < 0) { throw new ArgumentOutOfRangeException(nameof(value)); } lock (_sync) { _maxLogsCount = value; Trim(); } }
+        get
+        {
+            lock (_sync)
+            {
+                return _maxLogsCount;
+            }
+        }
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+            lock (_sync)
+            {
+                _maxLogsCount = value;
+                Trim();
+            }
+        }
     }
 
-    private void Trim() { while (_maxLogsCount > 0 && _logs.Count > _maxLogsCount) _logs.RemoveAt(0); }
-    
+    private void Trim()
+    {
+        while (_maxLogsCount > 0 && _logs.Count > _maxLogsCount)
+        {
+            _logs.RemoveAt(0);
+        }
+    }
+
     /// <inheritdoc/>
     public override bool IsThreadSafe => true;
 
@@ -73,9 +96,10 @@ public class InMemorySinkPNP : CustomTraceListener
     /// <param name="message">The log message to write.</param>
     public override void Write(string message)
     {
-        lock (_sync) 
-        { 
-            _logs.Add(message); Trim(); 
+        lock (_sync)
+        {
+            _logs.Add(message);
+            Trim();
         }
     }
 
@@ -106,7 +130,8 @@ public class InMemorySinkPNP : CustomTraceListener
         if (data is LogEntry logEntry)
         {
             timeStamp = logEntry.TimeStamp;
-            level = MapTraceEventTypeToLogLevel(logEntry.Severity); // If not the LogEntryException subclass, then LogLevel wasn't explicitly saved.
+            level = MapTraceEventTypeToLogLevel(logEntry.Severity);
+            // If not the LogEntryException subclass, then LogLevel wasn't explicitly saved.
 
             if (Formatter != null)
             {
@@ -134,10 +159,22 @@ public class InMemorySinkPNP : CustomTraceListener
         {
             EventHandler<LogEmitEventArgs> handler = (EventHandler<LogEmitEventArgs>)array[i];
             try
-            { 
-                handler(this, new LogEmitEventArgs { LogEvent = new LogEvent { TimeStamp = timeStamp, Message = message, Level = level, Exception = exception } });
+            {
+                handler(this, new LogEmitEventArgs
+                {
+                    LogEvent = new LogEvent
+                    {
+                        TimeStamp = timeStamp,
+                        Message = message,
+                        Level = level,
+                        Exception = exception
+                    }
+                });
             }
-            catch (Exception) { /* Observational notifications are best-effort. */ }
+            catch (Exception)
+            {
+                /* Observational notifications are best-effort. */
+            }
         }
     }
 

@@ -137,7 +137,10 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
 
     private static void CreateNewDB(string dbPath)
     {
-        string connectionString = new SqlCeConnectionStringBuilder { DataSource = dbPath }.ConnectionString;
+        string connectionString = new SqlCeConnectionStringBuilder
+        {
+            DataSource = dbPath
+        }.ConnectionString;
 
         // TODO(database retirement): Create and initialize a temporary database, then publish it.
         // A crash after CreateDatabase currently leaves a file without a usable migration table.
@@ -160,7 +163,10 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
 
     private static void UpdateExistingDB(string dbPath)
     {
-        using SqlCeConnection connection = new(new SqlCeConnectionStringBuilder { DataSource = dbPath }.ConnectionString);
+        using SqlCeConnection connection = new(new SqlCeConnectionStringBuilder
+        {
+            DataSource = dbPath
+        }.ConnectionString);
         connection.Open();
 
         uint startingNumber = 0;

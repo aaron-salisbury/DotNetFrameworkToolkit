@@ -74,10 +74,10 @@ public class ServiceCollectionPNP : IServiceCollection
         Guard.ArgumentNotNull(item, nameof(item));
 
         ServiceDescriptor copy = new()
-        { 
-            ServiceType = item.ServiceType, 
+        {
+            ServiceType = item.ServiceType,
             ImplementationType = item.ImplementationType,
-            ImplementationInstance = item.ImplementationInstance, 
+            ImplementationInstance = item.ImplementationInstance,
             Lifetime = item.Lifetime
         };
 
@@ -233,7 +233,16 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <summary>
     /// Gets the number of service descriptors contained in the collection.
     /// </summary>
-    public int Count { get { lock (_syncRoot) return _descriptors.Count; } }
+    public int Count
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _descriptors.Count;
+            }
+        }
+    }
 
     /// <summary>
     /// Gets a value indicating whether the collection is read-only.
@@ -249,16 +258,25 @@ public class ServiceCollectionPNP : IServiceCollection
     {
         get
         {
-            lock (_syncRoot) return Copy(_descriptors[index]);
+            lock (_syncRoot)
+            {
+                return Copy(_descriptors[index]);
+            }
         }
         set
         {
             ServiceDescriptor snapshot = Copy(value);
             lock (_syncRoot)
             {
-                if (index < 0 || index >= _descriptors.Count) throw new ArgumentOutOfRangeException(nameof(index));
+                if (index < 0 || index >= _descriptors.Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
                 int existingIndex = _descriptors.IndexOf(snapshot);
-                if (existingIndex >= 0 && existingIndex != index) throw new ArgumentException("A service type may appear only once.", nameof(value));
+                if (existingIndex >= 0 && existingIndex != index)
+                {
+                    throw new ArgumentException("A service type may appear only once.", nameof(value));
+                }
                 _descriptors[index] = snapshot;
             }
         }
@@ -271,7 +289,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns>The index of the item if found; otherwise, -1.</returns>
     public int IndexOf(ServiceDescriptor item)
     {
-        lock (_syncRoot) return _descriptors.IndexOf(item);
+        lock (_syncRoot)
+        {
+            return _descriptors.IndexOf(item);
+        }
     }
 
     /// <summary>
@@ -284,9 +305,12 @@ public class ServiceCollectionPNP : IServiceCollection
         item = Copy(item);
         lock (_syncRoot)
         {
-            if (index < 0 || index > _descriptors.Count) throw new ArgumentOutOfRangeException(nameof(index));
+            if (index < 0 || index > _descriptors.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
             // Subsequent attempts to add the same type replaces the previous addition.
-            // Could possibly enhance by letting more than one of a type in the collection, 
+            // Could possibly enhance by letting more than one of a type in the collection,
             // but would need to keep track of names. Would then need to update the
             // equality overrides of ServiceDescriptor as well.
             int existingIndex = IndexOf(item);
@@ -353,7 +377,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns><c>true</c> if the item is found; otherwise, <c>false</c>.</returns>
     public bool Contains(ServiceDescriptor item)
     {
-        lock (_syncRoot) return _descriptors.Contains(item);
+        lock (_syncRoot)
+        {
+            return _descriptors.Contains(item);
+        }
     }
 
     /// <summary>
@@ -406,7 +433,10 @@ public class ServiceCollectionPNP : IServiceCollection
         lock (_syncRoot)
         {
             List<ServiceDescriptor> snapshot = new();
-            foreach (ServiceDescriptor descriptor in _descriptors) snapshot.Add(Copy(descriptor));
+            foreach (ServiceDescriptor descriptor in _descriptors)
+            {
+                snapshot.Add(Copy(descriptor));
+            }
             return snapshot.GetEnumerator();
         }
     }

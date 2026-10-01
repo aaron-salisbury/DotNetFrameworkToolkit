@@ -23,7 +23,9 @@ internal sealed class OperationLifetime
             }
 
             int id = Thread.CurrentThread.ManagedThreadId;
-            threads.TryGetValue(id, out int count); threads[id] = count + 1; active++;
+            threads.TryGetValue(id, out int count);
+            threads[id] = count + 1;
+            active++;
             return new Lease(this, id);
         }
     }
@@ -56,7 +58,11 @@ internal sealed class OperationLifetime
     {
         private OperationLifetime owner;
         private readonly int id;
-        internal Lease(OperationLifetime owner, int id) { this.owner = owner; this.id = id; }
+        internal Lease(OperationLifetime owner, int id)
+        {
+            this.owner = owner;
+            this.id = id;
+        }
         public void Dispose()
         {
             OperationLifetime current = Interlocked.Exchange(ref owner, null);
@@ -72,7 +78,7 @@ internal sealed class OperationLifetime
                     current.threads.Remove(id);
                 }
 
-                current.active--; 
+                current.active--;
                 Monitor.PulseAll(current.sync);
             }
         }

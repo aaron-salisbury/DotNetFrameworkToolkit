@@ -1,10 +1,8 @@
 using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.Logging;
-using Microsoft.Practices.EnterpriseLibrary.Logging;
 using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Reflection;
 
@@ -64,8 +62,14 @@ public sealed class FileSystemAccess : IFileSystemAccess
                 {
                     // Remove read-only attribute before deleting.
                     File.SetAttributes(fullFilePath, attributes & ~FileAttributes.ReadOnly);
-                    try { _logger.LogInformation("Removed read-only attribute from file: {FilePath}", fullFilePath); }
-                    catch (Exception) { /* Logging must not prevent the deletion. */ }
+                    try
+                    {
+                        _logger.LogInformation("Removed read-only attribute from file: {FilePath}", fullFilePath);
+                    }
+                    catch (Exception)
+                    {
+                        /* Logging must not prevent the deletion. */
+                    }
                 }
 
                 File.Delete(fullFilePath);
@@ -144,10 +148,13 @@ public sealed class FileSystemAccess : IFileSystemAccess
             if (temporaryPath != null)
             {
                 try
-                { 
+                {
                     File.Delete(temporaryPath);
-                } 
-                catch (Exception) { /* Preserve the write failure. */ }
+                }
+                catch (Exception)
+                {
+                    /* Preserve the write failure. */
+                }
             }
         }
     }
@@ -165,9 +172,9 @@ public sealed class FileSystemAccess : IFileSystemAccess
             if (stream is null)
             {
                 return ProcessResult<string>.LogAndForwardException(
-                    $"Embedded resource '{filePath}' not found in assembly '{assemblyEmbeddedIn.FullName}'.",
-                    new FileNotFoundException($"The specified embedded resource '{filePath}' could not be found."),
-                    _logger);
+                $"Embedded resource '{filePath}' not found in assembly '{assemblyEmbeddedIn.FullName}'.",
+                new FileNotFoundException($"The specified embedded resource '{filePath}' could not be found."),
+                _logger);
             }
 
             using StreamReader streamReader = new(stream);

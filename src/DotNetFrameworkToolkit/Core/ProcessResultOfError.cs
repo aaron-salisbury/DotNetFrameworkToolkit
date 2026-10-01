@@ -20,7 +20,8 @@ public class ProcessResult<T, TError> where TError : struct, Enum
         _value = value;
     }
 
-    private ProcessResult(TError error, bool failure)
+    // Two typed arguments keep failure construction unambiguous when T and TError are identical.
+    private ProcessResult(T value, TError error) : this(value)
     {
         if (EqualityComparer<TError>.Default.Equals(error, default))
         {
@@ -40,9 +41,9 @@ public class ProcessResult<T, TError> where TError : struct, Enum
     {
         get
         {
-            if (!IsSuccessful) 
-            { 
-                throw new InvalidOperationException($"The process result is unsuccessful with error '{_error}'."); 
+            if (!IsSuccessful)
+            {
+                throw new InvalidOperationException($"The process result is unsuccessful with error '{_error}'.");
             }
             return _value;
         }
@@ -54,11 +55,23 @@ public class ProcessResult<T, TError> where TError : struct, Enum
         return IsSuccessful;
     }
 
-    public static ProcessResult<T, TError> Success(T value) => new(value);
+    public static ProcessResult<T, TError> Success(T value)
+    {
+        return new(value);
+    }
 
-    public static ProcessResult<T, TError> Failure(TError error) => new(error, true);
+    public static ProcessResult<T, TError> Failure(TError error)
+    {
+        return new(default(T), error);
+    }
 
-    public static implicit operator bool(ProcessResult<T, TError> result) => result != null && result.IsSuccessful;
+    public static implicit operator bool(ProcessResult<T, TError> result)
+    {
+        return result != null && result.IsSuccessful;
+    }
 
-    public override string ToString() => IsSuccessful ? $"Success({_value})" : $"Failure({_error})";
+    public override string ToString()
+    {
+        return IsSuccessful ? $"Success({_value})" : $"Failure({_error})";
+    }
 }

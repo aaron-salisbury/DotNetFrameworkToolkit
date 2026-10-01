@@ -95,9 +95,9 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
 
         List<string> snapshot = [.. errors];
 
-        if (ErrorsHaventChanged(EntityLevelErrors, snapshot, null)) 
-        { 
-            return; 
+        if (ErrorsHaventChanged(EntityLevelErrors, snapshot, null))
+        {
+            return;
         }
 
         EntityLevelErrors.Clear();
@@ -205,7 +205,10 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
     /// </summary>
     public bool HasErrors
     {
-        get { return EntityLevelErrors.Count > 0 || ErrorsByPropertyNames.Count > 0; }
+        get
+        {
+            return EntityLevelErrors.Count > 0 || ErrorsByPropertyNames.Count > 0;
+        }
     }
     #endregion
 
@@ -250,7 +253,8 @@ public abstract class ObservableValidator : ObservableObject, IDataErrorInfo, IN
         }
 
         List<string> errors = ValidateProperty(propertyDescriptor);
-        SetErrorsForProperty(propertyName, errors); // This must be called to keep the errors collection correct and to trigger the ErrorsChanged event as needed.
+        SetErrorsForProperty(propertyName, errors);
+        // This must be called to keep the errors collection correct and to trigger the ErrorsChanged event as needed.
 
         return errors.Count == 0;
     }

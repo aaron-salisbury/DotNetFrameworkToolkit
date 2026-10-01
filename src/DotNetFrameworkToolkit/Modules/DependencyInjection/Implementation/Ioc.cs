@@ -10,7 +10,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// service provider instance, which can then be used to resolve service instances.
 /// </summary>
 /// <remarks>
-/// Modeled after the CommunityToolkit offering 
+/// Modeled after the CommunityToolkit offering
 /// <see href="https://github.com/CommunityToolkit/dotnet/blob/main/src/CommunityToolkit.Mvvm/DependencyInjection/Ioc.cs">here</see>.
 /// </remarks>
 public sealed class Ioc : IServiceProvider, IDisposable
@@ -28,7 +28,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// </summary>
     /// <param name="serviceType">The type of service object to get.</param>
     /// <returns>
-    /// A service object of type <paramref name="serviceType"/>. 
+    /// A service object of type <paramref name="serviceType"/>.
     /// Returns <c>null</c> if the service is not found.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="serviceType"/> is <see langword="null"/>.</exception>
@@ -40,7 +40,10 @@ public sealed class Ioc : IServiceProvider, IDisposable
         using (lifetime.Enter())
         {
             IServiceProvider provider = serviceProvider;
-            if (provider == null) ThrowInvalidOperationExceptionForMissingInitialization();
+            if (provider == null)
+            {
+                ThrowInvalidOperationExceptionForMissingInitialization();
+            }
             return provider.GetService(serviceType);
         }
     }
@@ -104,7 +107,10 @@ public sealed class Ioc : IServiceProvider, IDisposable
         lifetime.Dispose(() =>
         {
             IServiceProvider provider = Interlocked.Exchange(ref serviceProvider, null);
-            if (provider is IDisposable disposable) disposable.Dispose();
+            if (provider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         });
     }
 

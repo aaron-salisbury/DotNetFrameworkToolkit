@@ -1,18 +1,17 @@
 using Microsoft.Practices.EnterpriseLibrary.Security.Cryptography;
 using Microsoft.Practices.Unity.Utility;
 using System;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace DotNetFrameworkToolkit.Modules.UserAccess;
 
 /// <summary>
-/// Defines methods for user authentication and credential management, 
+/// Defines methods for user authentication and credential management,
 /// including secure credential creation and password verification.
 /// </summary>
 /// <remarks>
-/// Creates versioned UTF-8 PBKDF2-HMAC-SHA1 credentials using
+/// Creates UTF-8 PBKDF2-HMAC-SHA1 credentials using
 /// Patterns & Practices Enterprise Library (.Net Framework 2.0).
 /// Inspired by this <see href="https://www.mking.net/blog/password-security-best-practices-with-examples-in-csharp">article</see> by Matthew King.
 /// </remarks>
@@ -49,8 +48,8 @@ public sealed class UserAuthenticator : IUserAuthenticator
             config = new CryptographyConfig();
         }
 
-        _saltLength = config.SaltLength; 
-        _workFactor = config.NewUserWorkFactor; 
+        _saltLength = config.SaltLength;
+        _workFactor = config.NewUserWorkFactor;
         _maxWorkFactor = config.MaxVerificationWorkFactor;
     }
 
@@ -66,11 +65,11 @@ public sealed class UserAuthenticator : IUserAuthenticator
         {
             Rfc2898DeriveBytes derive = new(bytes, salt, _workFactor);
 
-            return new CryptographyCredential 
+            return new CryptographyCredential
             {
-                LoginSalt = salt, 
-                LoginHash = derive.GetBytes(32), 
-                LoginWorkFactor = _workFactor 
+                LoginSalt = salt,
+                LoginHash = derive.GetBytes(32),
+                LoginWorkFactor = _workFactor
             };
         }
         finally

@@ -1,4 +1,4 @@
-﻿using Build.Tasks.Standard;
+using Build.Tasks.Standard;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using SixLabors.ImageSharp;
@@ -40,10 +40,10 @@ public sealed class ProcessImagesTask : AsyncFrostingTask<BuildContext>
         // Create deployment icons using the logo PNG as their basis.
         context.Log.Information($"Creating icons suitable for various deployments...");
         await Task.WhenAll(
-            ConvertPngToIcoAsync(pngPath, Path.Combine(contentDir, "favicon.ico")),
-            ConvertPngToIcoAsync(pngPath, Path.Combine(contentDir, "extension-icon.ico"), 64),
-            ResizePngAsync(pngPath, Path.Combine(contentDir, "extension-icon.png"), 90, 90),
-            ResizePngAsync(pngPath, Path.Combine(contentDir, "package-icon.png"), 128, 128)
+        ConvertPngToIcoAsync(pngPath, Path.Combine(contentDir, "favicon.ico")),
+        ConvertPngToIcoAsync(pngPath, Path.Combine(contentDir, "extension-icon.ico"), 64),
+        ResizePngAsync(pngPath, Path.Combine(contentDir, "extension-icon.png"), 90, 90),
+        ResizePngAsync(pngPath, Path.Combine(contentDir, "package-icon.png"), 128, 128)
         );
 
         stopwatch.Stop();

@@ -51,14 +51,19 @@ public class ValidationResult<T>
     /// </summary>
     public IEnumerable<string> GeneralMessages
     {
-        get { return _generalMessages.AsReadOnly(); }
+        get
+        {
+            return _generalMessages.AsReadOnly();
+        }
     }
 
     /// <summary>
     /// Initializes a successful validation result.
     /// </summary>
     /// <param name="value">The validated object.</param>
-    public ValidationResult(T value) : this(value, new Dictionary<string, string[]>(), []) { }
+    public ValidationResult(T value) : this(value, new Dictionary<string, string[]>(), [])
+    {
+    }
 
     /// <summary>
     /// Initializes a failed validation result with property and/or general messages.

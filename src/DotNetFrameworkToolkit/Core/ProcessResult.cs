@@ -62,7 +62,10 @@ public class ProcessResult<T>
     /// </summary>
     public T ValueOrDefault
     {
-        get { return _value; }
+        get
+        {
+            return _value;
+        }
     }
 
     /// <summary>
@@ -70,7 +73,10 @@ public class ProcessResult<T>
     /// </summary>
     public Exception Error
     {
-        get { return _exception; }
+        get
+        {
+            return _exception;
+        }
     }
 
     /// <summary>
@@ -78,7 +84,10 @@ public class ProcessResult<T>
     /// </summary>
     public bool IsSuccessful
     {
-        get { return !_hasError; }
+        get
+        {
+            return !_hasError;
+        }
     }
 
     /// <summary>

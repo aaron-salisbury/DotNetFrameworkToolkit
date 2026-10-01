@@ -13,46 +13,47 @@ internal sealed class FormattedLogValues
     internal readonly Dictionary<string, object> Properties = new();
 
     private readonly string _format;
-    
+
     internal FormattedLogValues(string message, params object[] args)
     {
         OriginalMessage = message ?? string.Empty;
-        MessageArguments = args == null 
-            ? [] 
+        MessageArguments = args == null
+            ? []
             : (object[])args.Clone();
 
         Properties["{OriginalFormat}"] = OriginalMessage;
 
-        if (MessageArguments.Length == 0) 
-        { 
-            _format = OriginalMessage; return; 
+        if (MessageArguments.Length == 0)
+        {
+            _format = OriginalMessage;
+            return;
         }
 
-        StringBuilder output = new(); 
-        Dictionary<string, int> names = new(); 
+        StringBuilder output = new();
+        Dictionary<string, int> names = new();
         int next = 0;
 
         for (int i = 0; i < OriginalMessage.Length; i++)
         {
             char c = OriginalMessage[i];
             if ((c == '{' || c == '}') && i + 1 < OriginalMessage.Length && OriginalMessage[i + 1] == c)
-            { 
-                output.Append(c).Append(c); 
-                i++; 
-                continue; 
+            {
+                output.Append(c).Append(c);
+                i++;
+                continue;
             }
 
-            if (c != '{') 
-            { 
-                output.Append(c); 
-                continue; 
+            if (c != '{')
+            {
+                output.Append(c);
+                continue;
             }
 
             int end = OriginalMessage.IndexOf('}', i + 1);
 
             if (end < 0)
-            { 
-                throw new FormatException("Unclosed log placeholder."); 
+            {
+                throw new FormatException("Unclosed log placeholder.");
             }
 
             string token = OriginalMessage.Substring(i + 1, end - i - 1);
@@ -60,8 +61,8 @@ internal sealed class FormattedLogValues
             string name = (suffix < 0 ? token : token.Substring(0, suffix)).Trim();
 
             if (name.Length == 0 || name.IndexOf('{') >= 0)
-            { 
-                throw new FormatException("Invalid log placeholder."); 
+            {
+                throw new FormatException("Invalid log placeholder.");
             }
 
             if (!int.TryParse(name, NumberStyles.None, CultureInfo.InvariantCulture, out int index))
@@ -90,7 +91,8 @@ internal sealed class FormattedLogValues
                 output.Append(token.Substring(suffix));
             }
 
-            output.Append('}'); i = end;
+            output.Append('}');
+            i = end;
         }
 
         _format = output.ToString();
@@ -98,8 +100,8 @@ internal sealed class FormattedLogValues
 
     public override string ToString()
     {
-        return MessageArguments.Length == 0 
-            ? _format 
+        return MessageArguments.Length == 0
+            ? _format
             : string.Format(CultureInfo.InvariantCulture, _format, MessageArguments);
     }
 }

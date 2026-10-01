@@ -29,8 +29,9 @@ public class LoggerPNPScope : IDisposable
 
         this._provider = provider;
 
-        State = state; _threadId = Thread.CurrentThread.ManagedThreadId;
-        Parent = provider.CurrentScope; 
+        State = state;
+        _threadId = Thread.CurrentThread.ManagedThreadId;
+        Parent = provider.CurrentScope;
         provider.CurrentScope = this;
     }
 

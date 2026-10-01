@@ -63,7 +63,10 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
             {
                 ToolPath = nugetExePath,
                 OutputDirectory = nuGetOutputPath,
-                Properties = new Dictionary<string, string> { { "Configuration", context.Config.ToString() } },
+                Properties = new Dictionary<string, string>
+                {
+                    { "Configuration", context.Config.ToString() }
+                },
                 NoPackageAnalysis = true,
                 IncludeReferencedProjects = true,
                 Symbols = true,
@@ -89,12 +92,17 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
             try
             {
                 using (var fs = new System.IO.FileStream(temporaryPath, System.IO.FileMode.CreateNew, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                {
                     await response.Content.CopyToAsync(fs);
+                }
                 System.IO.File.Move(temporaryPath, nugetExePath);
             }
             finally
             {
-                if (System.IO.File.Exists(temporaryPath)) System.IO.File.Delete(temporaryPath);
+                if (System.IO.File.Exists(temporaryPath))
+                {
+                    System.IO.File.Delete(temporaryPath);
+                }
             }
 
             stopwatch.Stop();
