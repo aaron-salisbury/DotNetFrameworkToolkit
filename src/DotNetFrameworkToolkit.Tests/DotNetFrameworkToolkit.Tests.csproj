@@ -71,7 +71,9 @@
     <Compile Include="DependencyInjectionTests.cs" />
     <Compile Include="FileSystemTests.cs" />
     <Compile Include="LifetimeTests.cs" />
+    <Compile Include="LoggingContractTests.cs" />
     <Compile Include="LoggingTests.cs" />
+    <Compile Include="PublicContractTests.cs" />
     <Compile Include="ResultTests.cs" />
     <Compile Include="SqlServerCeDatabaseTests.cs" />
     <Compile Include="UtilityTests.cs" />

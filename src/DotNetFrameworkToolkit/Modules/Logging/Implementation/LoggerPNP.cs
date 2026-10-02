@@ -12,6 +12,10 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 /// </summary>
 /// <remarks>
 /// This implementation uses the Patterns &amp; Practices Enterprise Library.
+/// Scopes belong to their creating thread and must be disposed there, even after logger shutdown.
+/// Enabled writes and scope creation reject shutdown; disabled writes remain no-ops.
+/// Formatting failures propagate before any entry is written. Do not dispose this logger
+/// from its formatter or a sink callback.
 /// </remarks>
 public class LoggerPNP : ILogger, IDisposable
 {
@@ -69,10 +73,13 @@ public class LoggerPNP : ILogger, IDisposable
     /// <inheritdoc />
     public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
-        using (lifetime.Enter())
-        {
-            return new LoggerPNPScope(this, state);
-        }
+        return new LoggerPNPScope(this, state);
+    }
+
+    // Direct construction and BeginScope share the same atomic lifetime admission.
+    internal IDisposable EnterScopeOperation()
+    {
+        return lifetime.Enter();
     }
 
     /// <inheritdoc />
@@ -89,44 +96,46 @@ public class LoggerPNP : ILogger, IDisposable
             return;
         }
 
-        using IDisposable operation = lifetime.Enter();
-        string formattedMessage;
-        if (formatter == null)
+        using (lifetime.Enter())
         {
-            formattedMessage = state == null ? string.Empty : state.ToString();
-        }
-        else
-        {
-            formattedMessage = formatter.Invoke(state, exception);
-        }
-
-        LogEntry entry = BuildLogEntry(logLevel, eventId, formattedMessage, exception);
-        List<LoggerPNPScope> chain = new();
-
-        for (LoggerPNPScope scope = CurrentScope; scope != null; scope = scope.Parent)
-        {
-            if (!scope.IsDisposed)
+            string formattedMessage;
+            if (formatter == null)
             {
-                chain.Add(scope);
+                formattedMessage = state == null ? string.Empty : state.ToString();
             }
-        }
+            else
+            {
+                formattedMessage = formatter.Invoke(state, exception);
+            }
 
-        List<string> scopeMessages = new();
-        for (int i = chain.Count - 1; i >= 0; i--)
-        {
-            AddProperties(entry, chain[i].State);
-            scopeMessages.Add(chain[i].State == null
-                ? string.Empty
-                : chain[i].State.ToString());
-        }
+            LogEntry entry = BuildLogEntry(logLevel, eventId, formattedMessage, exception);
+            List<LoggerPNPScope> chain = new();
 
-        if (scopeMessages.Count != 0)
-        {
-            entry.ExtendedProperties["Scopes"] = scopeMessages.ToArray();
-        }
+            for (LoggerPNPScope scope = CurrentScope; scope != null; scope = scope.Parent)
+            {
+                if (!scope.IsDisposed)
+                {
+                    chain.Add(scope);
+                }
+            }
 
-        AddProperties(entry, state);
-        _writer.Write(entry);
+            List<string> scopeMessages = new();
+            for (int i = chain.Count - 1; i >= 0; i--)
+            {
+                AddProperties(entry, chain[i].State);
+                scopeMessages.Add(chain[i].State == null
+                    ? string.Empty
+                    : chain[i].State.ToString());
+            }
+
+            if (scopeMessages.Count != 0)
+            {
+                entry.ExtendedProperties["Scopes"] = scopeMessages.ToArray();
+            }
+
+            AddProperties(entry, state);
+            _writer.Write(entry);
+        }
     }
 
     /// <summary>
@@ -136,8 +145,14 @@ public class LoggerPNP : ILogger, IDisposable
     {
         lifetime.Dispose(() =>
         {
-            _writer.Dispose();
-            CurrentScope = null;
+            try
+            {
+                _writer.Dispose();
+            }
+            finally
+            {
+                CurrentScope = null;
+            }
         });
     }
 

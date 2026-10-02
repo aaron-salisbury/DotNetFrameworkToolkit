@@ -4,7 +4,7 @@ using System.Threading;
 namespace DotNetFrameworkToolkit.Modules.Logging;
 
 /// <summary>
-/// A synchronous, thread-owned logging scope. It must be disposed on its creating thread;
+/// A synchronous, thread-owned logging scope. It must be disposed on its creating thread.
 /// </summary>
 /// <remarks>
 /// .Net Framework 2.0 scopes do not flow across asynchronous or worker-thread boundaries.
@@ -21,18 +21,21 @@ public class LoggerPNPScope : IDisposable
     private readonly int _threadId;
 
     /// <summary>
-    /// Creates a scope for this thread.
+    /// Creates a scope for this thread while the logger is accepting operations.
     /// </summary>
+    /// <exception cref="ObjectDisposedException">The logger is closing or disposed.</exception>
     public LoggerPNPScope(LoggerPNP provider, object state)
     {
         Guard.ArgumentNotNull(provider, nameof(provider));
 
-        this._provider = provider;
-
-        State = state;
-        _threadId = Thread.CurrentThread.ManagedThreadId;
-        Parent = provider.CurrentScope;
-        provider.CurrentScope = this;
+        using (provider.EnterScopeOperation())
+        {
+            _provider = provider;
+            State = state;
+            _threadId = Thread.CurrentThread.ManagedThreadId;
+            Parent = provider.CurrentScope;
+            provider.CurrentScope = this;
+        }
     }
 
     /// <summary>

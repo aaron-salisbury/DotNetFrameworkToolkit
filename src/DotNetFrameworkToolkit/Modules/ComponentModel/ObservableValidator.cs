@@ -13,6 +13,10 @@ namespace DotNetFrameworkToolkit.Modules.ComponentModel;
 /// </summary>
 /// <remarks>
 /// Instances belong to their UI thread. Marshal mutations and notifications to that thread.
+/// Error changes are committed before synchronous notifications. Observer exceptions propagate
+/// and can interrupt later notifications; repeating identical errors does not replay them.
+/// Message order matters. HasErrors notifications report changed errors even when validity
+/// stays unchanged. Full validation updates properties incrementally, not transactionally.
 /// <list type="bullet">
 /// <item>WinForms needs an ErrorProvider to be created and passed the control and its message via .UpdateError().</item>
 /// <item>WPF uses IDataErrorInfo when ValidatesOnDataErrors is set to true and the REAL INotifyDataErrorInfo when ValidatesOnNotifyDataErrors is set to true.</item>
