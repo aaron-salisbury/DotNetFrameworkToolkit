@@ -208,7 +208,7 @@ public class SqlServerCeDatabaseTests
         string output = Path.GetDirectoryName(typeof(SqlServerCeDatabaseTests).Assembly.Location);
         string provider = typeof(SqlCeConnection).Assembly.Location;
         Assert.AreEqual(output, Path.GetDirectoryName(provider), "A globally installed provider must not replace the pinned test provider.");
-        string restoredProvider = Path.GetFullPath(Path.Combine(output, "..", "..", "..", "packages", "System.Data.SqlServerCe_unofficial.4.0.8482.1", "lib", "net20", "System.Data.SqlServerCe.dll"));
+        string restoredProvider = Path.GetFullPath(Path.Combine(output, "..", "..", "..", "packages", "SqlServerCompact.4.0.8482.1", "lib", "System.Data.SqlServerCe.dll"));
         using (SHA256 hash = SHA256.Create())
         {
             CollectionAssert.AreEqual(hash.ComputeHash(File.ReadAllBytes(restoredProvider)), hash.ComputeHash(File.ReadAllBytes(provider)));

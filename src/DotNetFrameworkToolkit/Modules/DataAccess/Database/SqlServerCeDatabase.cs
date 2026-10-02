@@ -1,3 +1,4 @@
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Data.SqlServerCe;
 using System.IO;
@@ -21,7 +22,7 @@ public static class SqlServerCeDatabase
     /// <returns>A SQL CE connection string with the normalized path as its data source.</returns>
     /// <remarks>
     /// Relative, drive-relative, and current-drive-rooted paths are rejected. This method performs
-    /// no file operations. Use SqlCeConnectionStringBuilder to set additional provider options.
+    /// no file operations. Use <see cref="SqlCeConnectionStringBuilder"/> to set additional provider options.
     /// </remarks>
     public static string BuildConnectionString(string databasePath)
     {
@@ -80,10 +81,8 @@ public static class SqlServerCeDatabase
 
     private static string ValidateConnectionString(string connectionString)
     {
-        if (connectionString == null)
-        {
-            throw new ArgumentNullException(nameof(connectionString));
-        }
+        Guard.ArgumentNotNull(connectionString, nameof(connectionString));
+
         if (connectionString.Trim().Length == 0)
         {
             throw new ArgumentException("A connection string is required.", nameof(connectionString));
@@ -96,10 +95,8 @@ public static class SqlServerCeDatabase
 
     private static string ValidateDatabasePath(string databasePath)
     {
-        if (databasePath == null)
-        {
-            throw new ArgumentNullException(nameof(databasePath));
-        }
+        Guard.ArgumentNotNull(databasePath, nameof(databasePath));
+
         if (databasePath.Trim().Length == 0)
         {
             throw new ArgumentException("An absolute database file path is required.", nameof(databasePath));
