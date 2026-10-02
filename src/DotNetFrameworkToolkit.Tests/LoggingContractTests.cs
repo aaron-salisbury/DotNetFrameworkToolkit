@@ -93,6 +93,26 @@ public class LoggingContractTests
     }
 
     [TestMethod]
+    public void ListenerShutdownFailureStillClearsScopeAndClosesAdmission()
+    {
+        ApplicationException original = new("listener shutdown");
+        LoggerPNP logger = new(LogLevel.Information, new ThrowingShutdownSink(original));
+        IDisposable scope = logger.BeginScope("scope");
+        try
+        {
+            ApplicationException actual = Assert.ThrowsException<ApplicationException>(() => logger.Dispose());
+            Assert.AreSame(original, actual);
+            Assert.IsNull(logger.CurrentScope);
+            Assert.ThrowsException<ObjectDisposedException>(() => new LoggerPNPScope(logger, "late"));
+        }
+        finally
+        {
+            scope.Dispose();
+            logger.Dispose();
+        }
+    }
+
+    [TestMethod]
     public void ScopesOfDifferentLoggersAreIndependent()
     {
         using (LoggerPNP first = new(LogLevel.None))
@@ -371,6 +391,38 @@ public class LoggingContractTests
         public override string ToString()
         {
             throw _error;
+        }
+    }
+
+    private sealed class ThrowingShutdownSink : TraceListener
+    {
+        private readonly Exception _error;
+
+        public ThrowingShutdownSink(Exception error)
+        {
+            _error = error;
+        }
+
+        public override void Write(string message)
+        {
+        }
+
+        public override void WriteLine(string message)
+        {
+        }
+
+        public override void Close()
+        {
+            throw _error;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                throw _error;
+            }
+            base.Dispose(disposing);
         }
     }
 

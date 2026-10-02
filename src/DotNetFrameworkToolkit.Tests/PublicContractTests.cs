@@ -230,7 +230,7 @@ public class PublicContractTests
     }
 
     [DataTestMethod]
-    [DataRow(null)]
+    [DataRow((string)null)]
     [DataRow("")]
     [DataRow("missing")]
     public void ValidationRequiresARealPropertyName(string name)
