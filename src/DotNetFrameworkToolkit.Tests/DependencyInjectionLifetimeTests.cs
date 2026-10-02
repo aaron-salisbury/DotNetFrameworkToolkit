@@ -81,6 +81,19 @@ public class DependencyInjectionLifetimeTests
     }
 
     [TestMethod]
+    public void NullDescriptorArgumentLeavesTheContainerCallerOwned()
+    {
+        DisposalCounter supplied = new();
+        using UnityContainer container = new();
+        container.RegisterInstance<IDisposable>(supplied);
+        Assert.ThrowsException<ArgumentNullException>(() => new ServiceScopeFactoryPNP(container, null));
+        Assert.AreEqual(0, supplied.Disposals);
+        Assert.AreSame(supplied, container.Resolve<IDisposable>());
+        container.Dispose();
+        Assert.AreEqual(1, supplied.Disposals);
+    }
+
+    [TestMethod]
     public void InvalidDescriptorDisposesTheTransferredContainer()
     {
         DisposalCounter nativeSingleton = new();
