@@ -10,7 +10,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// Specifies the contract for a collection of service descriptors.
 /// </summary>
 /// <remarks>
-/// This implementation uses the Patterns & Practices Enterprise Library.
+/// This implementation uses the Patterns &amp; Practices Enterprise Library.
 /// </remarks>
 public class ServiceCollectionPNP : IServiceCollection
 {

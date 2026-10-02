@@ -16,12 +16,12 @@ jobs:
       matrix:
         configuration: [Debug, Release]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
-      - uses: microsoft/setup-msbuild@v2
-      - uses: NuGet/setup-nuget@v2
+      - uses: microsoft/setup-msbuild@v3
+      - uses: NuGet/setup-nuget@v3
         with:
           nuget-version: '6.14.0'
       # .NET 8 runs Cake; VS MSBuild/Roslyn compile against the restored net20 reference assemblies.
@@ -36,7 +36,7 @@ jobs:
           $env:TOOLKIT_ASSEMBLY = (Resolve-Path $dll).Path
           powershell -NoProfile -Command '$assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom($env:TOOLKIT_ASSEMBLY); if ($assembly.ImageRuntimeVersion -ne "v2.0.50727") { throw "Unexpected runtime: $($assembly.ImageRuntimeVersion)" }; Write-Host $assembly.ImageRuntimeVersion'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: net20-${{ matrix.configuration }}
           path: src/DotNetFrameworkToolkit/bin/${{ matrix.configuration }}/net20/

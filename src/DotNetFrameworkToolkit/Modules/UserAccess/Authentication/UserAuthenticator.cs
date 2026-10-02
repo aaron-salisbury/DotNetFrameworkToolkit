@@ -11,7 +11,7 @@ namespace DotNetFrameworkToolkit.Modules.UserAccess;
 /// including secure credential creation and password verification.
 /// </summary>
 /// <remarks>
-/// This implementation uses Patterns & Practices Enterprise Library and is inspired by this 
+/// This implementation uses Patterns &amp; Practices Enterprise Library and is inspired by this
 /// <see href="https://www.mking.net/blog/password-security-best-practices-with-examples-in-csharp">article</see> by Matthew King.
 /// </remarks>
 public sealed class UserAuthenticator : IUserAuthenticator

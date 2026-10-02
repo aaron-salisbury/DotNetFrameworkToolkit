@@ -5,7 +5,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
 /// <inheritdoc/>
 /// <remarks>
-/// This implementation uses the Patterns & Practices Enterprise Library.
+/// This implementation uses the Patterns &amp; Practices Enterprise Library.
 /// </remarks>
 public class ServiceScopePNP : IServiceScope, IDisposable
 {
