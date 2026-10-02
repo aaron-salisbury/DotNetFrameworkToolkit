@@ -103,8 +103,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a trace log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -118,8 +117,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a trace log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -132,8 +130,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a trace log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -146,8 +143,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a trace log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
@@ -161,8 +157,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an informational log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -176,8 +171,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an informational log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -190,8 +184,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an informational log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -204,8 +197,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an informational log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
@@ -219,8 +211,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a warning log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -234,8 +225,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a warning log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -248,8 +238,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a warning log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -262,8 +251,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a warning log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
@@ -277,8 +265,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an error log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -292,8 +279,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an error log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -306,8 +292,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an error log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -320,8 +305,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes an error log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
@@ -335,8 +319,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a critical log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
@@ -350,8 +333,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a critical log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -364,8 +346,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a critical log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -378,8 +359,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a critical log message.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <example>
@@ -391,8 +371,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a log message at the specified log level.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="logLevel">Entry will be written on this level.</param>
     /// <param name="message">Format string of the log message.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -400,8 +379,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a log message at the specified log level.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="logLevel">Entry will be written on this level.</param>
     /// <param name="eventId">The event id associated with the log.</param>
     /// <param name="message">Format string of the log message.</param>
@@ -410,8 +388,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats and writes a log message at the specified log level.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+    /// </summary>=
     /// <param name="logLevel">Entry will be written on this level.</param>
     /// <param name="exception">The exception to log.</param>
     /// <param name="message">Format string of the log message.</param>
@@ -432,8 +409,7 @@ public interface ILogger
 
     /// <summary>
     /// Formats the message and creates a scope.
-    /// </summary>
-    /// <param name="logger">The <see cref="ILogger"/> to create the scope in.</param>
+    /// </summary>=
     /// <param name="messageFormat">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c>.</param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
     /// <returns>A disposable scope object. Can be null.</returns>
