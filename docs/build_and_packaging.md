@@ -14,11 +14,11 @@ Run managed and private SQL CE tests without packaging:
 Run the complete Release pipeline (also the default Release target):
 
 ```powershell
-./build/build.ps1 --target="Verify Package" --configuration=Release
+./build/build.ps1 --target="Verify Consumer" --configuration=Release
 ./build/build.ps1 --configuration=Release
 ```
 
-`Package` creates artifacts; `Verify Package` additionally validates them. Packaging rejects Debug configuration. GitHub Actions uses `Verify Package` and uploads validated artifacts; it does not publish to NuGet.
+`Package` creates artifacts; `Verify Package` additionally validates them. Packaging rejects Debug configuration. `Verify Consumer` adds package installation and x86/x64 CLR 2.0 execution. GitHub Actions uses `Verify Consumer` and uploads validated artifacts; it does not publish to NuGet.
 
 | Stage | Checks and behavior |
 | --- | --- |
@@ -39,7 +39,7 @@ Artifacts are written to `artifacts/packages/Release/`:
 | `AaronSalisbury.DotNetFrameworkToolkit.<version>.snupkg` | Portable symbols in the matching `lib/net20` path. Source retrieval/Source Link is not configured by this phase. |
 | `validation.json` | Versions, source commit, configuration/runtime target, artifact SHA-256 hashes, and successful package/image regression checks. |
 
-CI also uploads generated images, the library output, and TRX test results. A successful package build proves artifact structure and CLR 4 behavior; installation and actual CLR 2.0 execution in a legacy consumer remain roadmap phase 6.
+CI also uploads generated images, the library output, and TRX test results. The full pipeline also uploads consumer runtime logs and a validation report. See [consumer verification](consumer_usage.md) for installation checks, CLR 2.0 execution and the declared Windows environment.
 
 ## Version and tag policy
 

@@ -21,11 +21,22 @@ jobs:
       - uses: NuGet/setup-nuget@v3
         with:
           nuget-version: '6.14.0'
+      - name: Ensure CLR 2.0 is available
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $feature = Get-WindowsFeature NET-Framework-Core
+          if (-not $feature.Installed) {
+            $result = Install-WindowsFeature NET-Framework-Core
+            if (-not $result.Success -or $result.RestartNeeded -eq 'Yes') {
+              throw 'CLR 2.0 installation failed or requires a restart.'
+            }
+          }
       # .NET 10 runs Cake; VS MSBuild/Roslyn compile against the restored net20 reference assemblies.
       # No .NET 4.x retargeting or Mono runtime substitution is used.
       - name: Build, test and verify packages through Cake.Frosting
         shell: pwsh
-        run: ./build/build.ps1 --target="Verify Package" --configuration=Release
+        run: ./build/build.ps1 --target="Verify Consumer" --configuration=Release
       - name: Verify CLR 2.0 assembly metadata
         shell: pwsh
         run: |
@@ -58,4 +69,13 @@ jobs:
         with:
           name: test-results-Release
           path: artifacts/test-results/Release/
+          if-no-files-found: warn
+      - name: Upload consumer verification
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: consumer-Release
+          path: |
+            artifacts/consumer/*.log
+            artifacts/consumer/validation.json
           if-no-files-found: warn

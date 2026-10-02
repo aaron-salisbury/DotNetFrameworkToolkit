@@ -48,4 +48,4 @@ using IServiceScope scope = factory.CreateScope();
 MyService service = (MyService)scope.ServiceProvider.GetService(typeof(MyService));
 ```
 
-The .NET Framework 4.8.1 tests exercise these contracts against Unity 1.2 on CLR 4. Actual CLR 2.0 runtime validation remains separate roadmap work.
+The .NET Framework 4.8.1 tests exercise these contracts against Unity 1.2 on CLR 4. The [installed-package consumer](../consumer_usage.md) additionally verifies scoped identity and disposal on CLR 2.0 in x86/x64 processes on Windows Server 2022; it is a representative smoke check rather than the full contract suite.
