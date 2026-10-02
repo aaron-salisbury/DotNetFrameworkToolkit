@@ -42,8 +42,6 @@ The library's post-build commands copy the native assets into its output. The te
 
 Consumers must ensure that the matching native engine for their process architecture and the accompanying Visual C++ runtime files reach the application's executable output, or arrange an appropriate runtime installation. Copying assets into a library's output does not by itself guarantee deployment into a consuming application's output. Microsoft documents [private deployment in application folders](https://learn.microsoft.com/en-us/aspnet/web-forms/overview/older-versions-getting-started/deployment-to-a-hosting-provider/deployment-to-a-hosting-provider-deploying-sql-server-compact-databases-2-of-12). Review the runtime's redistribution license when packaging an application.
 
-The toolkit's NuGet manifest currently still declares `System.Data.SqlServerCe_unofficial` 4.0.8482.1. That packaging dependency must be aligned with the Microsoft package before publishing a toolkit package intended to use the new dependency.
-
 | Evidence | What it establishes |
 | --- | --- |
 | Toolkit builds against net20 reference assemblies and has CLR metadata `v2.0.50727` | The library's declared compilation/runtime target remains Framework 2.0. |

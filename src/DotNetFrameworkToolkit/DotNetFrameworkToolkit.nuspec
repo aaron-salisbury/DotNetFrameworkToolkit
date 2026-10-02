@@ -19,7 +19,7 @@
         <dependency id="PatternsAndPractices.Cryptography" version="2.0.1" exclude="Build,Analyzers" />
         <dependency id="PatternsAndPractices.Logging" version="2.0.0" exclude="Build,Analyzers" />
         <dependency id="PatternsAndPractices.Unity" version="1.2.0" exclude="Build,Analyzers" />
-        <dependency id="System.Data.SqlServerCe_unofficial" version="4.0.8482.1" exclude="Build,Analyzers" />
+        <dependency id="SqlServerCompact" version="4.0.8482.1" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
