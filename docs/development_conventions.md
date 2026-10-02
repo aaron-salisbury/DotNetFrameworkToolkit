@@ -117,10 +117,12 @@ the legacy project does not automatically make every style diagnostic a CI build
   may introduce deliberate breaking changes; document them rather than silently migrating data.
 - Build Debug and Release through Cake and the Windows GitHub workflow using restored
   net20 reference assemblies. Verify CLR 2.0 assembly metadata as the workflow does.
-- Unit tests remain deferred. Do not claim compilation verifies concurrency, disposal,
-  authentication behavior, or SQL CE integration. Future tests must also target net20.
+- Unit tests target .NET Framework 4.8.1 and follow the same C# formatting rules.
+  Run them through Cake with `--target=Test`; the default package path also runs tests.
+  Tests execute on CLR 4 and do not prove CLR 2.0 compatibility. Keep the net20
+  reference-assembly/metadata checks and separate legacy-runtime smoke verification.
+  SQL CE native integration remains outside the unit suite.
 - Before submitting generated code, check every touched control-flow body for braces
   and every executable block for multiline formatting. Editor settings do not replace review.
 
-See [review fixes and compatibility notes](../REVIEW_FIXES.md) for current behavior and
-remaining database limitations.
+See the [roadmap](roadmap.md) for remaining compatibility and database work.

@@ -7,7 +7,7 @@ namespace Build.Tasks.Standard;
 
 [TaskName("Compile Projects")]
 [IsDependentOn(typeof(RestoreTask))]
-[TaskDescription("Builds the .NET Framework 2.0 solution with modern Visual Studio MSBuild.")]
+[TaskDescription("Builds the net20 library and net481 tests with modern Visual Studio MSBuild.")]
 public sealed class CompileProjectsTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)

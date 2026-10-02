@@ -19,19 +19,23 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 Contributor guidelines: [development conventions](docs/development_conventions.md).
 
-- The project targets .Net Framework 2.0 but is configured to use the latest language features as of the LTS version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download).
-- The Build project uses [Cake](https://cakebuild.net/) (C# Make) as the build orchestrator and can be launched from your IDE or via script.
+- The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.
+- Use Windows with Visual Studio 2022 MSBuild, the .NET Framework 4.8.1 developer pack and Visual Studio test tools, NuGet CLI on PATH, and the .NET 8 SDK for the Cake.Frosting build executable. The build restores the net20 reference assemblies through NuGet.
+- Modern C# syntax does not change the library's runtime target.
 
-	- On OSX/Linux run:
-	```bash
-	./build.sh
-	```
-	- If you get a "Permission denied" error, you may need to make the script executable first:
-	```bash
-	chmod +x build.sh
-	```
+Run the tests from the repository root:
 
-	- On Windows PowerShell run:
-	```powershell
-	./build.ps1
-	```
+```powershell
+./build/build.ps1 --target=Test --configuration=Debug
+./build/build.ps1 --target=Test --configuration=Release
+```
+
+Cake builds the solution before running MSTest through VSTest. Failed tests or zero discovered tests fail the build. TRX results are written to `artifacts/test-results/<configuration>/`; GitHub Actions uploads these results for both configurations.
+
+The default build also runs tests before publishing binaries and creating the package:
+
+```powershell
+./build/build.ps1 --configuration=Release
+```
+
+Tests cover managed behavior on CLR 4. SQL CE native integration and actual CLR 2.0 runtime verification remain separate [roadmap](docs/roadmap.md) work.
