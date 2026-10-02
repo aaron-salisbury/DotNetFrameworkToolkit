@@ -13,6 +13,8 @@
 | Worker cleanup | Scopes do not flow to workers. Each worker must dispose its own scopes before leaving that thread, including when another thread has already disposed the logger. This releases the worker's scope slot and its reference to the logger. |
 | Reentrant shutdown | Disposing the logger from its active formatter or sink callback throws `InvalidOperationException`. Do not synchronously wait for another thread to dispose the logger from these callbacks: shutdown waits for the callback's write. |
 
+Argument validation can precede lifetime admission. The string-template overloads parse placeholders before attempting the operation, so a malformed template may throw `FormatException` even when the logger is already disposed. No scope or entry is installed on failure.
+
 Keep scopes in `using` blocks and dispose them before their logger whenever possible. Scopes are synchronous context on .NET Framework 2.0, not asynchronous context propagation.
 
 ```csharp
