@@ -18,7 +18,7 @@ This project uses [Semantic Versioning](https://semver.org/).
 ## Build Requirements
 
 - The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.
-- Use Windows with Visual Studio 2022 MSBuild, the .NET Framework 4.8.1 developer pack and Visual Studio test tools, NuGet CLI on PATH, and the .NET 8 SDK for the Cake.Frosting build executable. The build restores the net20 reference assemblies through NuGet.
+- Use Windows with Visual Studio 2022 MSBuild, the .NET Framework 4.8.1 developer pack and Visual Studio test tools, NuGet CLI on PATH, and the .NET 10 SDK for the Cake.Frosting build executable. The build restores the net20 reference assemblies through NuGet.
 - Modern C# syntax does not change the library's runtime target.
 
 Run the tests from the repository root:

@@ -22,7 +22,7 @@ Business/Data/Presentation layers, UI framework, persistence model, or compositi
   requirements without a deliberate, net20-compatible implementation decision.
 - Packages and their transitive runtime dependencies must support net20. Keep
   Unity and Enterprise Library details inside their adapters where practical.
-- The Cake.Frosting build executable targets modern .NET independently. Modern
+- The Cake.Frosting build executable targets .NET 10 independently. Modern
   build-only APIs and packages must not leak into the distributed library.
 
 ## Organization and library contracts
