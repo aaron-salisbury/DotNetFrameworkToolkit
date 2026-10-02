@@ -6,7 +6,7 @@
 Common C# app development and shim code for legacy .Net Framework 2.0 projects.
 
 ## Purpose
-I occasionally find myself in restricted development scenarios where I target legacy Windows platforms limited to .Net Framework. So I created this library to aid in maintenance and rapid development under those constraints.
+I occasionally find myself in restricted deployment scenarios where I target legacy Windows platforms limited to .Net Framework. So I created this library to aid in maintenance and rapid development under those constraints.
 
 ## Versioning
 This project uses [Semantic Versioning](https://semver.org/).
@@ -16,13 +16,6 @@ This project uses [Semantic Versioning](https://semver.org/).
 - **PATCH** version: Backward-compatible bug fixes
 
 ## Build Requirements
-
-Contributor guidelines: [development conventions](docs/development_conventions.md).
-DI lifetime rules: [ownership and shutdown](docs/dependency_injection.md).
-Logging contracts: [lifetimes, scopes, templates, and observers](docs/logging.md).
-Results and validation: [public contracts](docs/public_contracts.md).
-Stored credentials: [format and migration rules](docs/credentials.md).
-Database helpers and native deployment: [SQL Server Compact](docs/sql_server_ce.md).
 
 - The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.
 - Use Windows with Visual Studio 2022 MSBuild, the .NET Framework 4.8.1 developer pack and Visual Studio test tools, NuGet CLI on PATH, and the .NET 8 SDK for the Cake.Frosting build executable. The build restores the net20 reference assemblies through NuGet.
@@ -44,3 +37,7 @@ The default build also runs tests before publishing binaries and creating the pa
 ```
 
 Tests cover managed behavior and the pinned SQL CE provider/native runtime on CLR 4. Actual CLR 2.0 runtime verification remains separate [roadmap](docs/roadmap.md) work.
+
+## Contributor Guidelines
+
+[Development Conventions](docs/development_conventions.md) | [API Contracts](docs/contracts/)
