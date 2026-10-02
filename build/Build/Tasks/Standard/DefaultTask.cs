@@ -5,7 +5,7 @@ using Cake.Frosting;
 namespace Build.Tasks.Standard;
 
 [TaskName("Default")]
-[IsDependentOn(typeof(PackageTask))] // The default task depends on the final build task and task execution order is scaffolded from there.
+[IsDependentOn(typeof(VerifyPackageTask))] // The default task depends on the final build task and task execution order is scaffolded from there.
 [TaskDescription("Entry point for the build process when a command-line target isn't specified.")]
 public sealed class DefaultTask : FrostingTask
 {

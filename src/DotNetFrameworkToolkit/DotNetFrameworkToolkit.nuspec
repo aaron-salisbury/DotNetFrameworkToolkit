@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>AaronSalisbury.DotNetFrameworkToolkit</id>
-    <version>0.2.9</version>
+    <version>$version$</version>
     <authors>Aaron Salisbury</authors>
     <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -13,13 +13,13 @@
     <releaseNotes>In-development / pre-alpha.</releaseNotes>
     <copyright>© Aaron Salisbury</copyright>
     <tags>app helpers legacy netframework</tags>
-    <repository type="git" url="https://github.com/aaron-salisbury/DotNetFrameworkToolkit" />
+    <repository type="git" url="https://github.com/aaron-salisbury/DotNetFrameworkToolkit" commit="$commit$" />
     <dependencies>
       <group targetFramework="net20">
-        <dependency id="PatternsAndPractices.Cryptography" version="2.0.1" exclude="Build,Analyzers" />
-        <dependency id="PatternsAndPractices.Logging" version="2.0.0" exclude="Build,Analyzers" />
-        <dependency id="PatternsAndPractices.Unity" version="1.2.0" exclude="Build,Analyzers" />
-        <dependency id="SqlServerCompact" version="4.0.8482.1" exclude="Build,Analyzers" />
+        <dependency id="PatternsAndPractices.Cryptography" version="[2.0.1]" exclude="Build,Analyzers" />
+        <dependency id="PatternsAndPractices.Logging" version="[2.0.0]" exclude="Build,Analyzers" />
+        <dependency id="PatternsAndPractices.Unity" version="[1.2.0]" exclude="Build,Analyzers" />
+        <dependency id="SqlServerCompact" version="[4.0.8482.1]" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
@@ -29,8 +29,5 @@
     <file src="bin\$Configuration$\net20\DotNetFrameworkToolkit.dll" target="lib\net20" />
     <file src="bin\$Configuration$\net20\DotNetFrameworkToolkit.pdb" target="lib\net20" />
     <file src="bin\$Configuration$\net20\DotNetFrameworkToolkit.xml" target="lib\net20" />
-    <file src="Core\**\*.cs" target="src\Core" />
-    <file src="Modules\**\*.cs" target="src\Modules" />
-    <file src="Properties\**\*.cs" target="src\Properties" />
   </files>
 </package>

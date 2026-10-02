@@ -13,6 +13,17 @@ public sealed class CleanTask : FrostingTask<BuildContext>
     {
         DirectoryPathCollection compileDirs = context.GetDirectories($"{context.SourceDirectory}/**/bin/{context.Config}");
 
+        DirectoryPathCollection intermediateDirs = context.GetDirectories($"{context.SourceDirectory}/**/obj/{context.Config}");
+        foreach (DirectoryPath dir in intermediateDirs)
+        {
+            context.CleanDirectory(dir);
+        }
+        DirectoryPath packages = new($"{context.AbsolutePathToRepo}/artifacts/packages/{context.Config}");
+        if (context.DirectoryExists(packages))
+        {
+            context.CleanDirectory(packages);
+        }
+
         foreach (DirectoryPath dir in compileDirs)
         {
             context.CleanDirectory(dir);
