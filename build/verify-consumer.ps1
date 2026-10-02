@@ -10,12 +10,12 @@ if (Test-Path $root) {
 $feed = Join-Path $root 'feed'
 $packages = Join-Path $root 'packages'
 New-Item $feed -ItemType Directory -Force | Out-Null
-$package = Join-Path $repo "artifacts/packages/Release/DotNetFrameworkToolkit.$version.nupkg"
+$package = Join-Path $repo "artifacts/packages/Release/AaronSalisbury.DotNetFrameworkToolkit.$version.nupkg"
 Copy-Item $package $feed
 # A local feed guarantees that this build's toolkit package is installed, even when
 # the same version already exists on nuget.org. Dependencies come from the restore.
 Get-ChildItem (Join-Path $repo 'src/packages') -Recurse -Filter '*.nupkg' | Copy-Item -Destination $feed
-& nuget install DotNetFrameworkToolkit -Version $version -Framework net20 -Source $feed -OutputDirectory $packages -NonInteractive -NoCache -DirectDownload
+& nuget install AaronSalisbury.DotNetFrameworkToolkit -Version $version -Framework net20 -Source $feed -OutputDirectory $packages -NonInteractive -NoCache -DirectDownload
 if ($LASTEXITCODE -ne 0) {
     throw 'Consumer runtime package installation failed.'
 }
@@ -23,7 +23,7 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
     throw 'Consumer reference assembly installation failed.'
 }
-$installedPackage = Join-Path $packages "DotNetFrameworkToolkit.$version/DotNetFrameworkToolkit.$version.nupkg"
+$installedPackage = Join-Path $packages "AaronSalisbury.DotNetFrameworkToolkit.$version/AaronSalisbury.DotNetFrameworkToolkit.$version.nupkg"
 if ((Get-FileHash $package).Hash -ne (Get-FileHash $installedPackage).Hash) {
     throw 'NuGet installed a different toolkit package.'
 }
@@ -34,7 +34,7 @@ foreach ($architecture in @('x86', 'x64')) {
         throw "Consumer compilation failed for $architecture."
     }
     $output = Join-Path $root $architecture
-    $installedDll = Join-Path $packages "DotNetFrameworkToolkit.$version/lib/net20/DotNetFrameworkToolkit.dll"
+    $installedDll = Join-Path $packages "AaronSalisbury.DotNetFrameworkToolkit.$version/lib/net20/DotNetFrameworkToolkit.dll"
     if ((Get-FileHash $installedDll).Hash -ne (Get-FileHash (Join-Path $output 'DotNetFrameworkToolkit.dll')).Hash) {
         throw 'Consumer does not use the installed package binary.'
     }
