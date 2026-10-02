@@ -122,7 +122,8 @@ the legacy project does not automatically make every style diagnostic a CI build
   Run them through Cake with `--target=Test`; the default package path also runs tests.
   Tests execute on CLR 4 and do not prove CLR 2.0 compatibility. Keep the net20
   reference-assembly/metadata checks and separate legacy-runtime smoke verification.
-  SQL CE native integration remains outside the unit suite.
+  SQL CE integration tests deploy the matching private native runtime and run through
+  the same Test task. This does not establish SQL CE operation on Framework 2.0-only machines.
 - Before submitting generated code, check every touched control-flow body for braces
   and every executable block for multiline formatting. Editor settings do not replace review.
 

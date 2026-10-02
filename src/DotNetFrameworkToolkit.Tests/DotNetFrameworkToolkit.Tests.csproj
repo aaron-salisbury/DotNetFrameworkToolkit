@@ -58,6 +58,9 @@
     <Reference Include="Microsoft.Practices.EnterpriseLibrary.Logging">
       <HintPath>..\packages\PatternsAndPractices.Logging.2.0.0\lib\Microsoft.Practices.EnterpriseLibrary.Logging.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SqlServerCe_unofficial.4.0.8482.1\lib\net20\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
@@ -70,6 +73,7 @@
     <Compile Include="LifetimeTests.cs" />
     <Compile Include="LoggingTests.cs" />
     <Compile Include="ResultTests.cs" />
+    <Compile Include="SqlServerCeDatabaseTests.cs" />
     <Compile Include="UtilityTests.cs" />
     <Compile Include="ValidationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -99,4 +103,12 @@
     <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.2.10\build\net46\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.2.10\build\net46\MSTest.TestAdapter.targets'))" />
   </Target>
   <Import Project="..\packages\MSTest.TestAdapter.2.2.10\build\net46\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.2.2.10\build\net46\MSTest.TestAdapter.targets')" />
+  <!-- Copy only matching native test assets; keep the unofficial net20 managed provider. -->
+  <Target Name="DeploySqlCeTestRuntime" AfterTargets="Build">
+    <ItemGroup>
+      <SqlCeNativeFiles Include="..\packages\SqlServerCompact.4.0.8482.1\NativeBinaries\**\*" />
+    </ItemGroup>
+    <Error Condition="!Exists('..\packages\SqlServerCompact.4.0.8482.1\NativeBinaries\amd64\sqlceme40.dll')" Text="Restore the matching SQL CE native test runtime before building tests." />
+    <Copy SourceFiles="@(SqlCeNativeFiles)" DestinationFiles="@(SqlCeNativeFiles->'$(TargetDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
