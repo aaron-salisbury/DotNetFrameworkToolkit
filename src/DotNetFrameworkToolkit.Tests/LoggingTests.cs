@@ -1,0 +1,166 @@
+using DotNetFrameworkToolkit.Modules.Logging;
+using Microsoft.Practices.EnterpriseLibrary.Logging;
+using Microsoft.Practices.EnterpriseLibrary.Logging.TraceListeners;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace DotNetFrameworkToolkit.Tests;
+
+[TestClass]
+public class LoggingTests
+{
+    [TestMethod]
+    public void NamedAndRepeatedTemplatesPreserveProperties()
+    {
+        FormattedLogValues values = new("User {User} / {User} paid {Amount:N2}", "Aaron", 12.5);
+        Assert.AreEqual("User Aaron / Aaron paid 12.50", values.ToString());
+        Assert.AreEqual("Aaron", values.Properties["User"]);
+        Assert.AreEqual(12.5, values.Properties["Amount"]);
+        Assert.AreEqual("User {User} / {User} paid {Amount:N2}", values.Properties["{OriginalFormat}"]);
+    }
+
+    [TestMethod]
+    public void CompositeFormattingSupportsAlignmentAndEscapedBraces()
+    {
+        Assert.AreEqual("{value:    7}", new FormattedLogValues("{{value: {0,4}}}", 7).ToString());
+        Assert.AreEqual("literal {no arguments}", new FormattedLogValues("literal {no arguments}").ToString());
+    }
+
+    [DataTestMethod]
+    [DataRow("{Name} {Missing}")]
+    [DataRow("Unclosed {Name")]
+    [DataRow("Invalid {}")]
+    public void MalformedOrMissingTemplateArgumentsThrow(string template)
+    {
+        Assert.ThrowsException<FormatException>(() => new FormattedLogValues(template, 1).ToString());
+    }
+
+    [TestMethod]
+    public void LoggerFiltersNoneAndDoesNotFormatDisabledMessages()
+    {
+        InMemorySinkPNP sink = new();
+        using LoggerPNP logger = new(LogLevel.Warning, sink);
+        Assert.IsFalse(logger.IsEnabled(LogLevel.None));
+        logger.LogInformation("{Missing}", Array.Empty<object>());
+        logger.LogWarning("accepted");
+        Assert.AreEqual(1, sink.Logs.Count);
+        StringAssert.Contains(sink.Logs[0], "accepted");
+    }
+
+    [TestMethod]
+    public void LoggerIncludesExceptionAndEventProperties()
+    {
+        CapturingSink sink = new();
+        using LoggerPNP logger = new(LogLevel.Trace, sink);
+        Exception error = new ApplicationException("diagnostic");
+        logger.LogError(new EventId(42, "Failure"), error, "User {User}", "Aaron");
+        Assert.AreEqual(42, sink.Last.EventId);
+        Assert.AreEqual("Failure", sink.Last.ExtendedProperties["EventName"]);
+        Assert.AreEqual("Aaron", sink.Last.ExtendedProperties["User"]);
+        StringAssert.Contains(sink.Last.Message, "diagnostic");
+    }
+
+    [TestMethod]
+    public void NestedScopesAllowOutOfOrderDisposalWithoutResurrection()
+    {
+        CapturingSink sink = new();
+        using LoggerPNP logger = new(LogLevel.Information, sink);
+        IDisposable outer = logger.BeginScope("Outer {Correlation}", 10);
+        IDisposable inner = logger.BeginScope("Inner {Request}", 20);
+        try
+        {
+            outer.Dispose();
+            logger.LogInformation("first");
+            Assert.IsFalse(sink.Last.ExtendedProperties.ContainsKey("Correlation"));
+            Assert.AreEqual(20, sink.Last.ExtendedProperties["Request"]);
+            inner.Dispose();
+            logger.LogInformation("second");
+            Assert.IsFalse(sink.Last.ExtendedProperties.ContainsKey("Scopes"));
+        }
+        finally
+        {
+            inner.Dispose();
+            outer.Dispose();
+        }
+    }
+
+    [TestMethod]
+    public void ScopesDoNotFlowToWorkerThreadsAndRejectWorkerDisposal()
+    {
+        InMemorySinkPNP sink = new();
+        using LoggerPNP logger = new(LogLevel.Information, sink);
+        using IDisposable scope = logger.BeginScope("scope");
+        Task.Run(() =>
+        {
+            Assert.IsNull(logger.CurrentScope);
+            Assert.ThrowsException<InvalidOperationException>(() => scope.Dispose());
+        }).GetAwaiter().GetResult();
+        Assert.IsNotNull(logger.CurrentScope);
+    }
+
+    [TestMethod]
+    public void MemorySinkReturnsReadOnlySnapshotsAndTrimsWhenLimitDrops()
+    {
+        InMemorySinkPNP sink = new(0);
+        sink.Write("one");
+        IList<string> snapshot = sink.Logs;
+        sink.Write("two");
+        sink.Write("three");
+        Assert.AreEqual(1, snapshot.Count);
+        Assert.ThrowsException<NotSupportedException>(() => snapshot.Clear());
+        sink.MaxLogsCount = 2;
+        CollectionAssert.AreEqual(new[] { "two", "three" }, sink.Logs.ToArray());
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => sink.MaxLogsCount = -1);
+    }
+
+    [TestMethod]
+    public void ConcurrentWritesKeepRetentionConsistent()
+    {
+        InMemorySinkPNP sink = new(25);
+        Parallel.For(0, 500, i => sink.Write(i.ToString()));
+        Assert.AreEqual(25, sink.Logs.Count);
+        Assert.AreEqual(25, sink.Logs.Distinct().Count());
+    }
+
+    [TestMethod]
+    public void FailingObserverDoesNotPreventRemainingObservers()
+    {
+        InMemorySinkPNP sink = new();
+        int notified = 0;
+        sink.LogEmitted += (sender, args) => throw new ApplicationException("observer");
+        sink.LogEmitted += (sender, args) => notified++;
+        using LoggerPNP logger = new(LogLevel.Information, sink);
+        logger.LogInformation("message");
+        Assert.AreEqual(1, notified);
+        Assert.AreEqual(1, sink.Logs.Count);
+    }
+
+    [TestMethod]
+    public void DisposedLoggerRejectsEnabledOperations()
+    {
+        LoggerPNP logger = new();
+        logger.Dispose();
+        logger.Dispose();
+        Assert.ThrowsException<ObjectDisposedException>(() => logger.LogInformation("message"));
+        Assert.ThrowsException<ObjectDisposedException>(() => logger.BeginScope("scope"));
+    }
+
+    private sealed class CapturingSink : CustomTraceListener
+    {
+        public LogEntry Last { get; private set; }
+        public override void Write(string message)
+        {
+        }
+        public override void WriteLine(string message)
+        {
+        }
+        public override void TraceData(TraceEventCache cache, string source, TraceEventType type, int id, object data)
+        {
+            Last = (LogEntry)data;
+        }
+    }
+}
