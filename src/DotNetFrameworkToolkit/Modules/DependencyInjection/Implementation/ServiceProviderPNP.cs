@@ -10,6 +10,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// A Unity-backed provider.
 /// </summary>
 /// <remarks>
+/// For providers constructed from service descriptors:
 /// <list type="bullet">
 /// <item>Container-created disposables belong to their resolving lifetime</item>
 /// <item>Supplied singleton instances remain owned by the caller</item>

@@ -14,8 +14,8 @@ public interface IServiceScopeFactory
     /// </summary>
     /// <returns>
     /// An <see cref="IServiceScope"/> controlling the lifetime of the scope. Once this is
-    /// disposed, any scoped services and any transient services that have been resolved from
-    /// the <see cref="IServiceProvider"/> will also be disposed.
+    /// disposed, services owned by that scope will also be disposed according to its
+    /// implementation's ownership rules.
     /// </returns>
     IServiceScope CreateScope();
 }
