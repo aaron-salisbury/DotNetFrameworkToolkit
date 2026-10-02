@@ -55,6 +55,20 @@ public class DependencyInjectionTests
     }
 
     [TestMethod]
+    public void OwnedConsumerIsDisposedBeforeItsDependency()
+    {
+        ServiceCollectionPNP services = new();
+        services.AddTransient<DisposableService>();
+        services.AddTransient<DisposableConsumer>();
+        ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
+        DisposableConsumer consumer = (DisposableConsumer)root.GetService(typeof(DisposableConsumer));
+        root.Dispose();
+        Assert.AreEqual(0, consumer.DependencyDisposalsAtShutdown);
+        Assert.AreEqual(1, consumer.Disposals);
+        Assert.AreEqual(1, consumer.Dependency.Disposals);
+    }
+
+    [TestMethod]
     public void SuppliedSingletonIsCallerOwned()
     {
         DisposableService supplied = new();
@@ -154,6 +168,7 @@ public class DependencyInjectionTests
     }
 
     [TestMethod]
+    [Timeout(15000)]
     public void ConcurrentSingletonResolutionReturnsOneInstance()
     {
         ServiceCollectionPNP services = new();
@@ -204,6 +219,24 @@ public class DependencyInjectionTests
             Disposals++;
         }
     }
+    public class DisposableConsumer : IDisposable
+    {
+        public DisposableService Dependency { get; }
+        public int Disposals { get; private set; }
+        public int DependencyDisposalsAtShutdown { get; private set; } = -1;
+
+        public DisposableConsumer(DisposableService dependency)
+        {
+            Dependency = dependency;
+        }
+
+        public void Dispose()
+        {
+            DependencyDisposalsAtShutdown = Dependency.Disposals;
+            Disposals++;
+        }
+    }
+
     public class SingletonConsumer
     {
         public DisposableService Dependency { get; }

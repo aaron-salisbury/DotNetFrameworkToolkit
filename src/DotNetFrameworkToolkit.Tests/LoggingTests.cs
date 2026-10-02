@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,6 +22,34 @@ public class LoggingTests
         Assert.AreEqual("Aaron", values.Properties["User"]);
         Assert.AreEqual(12.5, values.Properties["Amount"]);
         Assert.AreEqual("User {User} / {User} paid {Amount:N2}", values.Properties["{OriginalFormat}"]);
+    }
+
+    [TestMethod]
+    public void FormattingIsInvariantAndArgumentsAreSnapshotted()
+    {
+        CultureInfo original = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+            object[] arguments = { 12.5 };
+            FormattedLogValues values = new("Amount {Amount:N2}", arguments);
+            arguments[0] = 99;
+            Assert.AreEqual("Amount 12.50", values.ToString());
+            Assert.AreEqual(12.5, values.Properties["Amount"]);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = original;
+        }
+    }
+
+    [TestMethod]
+    public void MixedNumericAndNamedTemplatesAssignTheNextArgument()
+    {
+        FormattedLogValues values = new("{0} / {Name} / {Name}", "first", "second");
+        Assert.AreEqual("first / second / second", values.ToString());
+        Assert.AreEqual("first", values.Properties["0"]);
+        Assert.AreEqual("second", values.Properties["Name"]);
     }
 
     [TestMethod]
@@ -89,6 +118,7 @@ public class LoggingTests
     }
 
     [TestMethod]
+    [Timeout(15000)]
     public void ScopesDoNotFlowToWorkerThreadsAndRejectWorkerDisposal()
     {
         InMemorySinkPNP sink = new();
@@ -118,6 +148,7 @@ public class LoggingTests
     }
 
     [TestMethod]
+    [Timeout(15000)]
     public void ConcurrentWritesKeepRetentionConsistent()
     {
         InMemorySinkPNP sink = new(25);
