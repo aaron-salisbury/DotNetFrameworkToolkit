@@ -93,10 +93,7 @@ public class ResultTests
         Assert.AreEqual(Outcome.NotFound, result.Error);
         Assert.IsFalse(result.TryGet(out int value));
         Assert.AreEqual(0, value);
-        Assert.ThrowsException<InvalidOperationException>(() =>
-            {
-                int ignored = result.Value;
-            });
+        Assert.ThrowsException<InvalidOperationException>(() => { int ignored = result.Value; });
     }
 
     [TestMethod]
@@ -125,7 +122,7 @@ public class ResultTests
     {
         string[] messages = { "required" };
         Dictionary<string, string[]> properties = new() { { "Name", messages } };
-        List<string> general = new() { "entity" };
+        List<string> general = ["entity"];
         ValidationResult<object> result = new(new object(), properties, general);
         messages[0] = "changed";
         properties.Clear();
@@ -149,7 +146,7 @@ public class ResultTests
     {
         Exception first = new ApplicationException("first");
         Exception second = new InvalidOperationException("second");
-        List<Exception> input = new() { first, new ToolkitAggregateException(second) };
+        List<Exception> input = [first, new ToolkitAggregateException(second)];
         ToolkitAggregateException aggregate = new(input);
         input.Clear();
         CollectionAssert.AreEqual(new[] { first, second }, aggregate.Flatten().InnerExceptions.ToArray());
@@ -162,7 +159,7 @@ public class ResultTests
     [TestMethod]
     public void AggregateRejectsNullElementsAndRoundTripsSerialization()
     {
-        Assert.ThrowsException<ArgumentException>(() => new ToolkitAggregateException(new Exception[] { null }));
+        Assert.ThrowsException<ArgumentException>(() => new ToolkitAggregateException([null]));
         ToolkitAggregateException original = new("context", new ApplicationException("inner"));
         using MemoryStream stream = new();
         BinaryFormatter formatter = new();

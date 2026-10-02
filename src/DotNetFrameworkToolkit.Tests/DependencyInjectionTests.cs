@@ -15,7 +15,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void MissingRegistrationReturnsNullButRegisteredConstructionFailurePropagates()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<Broken>();
         using ServiceProviderPNP provider = (ServiceProviderPNP)services.BuildServiceProvider();
         Assert.IsNull(provider.GetService(typeof(DisposableService)));
@@ -25,7 +25,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void TransientScopedAndSingletonHaveDistinctLifetimes()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<Transient>();
         services.AddScoped<Scoped>();
         services.AddSingleton<Singleton>();
@@ -43,7 +43,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void ScopeOwnsResolvedTransientsAndDisposesOnlyOnce()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<DisposableService>();
         using ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
         IServiceScope scope = ((IServiceScopeFactory)root.GetService(typeof(IServiceScopeFactory))).CreateScope();
@@ -57,7 +57,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void OwnedConsumerIsDisposedBeforeItsDependency()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<DisposableService>();
         services.AddTransient<DisposableConsumer>();
         ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
@@ -72,7 +72,7 @@ public class DependencyInjectionTests
     public void SuppliedSingletonIsCallerOwned()
     {
         DisposableService supplied = new();
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddInstance(typeof(DisposableService), supplied, ServiceLifetime.Singleton);
         using (ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider())
         {
@@ -86,7 +86,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void SingletonDependenciesBelongToRootEvenWhenFirstResolvedInScope()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<DisposableService>();
         services.AddSingleton<SingletonConsumer>();
         ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
@@ -108,7 +108,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void DisposingRootClosesRemainingScopes()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddScoped<DisposableService>();
         ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
         IServiceScope scope = ((IServiceScopeFactory)root.GetService(typeof(IServiceScopeFactory))).CreateScope();
@@ -122,7 +122,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void DisposalContinuesAfterAnOwnedInstanceThrows()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<DisposableService>();
         services.AddTransient<ThrowingDisposable>();
         ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
@@ -137,8 +137,7 @@ public class DependencyInjectionTests
     public void BuiltProviderAndDescriptorsAreIndependentSnapshots()
     {
         ServiceDescriptor input = new() { ServiceType = typeof(IDisposable), ImplementationType = typeof(DisposableService), Lifetime = ServiceLifetime.Scoped };
-        ServiceCollectionPNP services = new();
-        services.Add(input);
+        ServiceCollectionPNP services = [input];
         input.ImplementationType = typeof(ThrowingDisposable);
         using ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
         services[0].ImplementationType = typeof(ThrowingDisposable);
@@ -150,7 +149,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void EnumerationSnapshotSurvivesCollectionMutation()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddTransient<Transient>();
         IEnumerator<ServiceDescriptor> iterator = services.GetEnumerator();
         services.Clear();
@@ -162,7 +161,7 @@ public class DependencyInjectionTests
     [TestMethod]
     public void UnsupportedInstanceAndGenericLifetimesAreRejected()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         Assert.ThrowsException<ArgumentException>(() => services.AddInstance(typeof(DisposableService), new DisposableService(), ServiceLifetime.Scoped));
         Assert.ThrowsException<NotSupportedException>(() => services.Add(typeof(List<>), typeof(List<>), ServiceLifetime.Transient));
     }
@@ -171,7 +170,7 @@ public class DependencyInjectionTests
     [Timeout(15000)]
     public void ConcurrentSingletonResolutionReturnsOneInstance()
     {
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         services.AddSingleton<Singleton>();
         using ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
         object[] values = new object[50];
@@ -191,7 +190,7 @@ public class DependencyInjectionTests
     {
         using Ioc ioc = new();
         Assert.ThrowsException<InvalidOperationException>(() => ioc.GetService<object>());
-        ServiceCollectionPNP services = new();
+        ServiceCollectionPNP services = [];
         ServiceProviderPNP root = (ServiceProviderPNP)services.BuildServiceProvider();
         ioc.ConfigureServices(root);
         Assert.IsNull(ioc.GetService<Transient>());
@@ -211,6 +210,7 @@ public class DependencyInjectionTests
     public class Singleton
     {
     }
+
     public class DisposableService : IDisposable
     {
         public int Disposals { get; private set; }
@@ -219,6 +219,7 @@ public class DependencyInjectionTests
             Disposals++;
         }
     }
+
     public class DisposableConsumer : IDisposable
     {
         public DisposableService Dependency { get; }

@@ -100,6 +100,7 @@ public class LoggingTests
         using LoggerPNP logger = new(LogLevel.Information, sink);
         IDisposable outer = logger.BeginScope("Outer {Correlation}", 10);
         IDisposable inner = logger.BeginScope("Inner {Request}", 20);
+
         try
         {
             outer.Dispose();
@@ -183,12 +184,8 @@ public class LoggingTests
     private sealed class CapturingSink : CustomTraceListener
     {
         public LogEntry Last { get; private set; }
-        public override void Write(string message)
-        {
-        }
-        public override void WriteLine(string message)
-        {
-        }
+        public override void Write(string message) { }
+        public override void WriteLine(string message) { }
         public override void TraceData(TraceEventCache cache, string source, TraceEventType type, int id, object data)
         {
             Last = (LogEntry)data;

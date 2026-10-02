@@ -38,7 +38,7 @@ public class ValidationTests
     public void PropertyNotificationsOccurOnlyWhenErrorsChange()
     {
         Validator model = new();
-        List<string> notifications = new();
+        List<string> notifications = [];
         model.ErrorsChangedCore += (sender, args) => notifications.Add(args.PropertyName);
         Assert.IsFalse(model.PropertyIsValid(nameof(Validator.Name)));
         Assert.IsFalse(model.PropertyIsValid(nameof(Validator.Name)));
@@ -63,7 +63,7 @@ public class ValidationTests
     public void EntityChangesNotifyErrorAndHasErrorsWithoutDuplicateNotifications()
     {
         Validator model = new();
-        List<string> properties = new();
+        List<string> properties = [];
         model.PropertyChanged += (sender, args) => properties.Add(args.PropertyName);
         model.SetEntity("entity");
         model.SetEntity("entity");
@@ -93,7 +93,7 @@ public class ValidationTests
         public string Name { get; set; }
         public override List<string> ValidateProperty(PropertyDescriptor property)
         {
-            return property.Name == nameof(Name) && string.IsNullOrEmpty(Name) ? new List<string> { "required" } : new List<string>();
+            return property.Name == nameof(Name) && string.IsNullOrEmpty(Name) ? ["required"] : [];
         }
         public void SetEntity(params string[] errors)
         {

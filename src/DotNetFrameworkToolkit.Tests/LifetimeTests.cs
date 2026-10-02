@@ -110,6 +110,7 @@ public class LifetimeTests
         public readonly ManualResetEventSlim Release = new();
         public readonly object Value = new();
         public int Disposals;
+
         public object GetService(Type type)
         {
             if (type == typeof(string))
@@ -123,6 +124,7 @@ public class LifetimeTests
             }
             return Value;
         }
+
         public void Dispose()
         {
             Interlocked.Increment(ref Disposals);

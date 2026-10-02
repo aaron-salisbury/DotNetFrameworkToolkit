@@ -57,8 +57,8 @@ public class FileSystemTests
     [TestMethod]
     public void WriteCreatesThenAtomicallyReplacesExistingFile()
     {
-        Assert.IsTrue(_files.WriteFile(new[] { "first", "second" }, "content.txt", _directory).Value);
-        Assert.IsTrue(_files.WriteFile(new[] { "replacement" }, "content.txt", _directory).Value);
+        Assert.IsTrue(_files.WriteFile(["first", "second"], "content.txt", _directory).Value);
+        Assert.IsTrue(_files.WriteFile(["replacement"], "content.txt", _directory).Value);
         CollectionAssert.AreEqual(new[] { "replacement" }, File.ReadAllLines(Path.Combine(_directory, "content.txt")));
         Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
     }
