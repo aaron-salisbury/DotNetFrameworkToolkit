@@ -84,15 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetFrameworkToolkit\DotNetFrameworkToolkit.csproj">
-      <Project>{c4a2be97-2ca0-4da5-acf7-aa4896715926}  <!-- Copy only matching native test assets; keep the unofficial net20 managed provider. -->
-  <Target Name="DeploySqlCeTestRuntime" AfterTargets="Build">
-    <ItemGroup>
-      <SqlCeNativeFiles Include="..\packages\SqlServerCompact.4.0.8482.1\NativeBinaries\**\*" />
-    </ItemGroup>
-    <Error Condition="!Exists('..\packages\SqlServerCompact.4.0.8482.1\NativeBinaries\amd64\sqlceme40.dll')" Text="Restore the matching SQL CE native test runtime before building tests." />
-    <Copy SourceFiles="@(SqlCeNativeFiles)" DestinationFiles="@(SqlCeNativeFiles->'$(TargetDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-  </Target>
-</Project>
+      <Project>{c4a2be97-2ca0-4da5-acf7-aa4896715926}</Project>
       <Name>DotNetFrameworkToolkit</Name>
     </ProjectReference>
   </ItemGroup>
