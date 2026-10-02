@@ -19,6 +19,9 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 Contributor guidelines: [development conventions](docs/development_conventions.md).
 DI lifetime rules: [ownership and shutdown](docs/dependency_injection.md).
+Logging contracts: [lifetimes, scopes, templates, and observers](docs/logging.md).
+Results and validation: [public contracts](docs/public_contracts.md).
+Stored credentials: [format and migration rules](docs/credentials.md).
 Database helpers and native deployment: [SQL Server Compact](docs/sql_server_ce.md).
 
 - The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.

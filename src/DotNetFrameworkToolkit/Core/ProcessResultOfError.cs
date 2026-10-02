@@ -15,6 +15,7 @@ public class ProcessResult<T, TError> where TError : struct, Enum
     private readonly T _value;
     private readonly TError _error;
 
+    /// <summary>Creates a successful result, including for null or false values.</summary>
     public ProcessResult(T value)
     {
         _value = value;
@@ -31,12 +32,17 @@ public class ProcessResult<T, TError> where TError : struct, Enum
         _error = error;
     }
 
+    /// <summary>Reports whether the stored error is the zero/default success sentinel.</summary>
     public bool IsSuccessful => EqualityComparer<TError>.Default.Equals(_error, default);
 
+    /// <summary>Gets the modeled error, or zero/default on success.</summary>
     public TError Error => _error;
 
+    /// <summary>Gets the successful value, or the value type's default on failure.</summary>
     public T ValueOrDefault => _value;
 
+    /// <summary>Gets the successful value.</summary>
+    /// <exception cref="InvalidOperationException">The result is unsuccessful.</exception>
     public T Value
     {
         get
@@ -49,27 +55,33 @@ public class ProcessResult<T, TError> where TError : struct, Enum
         }
     }
 
+    /// <summary>Returns the success flag and the value, or default on failure.</summary>
     public bool TryGet(out T value)
     {
         value = _value;
         return IsSuccessful;
     }
 
+    /// <summary>Creates a successful result without interpreting the value as an error.</summary>
     public static ProcessResult<T, TError> Success(T value)
     {
         return new(value);
     }
 
+    /// <summary>Creates a failure with any nonzero error, including an undefined enum value.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The error is zero/default.</exception>
     public static ProcessResult<T, TError> Failure(TError error)
     {
         return new(default(T), error);
     }
 
+    /// <summary>Reports operation success; a null result converts to false.</summary>
     public static implicit operator bool(ProcessResult<T, TError> result)
     {
         return result != null && result.IsSuccessful;
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return IsSuccessful ? $"Success({_value})" : $"Failure({_error})";

@@ -17,7 +17,9 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 public class InMemorySinkPNP : CustomTraceListener
 {
     /// <summary>
-    /// Occurs when a log event is emitted and added to the in-memory log collection.
+    /// Occurs synchronously after a formatted trace event is stored, outside the buffer lock.
+    /// Observers receive separate event data. Their exceptions are swallowed independently
+    /// so that later observers still run. Direct Write/WriteLine calls do not raise this event.
     /// </summary>
     public event EventHandler<LogEmitEventArgs> LogEmitted;
 
