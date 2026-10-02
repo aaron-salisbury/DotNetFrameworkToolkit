@@ -36,7 +36,7 @@ Commands, readers, connections, and transactions follow the provider's ownership
 
 ## Deployment and compatibility
 
-Microsoft's pinned package contains the managed provider at `lib/System.Data.SqlServerCe.dll` and matching native engines under `NativeBinaries/x86` and `NativeBinaries/amd64`, including their `Microsoft.VC90.CRT` subfolders. Its managed provider DLL is byte-for-byte identical to the DLL in the previously referenced unofficial 4.0.8482.1 package, so this change does not replace the provider API or binary.
+Microsoft's pinned package contains the managed provider at `lib/System.Data.SqlServerCe.dll` and matching native engines under `NativeBinaries/x86` and `NativeBinaries/amd64`, including their `Microsoft.VC90.CRT` subfolders.
 
 The library's post-build commands copy the native assets into its output. The test project's MSBuild target copies them into the test output, and its provider verification compares the loaded managed DLL with `lib/System.Data.SqlServerCe.dll` in the restored Microsoft package.
 
@@ -48,15 +48,5 @@ Consumers must ensure that the matching native engine for their process architec
 | Inspected Microsoft package provider metadata | The provider has CLR metadata `v2.0.50727` and references `mscorlib`, `System`, `System.Data`, and `System.Transactions` version 2.0.0.0. This is not native deployment or OS verification. |
 | Windows Release tests on Framework 4.8.1 / CLR 4 | The exact pinned managed provider and matching private native engine can create, query, transact, encrypt, reopen, and release databases in the test environment. Tests verify provider bytes/location and loaded native engine location/version to prevent a global installation from silently substituting another version. |
 | Framework 2.0-only machine | **Not yet runtime-verified.** Microsoft lists Framework 3.5 SP1 or 4 for SQL CE 4.0 managed development and lists specific supported Windows versions in its [runtime requirements](https://www.microsoft.com/en-us/download/details.aspx?id=30709). Package contents and framework metadata do not establish compatibility with every Framework 2.0-era Windows environment. Actual legacy-runtime validation remains roadmap phase 6. |
-
-Initial phase 3 [Release CI validation](https://github.com/aaron-salisbury/DotNetFrameworkToolkit/actions/runs/37052662014) passed all 126 cases, including 25 new SQL CE cases, on October 2, 2026, before the package-reference change. The Microsoft package supplies the same managed provider binary. The integration tests run through the same Cake `Test` task and Release CI as the rest of the suite. They fail when native deployment is missing or incompatible; they are not skipped or reported as inconclusive. `SqlCeIntegration` is a test category for identifying native operations, not a default exclusion.
-
-## Breaking changes from the previous database layer
-
-| Removed API | Consumer migration |
-| --- | --- |
-| `IDataEntity` | Define your own entities and keys. The toolkit no longer requires nullable `uint` IDs or `CreatedAt` properties. |
-| `IDatabaseInitializer` and `SqlServerCEDatabaseInitializer` | Choose the database path explicitly. Use the creation/opening helpers and perform application initialization yourself. |
-| `IMigration` and `SQLServerCEMigration` | Move migration execution, discovery, ordering, transactions, and version bookkeeping into the consuming application or its chosen infrastructure. |
 
 Removing these APIs does not change existing `.sdf` files. Any existing `Migration` table remains in those files; the new helpers neither read nor alter it. Consumers must deliberately retain or replace their previous migration bookkeeping. No automatic file-format upgrade or data migration is performed.
