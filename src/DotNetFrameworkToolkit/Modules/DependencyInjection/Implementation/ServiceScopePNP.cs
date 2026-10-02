@@ -15,6 +15,11 @@ public class ServiceScopePNP : IServiceScope, IDisposable
     /// Initializes a new instance of the <see cref="ServiceScopePNP"/> class.
     /// </summary>
     /// <param name="serviceProvider">The scoped service provider for this scope.</param>
+    /// <remarks>
+    /// This wrapper owns the supplied provider and delegates shutdown to it. Wrapping a root
+    /// provider therefore disposes that root and its children, rather than creating a child lifetime.
+    /// Prefer IServiceScopeFactory.CreateScope when a new child lifetime is required.
+    /// </remarks>
     public ServiceScopePNP(ServiceProviderPNP serviceProvider)
     {
         Guard.ArgumentNotNull(serviceProvider, nameof(serviceProvider));

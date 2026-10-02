@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticationTests.cs" />
+    <Compile Include="DependencyInjectionLifetimeTests.cs" />
     <Compile Include="DependencyInjectionTests.cs" />
     <Compile Include="FileSystemTests.cs" />
     <Compile Include="LifetimeTests.cs" />
