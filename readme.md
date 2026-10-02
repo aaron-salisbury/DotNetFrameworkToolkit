@@ -15,6 +15,8 @@ This project uses [Semantic Versioning](https://semver.org/).
 - **MINOR** version: Backward-compatible functionality
 - **PATCH** version: Backward-compatible bug fixes
 
+Version values live in `version.props`; the package/file version rules and stable assembly binding policy are documented in [build and packaging](docs/build_and_packaging.md).
+
 ## Build Requirements
 
 - The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.
@@ -28,13 +30,15 @@ Run the tests from the repository root:
 ./build/build.ps1 --target=Test --configuration=Release
 ```
 
-Cake builds the solution before running MSTest through VSTest. Failed tests or zero discovered tests fail the build. TRX results are written to `artifacts/test-results/<configuration>/`; GitHub Actions builds and tests Release only and uploads its results.
+Cake builds the solution before running MSTest through VSTest. Failed tests or zero discovered tests fail the build. TRX results are written to `artifacts/test-results/<configuration>/`; GitHub Actions runs the full Release image/package verification pipeline and uploads its artifacts and test results.
 
-The default build also runs tests before publishing binaries and creating the package:
+The default Release build also generates and verifies images, creates NuGet/symbol packages, and validates their contents:
 
 ```powershell
 ./build/build.ps1 --configuration=Release
 ```
+
+Validated packages and a hash/version report are written to `artifacts/packages/Release/`. See [build and packaging](docs/build_and_packaging.md) for checks and version/tag rules.
 
 Tests cover managed behavior and the pinned SQL CE provider/native runtime on CLR 4. Actual CLR 2.0 runtime verification remains separate [roadmap](docs/roadmap.md) work.
 
