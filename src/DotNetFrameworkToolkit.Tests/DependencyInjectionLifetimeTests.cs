@@ -26,7 +26,7 @@ public class DependencyInjectionLifetimeTests
         };
         // Use a different registration for the native singleton retained by the container.
         container.RegisterInstance<IDisposable>(nativeSingleton);
-        using ServiceScopeFactoryPNP factory = new(container, new[] { descriptor });
+        using ServiceScopeFactoryPNP factory = new(container, [descriptor]);
         descriptor.ImplementationType = typeof(ThrowingCounter);
         IServiceScope first = factory.CreateScope();
         IServiceScope second = factory.CreateScope();
@@ -55,7 +55,7 @@ public class DependencyInjectionLifetimeTests
             ImplementationInstance = supplied,
             Lifetime = ServiceLifetime.Singleton
         };
-        using (ServiceScopeFactoryPNP factory = new(new UnityContainer(), new[] { descriptor }))
+        using (ServiceScopeFactoryPNP factory = new(new UnityContainer(), [descriptor]))
         {
             using IServiceScope scope = factory.CreateScope();
             Assert.AreSame(supplied, scope.ServiceProvider.GetService(typeof(DisposalCounter)));
@@ -99,7 +99,7 @@ public class DependencyInjectionLifetimeTests
         DisposalCounter nativeSingleton = new();
         UnityContainer container = new();
         container.RegisterInstance(nativeSingleton);
-        Assert.ThrowsException<ArgumentException>(() => new ServiceScopeFactoryPNP(container, new[] { new ServiceDescriptor() }));
+        Assert.ThrowsException<ArgumentException>(() => new ServiceScopeFactoryPNP(container, [new ServiceDescriptor()]));
         Assert.AreEqual(1, nativeSingleton.Disposals);
     }
 
