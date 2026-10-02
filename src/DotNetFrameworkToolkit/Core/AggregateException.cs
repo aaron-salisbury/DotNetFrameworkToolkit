@@ -7,10 +7,10 @@ using System.Text;
 
 namespace DotNetFrameworkToolkit.Core;
 
-[Serializable]
 /// <summary>
 /// Represents one or more errors that occur during application execution.
 /// </summary>
+[Serializable]
 public class AggregateException : Exception
 {
     private const string InnerExceptionsSerializationName = "InnerExceptions";
