@@ -6,10 +6,13 @@ using System.Collections.Generic;
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
 /// <summary>
-/// An <see cref="IServiceProvider"/> implementation that uses a Unity container to resolve services.
+/// A Unity-backed provider.
 /// </summary>
 /// <remarks>
-/// This implementation uses the Patterns &amp; Practices Enterprise Library.
+/// <list type="bullet">
+/// <item>Container-created disposables belong to their resolving lifetime</item>
+/// <item>Supplied singleton instances remain owned by the caller</item>
+/// </list>
 /// </remarks>
 public class ServiceProviderPNP : IServiceProvider, IDisposable
 {

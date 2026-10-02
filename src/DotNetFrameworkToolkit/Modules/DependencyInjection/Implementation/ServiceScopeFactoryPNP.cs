@@ -5,9 +5,6 @@ using System.Collections.Generic;
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 
 /// <inheritdoc/>
-/// <remarks>
-/// This implementation uses the Patterns &amp; Practices Enterprise Library.
-/// </remarks>
 public class ServiceScopeFactoryPNP : IServiceScopeFactory
 {
     private readonly IUnityContainer _unityProvider;
