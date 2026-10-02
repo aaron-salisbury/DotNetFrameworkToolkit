@@ -16,10 +16,6 @@ Passwords are encoded as supplied: there is no Unicode normalization, trimming, 
 
 ## Format changes
 
-The current DTO has **no algorithm or format identifier**. The earlier ASCII/repeated-salted-hash format was deliberately removed during the 0.x changes. It is not tried as a fallback. Legacy records need an application-controlled reset or explicit migration using separately identified legacy records; their hashes cannot be converted to the current format without the password.
-
 Future changes to password encoding, derivation algorithm, hash length, or field meanings must introduce an explicit format discriminator and a documented migration/reset path before shipping. Do not reinterpret unversioned records, guess an algorithm from their bytes, or silently attempt multiple formats. An application planning multiple formats should store its own format identifier alongside these fields now.
-
-Phase 4 retains the existing format. Fixed ASCII and Unicode test vectors protect stored-record compatibility. Changing only a new-record work factor within the same algorithm does not change the format because each record already stores its count.
 
 The default work factor is a compatibility default, not a deployment recommendation. Applications must calibrate their settings for their environment. Never log passwords, salts, or hashes.
