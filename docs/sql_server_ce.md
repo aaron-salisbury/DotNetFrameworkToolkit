@@ -45,7 +45,7 @@ The test project restores Microsoft's [`SqlServerCompact` 4.0.8482.1](https://ww
 | Windows Release tests on Framework 4.8.1 / CLR 4 | The exact pinned managed provider and matching private native engine can create, query, transact, encrypt, reopen, and release databases in the test environment. Tests verify provider bytes/location and loaded native engine location/version to prevent a global installation from silently substituting another version. |
 | Framework 2.0-only machine | **Not yet runtime-verified.** Microsoft lists Framework 3.5 SP1 or 4 for SQL CE 4.0 managed development and lists specific supported Windows versions in its [runtime requirements](https://www.microsoft.com/en-us/download/details.aspx?id=30709). NuGet's net20 label does not establish compatibility with every Framework 2.0-era Windows environment. Actual legacy-runtime validation remains roadmap phase 6. |
 
-The integration tests run through the same Cake `Test` task and Release CI as the rest of the suite. They fail when native deployment is missing or incompatible; they are not skipped or reported as inconclusive. `SqlCeIntegration` is a test category for identifying native operations, not a default exclusion.
+[Release CI validation](https://github.com/aaron-salisbury/DotNetFrameworkToolkit/actions/runs/37052662014) passed all 126 cases, including 25 new SQL CE cases, on October 2, 2026. The integration tests run through the same Cake `Test` task and Release CI as the rest of the suite. They fail when native deployment is missing or incompatible; they are not skipped or reported as inconclusive. `SqlCeIntegration` is a test category for identifying native operations, not a default exclusion.
 
 ## Breaking changes from the previous database layer
 
