@@ -7,6 +7,7 @@ using DotNetFrameworkToolkit.Modules.UserAccess;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
+using System.Diagnostics;
 using System.IO;
 
 namespace ConsumerSmoke;
@@ -80,13 +81,18 @@ internal static class Program
     private static void Logging()
     {
         using (InMemorySinkPNP sink = new InMemorySinkPNP())
-        using (LoggerPNP logger = new LoggerPNP(LogLevel.Information, sink))
+        using (ScopeSink capture = new ScopeSink())
+        using (LoggerPNP logger = new LoggerPNP(LogLevel.Information, sink, capture))
         {
             using (IDisposable scope = logger.BeginScope("Import"))
             {
                 logger.LogInformation("Imported {Count} records", 3);
+                string[] scopes = (string[])capture.Last.ExtendedProperties["Scopes"];
+                Require(scopes.Length == 1 && scopes[0] == "Import", "Scope context was lost.");
             }
             Require(sink.Logs.Count == 1 && sink.Logs[0].Contains("3"), "Logging did not reach the sink.");
+            logger.LogInformation("Finished");
+            Require(!capture.Last.ExtendedProperties.ContainsKey("Scopes"), "Disposed scope context remained active.");
         }
     }
 
@@ -133,6 +139,22 @@ internal static class Program
                 command.Parameters.Clear();
                 command.CommandText = "SELECT Text FROM Notes WHERE NoteId = 1";
                 Require((string)command.ExecuteScalar() == "Hello", "SQL CE did not return the stored value.");
+                bool privateEngineLoaded = false;
+                using (Process process = Process.GetCurrentProcess())
+                {
+                    foreach (ProcessModule module in process.Modules)
+                    {
+                        if (string.Equals(module.ModuleName, "sqlceqp40.dll", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string architecture = IntPtr.Size == 4 ? "x86" : "amd64";
+                            string expected = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, architecture), "sqlceqp40.dll");
+                            Require(string.Equals(module.FileName, expected, StringComparison.OrdinalIgnoreCase), "SQL CE loaded a global native engine.");
+                            Console.WriteLine("Native engine: " + module.FileName);
+                            privateEngineLoaded = true;
+                        }
+                    }
+                }
+                Require(privateEngineLoaded, "The private SQL CE engine was not loaded.");
             }
         }
         finally
@@ -179,5 +201,23 @@ internal sealed class NameModel : ObservableValidator
             errors.Add("A name is required.");
         }
         SetErrorsForProperty("Name", errors);
+    }
+}
+
+internal sealed class ScopeSink : Microsoft.Practices.EnterpriseLibrary.Logging.TraceListeners.CustomTraceListener
+{
+    public Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry Last { get; private set; }
+
+    public override void Write(string message)
+    {
+    }
+
+    public override void WriteLine(string message)
+    {
+    }
+
+    public override void TraceData(TraceEventCache cache, string source, TraceEventType type, int id, object data)
+    {
+        Last = (Microsoft.Practices.EnterpriseLibrary.Logging.LogEntry)data;
     }
 }
