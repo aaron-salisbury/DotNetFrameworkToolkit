@@ -12,7 +12,7 @@ From the repository root:
 ./build/build.ps1 --target="Verify Consumer" --configuration=Release
 ```
 
-This is also the default Release target. It first runs the library tests, image checks and package verification. Consumer verification then creates an empty `artifacts/consumer` directory, builds a local feed from this build's package and restored dependencies, installs through NuGet CLI, and checks the installed package's hash. The reference-assemblies package is installed separately as a build dependency. Both x86 and x64 consumers compile, receive private native SQL CE assets, and run with explicit CLR 2.0 and architecture assertions. The deployed toolkit DLL must match the installed package DLL.
+This is also the default Release target. It first runs the library tests, image checks and package verification. Consumer verification then creates an empty `artifacts/consumer` directory, builds a local feed from this build's package and restored dependencies, installs through NuGet CLI, and checks the installed package's hash. The reference-assemblies package is installed separately as a build dependency. Both x86 and x64 consumers compile, receive private native SQL CE assets, and run with explicit CLR 2.0 and architecture assertions. The deployed toolkit DLL must match the installed package DLL. SQL CE execution checks that the native query engine is loaded from the matching private architecture directory.
 
 `artifacts/consumer/x86.log`, `x64.log` and `validation.json` record the runtime, architecture, operating system, package hash and results. CI uploads these as `consumer-Release`. Missing dependencies, compile errors, incorrect binaries, runtime mismatches and failed operations fail Cake.
 
