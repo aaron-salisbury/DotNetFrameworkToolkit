@@ -31,7 +31,7 @@ Run the tests from the repository root:
 ./build/build.ps1 --target=Test --configuration=Release
 ```
 
-Cake builds the solution before running MSTest through VSTest. Failed tests or zero discovered tests fail the build. TRX results are written to `artifacts/test-results/<configuration>/`; GitHub Actions uploads these results for both configurations.
+Cake builds the solution before running MSTest through VSTest. Failed tests or zero discovered tests fail the build. TRX results are written to `artifacts/test-results/<configuration>/`; GitHub Actions builds and tests Release only and uploads its results.
 
 The default build also runs tests before publishing binaries and creating the package:
 

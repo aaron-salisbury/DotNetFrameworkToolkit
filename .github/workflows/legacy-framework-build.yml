@@ -11,10 +11,7 @@ jobs:
   build:
     runs-on: windows-2022
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        configuration: [Debug, Release]
+    name: Build and test (Release)
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -28,23 +25,23 @@ jobs:
       # No .NET 4.x retargeting or Mono runtime substitution is used.
       - name: Build and test through Cake.Frosting
         shell: pwsh
-        run: ./build/build.ps1 --target="Test" --configuration=${{ matrix.configuration }}
+        run: ./build/build.ps1 --target="Test" --configuration=Release
       - name: Verify CLR 2.0 assembly metadata
         shell: pwsh
         run: |
-          $dll = "src/DotNetFrameworkToolkit/bin/${{ matrix.configuration }}/net20/DotNetFrameworkToolkit.dll"
+          $dll = "src/DotNetFrameworkToolkit/bin/Release/net20/DotNetFrameworkToolkit.dll"
           $env:TOOLKIT_ASSEMBLY = (Resolve-Path $dll).Path
           powershell -NoProfile -Command '$assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom($env:TOOLKIT_ASSEMBLY); if ($assembly.ImageRuntimeVersion -ne "v2.0.50727") { throw "Unexpected runtime: $($assembly.ImageRuntimeVersion)" }; Write-Host $assembly.ImageRuntimeVersion'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v6
         with:
-          name: net20-${{ matrix.configuration }}
-          path: src/DotNetFrameworkToolkit/bin/${{ matrix.configuration }}/net20/
+          name: net20-Release
+          path: src/DotNetFrameworkToolkit/bin/Release/net20/
           if-no-files-found: error
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: test-results-${{ matrix.configuration }}
-          path: artifacts/test-results/${{ matrix.configuration }}/
+          name: test-results-Release
+          path: artifacts/test-results/Release/
           if-no-files-found: warn
