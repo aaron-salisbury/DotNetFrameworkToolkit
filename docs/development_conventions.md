@@ -115,8 +115,9 @@ the legacy project does not automatically make every style diagnostic a CI build
 - Credit identifiable sources near substantially derived implementations when practical.
 - Update compatibility notes whenever public APIs or stored formats change. Version 0.x
   may introduce deliberate breaking changes; document them rather than silently migrating data.
-- Build Debug and Release through Cake and the Windows GitHub workflow using restored
-  net20 reference assemblies. Verify CLR 2.0 assembly metadata as the workflow does.
+- Build through Cake using restored net20 reference assemblies. Debug remains available
+  for local development; the Windows GitHub workflow builds and tests Release only.
+  Verify CLR 2.0 assembly metadata as the workflow does.
 - Unit tests target .NET Framework 4.8.1 and follow the same C# formatting rules.
   Run them through Cake with `--target=Test`; the default package path also runs tests.
   Tests execute on CLR 4 and do not prove CLR 2.0 compatibility. Keep the net20
