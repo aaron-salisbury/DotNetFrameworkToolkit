@@ -125,5 +125,4 @@ the legacy project does not automatically make every style diagnostic a CI build
 - Before submitting generated code, check every touched control-flow body for braces
   and every executable block for multiline formatting. Editor settings do not replace review.
 
-See [review fixes and compatibility notes](../REVIEW_FIXES.md) for current behavior and
-remaining database limitations.
+See the [roadmap](roadmap.md) for remaining compatibility and database work.
