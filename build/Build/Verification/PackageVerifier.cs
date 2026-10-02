@@ -163,7 +163,11 @@ internal static class PackageVerifier
                         Require(reader.Documents.Count > 0, "Portable PDB has no source documents.");
                         DebugDirectoryEntry checksumEntry = pe.ReadDebugDirectory().Single(value => value.Type == DebugDirectoryEntryType.PdbChecksum);
                         PdbChecksumDebugDirectoryData checksum = pe.ReadPdbChecksumDebugDirectoryData(checksumEntry);
-                        Require(checksum.AlgorithmName == "SHA256" && checksum.Checksum.AsSpan().SequenceEqual(SHA256.HashData(pdb)), "Portable PDB checksum does not match the DLL.");
+                        // The PE/COFF checksum hashes the PDB with its 20-byte ID zeroed.
+                        // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md
+                        byte[] checksumContent = (byte[])pdb.Clone();
+                        checksumContent.AsSpan(reader.DebugMetadataHeader.IdStartOffset, 20).Clear();
+                        Require(checksum.AlgorithmName == "SHA256" && checksum.Checksum.AsSpan().SequenceEqual(SHA256.HashData(checksumContent)), "Portable PDB checksum does not match the DLL.");
                     }
                 }
             }
