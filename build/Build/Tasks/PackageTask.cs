@@ -1,115 +1,48 @@
 using Build.Tasks.Standard;
-using Cake.Common.Tools.DotNet;
-using Cake.Common.Tools.DotNet.Pack;
+using Build.Verification;
 using Cake.Common.Tools.NuGet;
 using Cake.Common.Tools.NuGet.Pack;
-using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.IO;
 using static Build.BuildContext;
 
 namespace Build.Tasks;
 
 [TaskName("Package")]
 [IsDependentOn(typeof(PublishTask))]
-[IsDependentOn(typeof(ProcessImagesTask))]
-[TaskDescription("Generates the NuGet packages using previously processed images and project properties. Legacy projects should have a nuspec file, named after and next to the .csproj, to use as a template.")]
-public sealed class PackageTask : AsyncFrostingTask<BuildContext>
+[IsDependentOn(typeof(VerifyImagesTask))]
+[TaskDescription("Creates Release NuGet and portable-symbol packages with NuGet analysis enabled.")]
+public sealed class PackageTask : FrostingTask<BuildContext>
 {
-    public override bool ShouldRun(BuildContext context)
+    public override void Run(BuildContext context)
     {
-        return context.Config == BuildConfigurations.Release;
-    }
+        if (context.Config != BuildConfigurations.Release)
+        {
+            throw new InvalidOperationException("Packaging requires --configuration=Release.");
+        }
 
-    public override async Task RunAsync(BuildContext context)
-    {
+        ReleaseVersion version = ReleaseVersion.Load(context.AbsolutePathToRepo);
+        version.ValidateTag(context.Arguments.GetArgument("release-tag"), Environment.GetEnvironmentVariable("GITHUB_REF_TYPE"), Environment.GetEnvironmentVariable("GITHUB_REF_NAME"));
+        string output = Path.Combine(context.AbsolutePathToRepo, "artifacts", "packages", "Release");
+        Directory.CreateDirectory(output);
         foreach (ReleaseProject project in context.ReleaseProjects)
         {
-            await PackageProjectAsync(context, project);
-        }
-    }
-
-    private static async Task PackageProjectAsync(BuildContext context, ReleaseProject project)
-    {
-        string nuGetOutputPath = System.IO.Path.Combine(project.OutputDirectoryPathAbsolute, "NuGet");
-
-        if (project.IsSdkStyleProject)
-        {
-            context.DotNetPack(project.CsprojFilePathAbsolute, new DotNetPackSettings
+            string nuspec = Path.Combine(project.DirectoryPathAbsolute, project.Name + ".nuspec");
+            context.NuGetPack(nuspec, new NuGetPackSettings
             {
-                OutputDirectory = nuGetOutputPath,
-                Configuration = context.Config.ToString(),
-                NoRestore = true,
-                NoBuild = true
-            });
-        }
-        else
-        {
-            // For legacy projects, use NuGet.
-            string toolsDirectory = System.IO.Path.Combine(context.AbsolutePathToRepo, "tools");
-            string nugetExePath = await VerifyNuGetToolAsync(context, toolsDirectory);
-            string nuspecPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(project.CsprojFilePathAbsolute)!, $"{project.Name}.nuspec");
-
-            if (!System.IO.File.Exists(nuspecPath))
-            {
-                throw new InvalidOperationException($"Required nuspec file not found: {nuspecPath}");
-            }
-
-            context.NuGetPack(nuspecPath, new NuGetPackSettings
-            {
-                ToolPath = nugetExePath,
-                OutputDirectory = nuGetOutputPath,
+                OutputDirectory = output,
                 Properties = new Dictionary<string, string>
                 {
-                    { "Configuration", context.Config.ToString() }
+                    { "Configuration", "Release" },
+                    { "version", version.PackageVersion },
+                    { "commit", PackageVerifier.GetSourceCommit(context.AbsolutePathToRepo) }
                 },
-                NoPackageAnalysis = true,
-                IncludeReferencedProjects = true,
+                NoPackageAnalysis = false,
                 Symbols = true,
                 SymbolPackageFormat = "snupkg"
             });
         }
-    }
-
-    private static async Task<string> VerifyNuGetToolAsync(BuildContext context, string toolsDirectory)
-    {
-        string nugetExePath = System.IO.Path.Combine(toolsDirectory, "nuget-6.14.0.exe");
-
-        if (!System.IO.File.Exists(nugetExePath))
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            context.Log.Information("NuGet tool not found. Downloading NuGet 6.14.0...");
-
-            System.IO.Directory.CreateDirectory(toolsDirectory);
-            using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/v6.14.0/nuget.exe");
-            response.EnsureSuccessStatusCode();
-            string temporaryPath = nugetExePath + "." + Guid.NewGuid().ToString("N") + ".download";
-            try
-            {
-                using (var fs = new System.IO.FileStream(temporaryPath, System.IO.FileMode.CreateNew, System.IO.FileAccess.Write, System.IO.FileShare.None))
-                {
-                    await response.Content.CopyToAsync(fs);
-                }
-                System.IO.File.Move(temporaryPath, nugetExePath);
-            }
-            finally
-            {
-                if (System.IO.File.Exists(temporaryPath))
-                {
-                    System.IO.File.Delete(temporaryPath);
-                }
-            }
-
-            stopwatch.Stop();
-            double completionTime = Math.Round(stopwatch.Elapsed.TotalSeconds, 1);
-            context.Log.Information($"NuGet tool download complete ({completionTime}s)");
-        }
-
-        return nugetExePath;
     }
 }

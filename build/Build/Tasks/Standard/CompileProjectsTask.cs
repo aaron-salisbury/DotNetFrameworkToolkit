@@ -7,6 +7,7 @@ namespace Build.Tasks.Standard;
 
 [TaskName("Compile Projects")]
 [IsDependentOn(typeof(RestoreTask))]
+[IsDependentOn(typeof(ValidateVersionTask))]
 [TaskDescription("Builds the net20 library and net481 tests with modern Visual Studio MSBuild.")]
 public sealed class CompileProjectsTask : FrostingTask<BuildContext>
 {
