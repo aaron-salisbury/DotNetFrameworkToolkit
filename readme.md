@@ -19,6 +19,7 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 Contributor guidelines: [development conventions](docs/development_conventions.md).
 DI lifetime rules: [ownership and shutdown](docs/dependency_injection.md).
+Database helpers and native deployment: [SQL Server Compact](docs/sql_server_ce.md).
 
 - The shipped library targets .NET Framework 2.0 / CLR 2.0. The test project targets .NET Framework 4.8.1 and does not ship with the package.
 - Use Windows with Visual Studio 2022 MSBuild, the .NET Framework 4.8.1 developer pack and Visual Studio test tools, NuGet CLI on PATH, and the .NET 8 SDK for the Cake.Frosting build executable. The build restores the net20 reference assemblies through NuGet.
@@ -39,4 +40,4 @@ The default build also runs tests before publishing binaries and creating the pa
 ./build/build.ps1 --configuration=Release
 ```
 
-Tests cover managed behavior on CLR 4. SQL CE native integration and actual CLR 2.0 runtime verification remain separate [roadmap](docs/roadmap.md) work.
+Tests cover managed behavior and the pinned SQL CE provider/native runtime on CLR 4. Actual CLR 2.0 runtime verification remains separate [roadmap](docs/roadmap.md) work.

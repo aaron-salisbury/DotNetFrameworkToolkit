@@ -79,11 +79,7 @@
     <Compile Include="Modules\ComponentModel\ObservableValidator.cs" />
     <Compile Include="Modules\ComponentModel\Validation\DataErrorsChangedEventArgs.cs" />
     <Compile Include="Modules\ComponentModel\Validation\INotifyDataErrorInfo.cs" />
-    <Compile Include="Modules\DataAccess\Database\Migrations\IMigration.cs" />
-    <Compile Include="Modules\DataAccess\Database\Migrations\SQLServerCEMigration.cs" />
-    <Compile Include="Modules\DataAccess\Database\IDataEntity.cs" />
-    <Compile Include="Modules\DataAccess\Database\Initialization\IDatabaseInitializer.cs" />
-    <Compile Include="Modules\DataAccess\Database\Initialization\SqlServerCEDatabaseInitializer.cs" />
+    <Compile Include="Modules\DataAccess\Database\SqlServerCeDatabase.cs" />
     <Compile Include="Modules\DataAccess\FileSystem\FileSystemAccess.cs" />
     <Compile Include="Modules\DataAccess\FileSystem\IFileSystemAccess.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\Ioc.cs" />
