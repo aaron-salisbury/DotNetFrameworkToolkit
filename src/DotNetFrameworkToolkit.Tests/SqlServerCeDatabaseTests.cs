@@ -83,10 +83,15 @@ public class SqlServerCeDatabaseTests
         Assert.AreEqual(0, Directory.GetFiles(_directory).Length);
     }
 
-    [TestMethod]
+    [DataTestMethod]
+    [DataRow("database.sdf")]
+    [DataRow("database;semi.sdf")]
+    [DataRow("資料庫.sdf")]
+    [DataRow("database.data")]
     [TestCategory("SqlCeIntegration")]
-    public void CreatedDatabaseHasNoApplicationTablesAndConnectionIsCallerOwned()
+    public void CreatedDatabaseHasNoApplicationTablesAndConnectionIsCallerOwned(string fileName)
     {
+        _path = Path.Combine(_directory, fileName);
         string connectionString = SqlServerCeDatabase.BuildConnectionString(_path);
         SqlServerCeDatabase.CreateDatabase(connectionString);
         Assert.IsTrue(File.Exists(_path));
