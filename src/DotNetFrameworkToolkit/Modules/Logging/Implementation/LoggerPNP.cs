@@ -11,7 +11,7 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 /// check if a log level is enabled, and create logical operation scopes for grouping related log entries.
 /// </summary>
 /// <remarks>
-/// This implementation uses the Patterns & Practices Enterprise Library.
+/// This implementation uses the Patterns &amp; Practices Enterprise Library.
 /// </remarks>
 public class LoggerPNP : ILogger, IDisposable
 {

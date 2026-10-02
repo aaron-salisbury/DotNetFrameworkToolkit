@@ -9,7 +9,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// An <see cref="IServiceProvider"/> implementation that uses a Unity container to resolve services.
 /// </summary>
 /// <remarks>
-/// This implementation uses the Patterns & Practices Enterprise Library.
+/// This implementation uses the Patterns &amp; Practices Enterprise Library.
 /// </remarks>
 public class ServiceProviderPNP : IServiceProvider, IDisposable
 {
