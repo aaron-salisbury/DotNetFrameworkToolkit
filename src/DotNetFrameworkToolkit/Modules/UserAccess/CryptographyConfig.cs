@@ -1,5 +1,4 @@
-﻿using Microsoft.Practices.EnterpriseLibrary.Security.Cryptography;
-using System.Security.Cryptography;
+using Microsoft.Practices.EnterpriseLibrary.Security.Cryptography;
 
 namespace DotNetFrameworkToolkit.Modules.UserAccess;
 
@@ -18,15 +17,12 @@ public class CryptographyConfig
     /// Higher values increase computational cost and security.
     /// </summary>
     /// <remarks>
-    /// OWASP recommends at least 10,000 iterations, but the ideal value depends on your hardware and performance requirements.
+    /// Calibrate this value for deployment hardware. The compatibility default is not a security recommendation.
     /// </remarks>
     public int NewUserWorkFactor { get; set; } = 10000;
 
     /// <summary>
-    /// The hash algorithm to use for password hashing (e.g., "SHA256Managed").
+    /// Upper bound on iterations accepted from stored credential data.
     /// </summary>
-    /// <remarks>
-    /// SHA-256 is a widely supported choice for PBKDF2.
-    /// </remarks>
-    public HashAlgorithm HashAlgorithm { get; set; } = new SHA256Managed();
+    public int MaxVerificationWorkFactor { get; set; } = 1000000;
 }

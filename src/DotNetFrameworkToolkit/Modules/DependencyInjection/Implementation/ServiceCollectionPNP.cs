@@ -1,4 +1,4 @@
-﻿using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections;
@@ -56,30 +56,65 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <inheritdoc/>
     public IServiceProvider BuildServiceProvider()
     {
+        List<ServiceDescriptor> snapshot;
         lock (_syncRoot)
         {
-            IUnityContainer container = new UnityContainer();
-            List<ServiceDescriptor> scopedDescriptors = [];
-
+            snapshot = new List<ServiceDescriptor>();
             foreach (ServiceDescriptor descriptor in _descriptors)
             {
-                if (descriptor.Lifetime == ServiceLifetime.Scoped)
-                {
-                    scopedDescriptors.Add(descriptor);
-                }
+                snapshot.Add(Copy(descriptor));
+            }
+        }
 
-                if (descriptor.ImplementationInstance != null)
-                {
-                    container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance);
-                }
-                else
-                {
-                    container.RegisterType(descriptor.ServiceType, descriptor.ImplementationType, LifetimeManagerForServiceLifetime(descriptor.Lifetime));
-                }
+        return new ServiceProviderPNP(new UnityContainer(), snapshot);
+    }
+
+    internal static ServiceDescriptor Copy(ServiceDescriptor item)
+    {
+        Guard.ArgumentNotNull(item, nameof(item));
+
+        ServiceDescriptor copy = new()
+        {
+            ServiceType = item.ServiceType,
+            ImplementationType = item.ImplementationType,
+            ImplementationInstance = item.ImplementationInstance,
+            Lifetime = item.Lifetime
+        };
+
+        if (copy.ServiceType == null)
+        {
+            throw new ArgumentException("A service type is required.", nameof(item));
+        }
+
+        if (copy.ServiceType.ContainsGenericParameters || (copy.ImplementationType != null && copy.ImplementationType.ContainsGenericParameters))
+        {
+            throw new NotSupportedException("This Unity 1.2 adapter requires closed service types; register each required closed generic explicitly.");
+        }
+
+        if (!Enum.IsDefined(typeof(ServiceLifetime), copy.Lifetime))
+        {
+            throw new ArgumentException("Unknown lifetime.", nameof(item));
+        }
+
+        if (copy.ImplementationInstance != null)
+        {
+            if (copy.ImplementationType != null || !copy.ServiceType.IsInstanceOfType(copy.ImplementationInstance))
+            {
+                throw new ArgumentException("The instance must implement the service type.", nameof(item));
             }
 
-            return new ServiceProviderPNP(container, scopedDescriptors);
+            if (copy.Lifetime != ServiceLifetime.Singleton)
+            {
+                throw new ArgumentException("Supplied instances must be singletons and remain caller-owned.", nameof(item));
+            }
         }
+        else if (copy.ImplementationType == null || copy.ImplementationType.IsAbstract || copy.ImplementationType.IsInterface ||
+            (!copy.ServiceType.IsGenericTypeDefinition && !copy.ServiceType.IsAssignableFrom(copy.ImplementationType)))
+        {
+            throw new ArgumentException("A concrete compatible implementation type is required.", nameof(item));
+        }
+
+        return copy;
     }
 
     #region Explicit Interface Implementation of Generic Overloads
@@ -198,7 +233,16 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <summary>
     /// Gets the number of service descriptors contained in the collection.
     /// </summary>
-    public int Count => _descriptors.Count;
+    public int Count
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _descriptors.Count;
+            }
+        }
+    }
 
     /// <summary>
     /// Gets a value indicating whether the collection is read-only.
@@ -214,11 +258,27 @@ public class ServiceCollectionPNP : IServiceCollection
     {
         get
         {
-            return _descriptors[index];
+            lock (_syncRoot)
+            {
+                return Copy(_descriptors[index]);
+            }
         }
         set
         {
-            _descriptors[index] = value;
+            ServiceDescriptor snapshot = Copy(value);
+            lock (_syncRoot)
+            {
+                if (index < 0 || index >= _descriptors.Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+                int existingIndex = _descriptors.IndexOf(snapshot);
+                if (existingIndex >= 0 && existingIndex != index)
+                {
+                    throw new ArgumentException("A service type may appear only once.", nameof(value));
+                }
+                _descriptors[index] = snapshot;
+            }
         }
     }
 
@@ -229,7 +289,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns>The index of the item if found; otherwise, -1.</returns>
     public int IndexOf(ServiceDescriptor item)
     {
-        return _descriptors.IndexOf(item);
+        lock (_syncRoot)
+        {
+            return _descriptors.IndexOf(item);
+        }
     }
 
     /// <summary>
@@ -239,10 +302,15 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="item">The service descriptor to insert.</param>
     public void Insert(int index, ServiceDescriptor item)
     {
+        item = Copy(item);
         lock (_syncRoot)
         {
+            if (index < 0 || index > _descriptors.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
             // Subsequent attempts to add the same type replaces the previous addition.
-            // Could possibly enhance by letting more than one of a type in the collection, 
+            // Could possibly enhance by letting more than one of a type in the collection,
             // but would need to keep track of names. Would then need to update the
             // equality overrides of ServiceDescriptor as well.
             int existingIndex = IndexOf(item);
@@ -309,7 +377,10 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns><c>true</c> if the item is found; otherwise, <c>false</c>.</returns>
     public bool Contains(ServiceDescriptor item)
     {
-        return _descriptors.Contains(item);
+        lock (_syncRoot)
+        {
+            return _descriptors.Contains(item);
+        }
     }
 
     /// <summary>
@@ -319,7 +390,25 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <param name="arrayIndex">The zero-based index in the array at which copying begins.</param>
     public void CopyTo(ServiceDescriptor[] array, int arrayIndex)
     {
-        _descriptors.CopyTo(array, arrayIndex);
+        Guard.ArgumentNotNull(array, nameof(array));
+
+        if (arrayIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+        }
+
+        lock (_syncRoot)
+        {
+            if (arrayIndex > array.Length || _descriptors.Count > array.Length - arrayIndex)
+            {
+                throw new ArgumentException("Insufficient array capacity.", nameof(array));
+            }
+
+            for (int i = 0; i < _descriptors.Count; i++)
+            {
+                array[arrayIndex + i] = Copy(_descriptors[i]);
+            }
+        }
     }
 
     /// <summary>
@@ -341,7 +430,15 @@ public class ServiceCollectionPNP : IServiceCollection
     /// <returns>An enumerator for the collection.</returns>
     public IEnumerator<ServiceDescriptor> GetEnumerator()
     {
-        return _descriptors.GetEnumerator();
+        lock (_syncRoot)
+        {
+            List<ServiceDescriptor> snapshot = new();
+            foreach (ServiceDescriptor descriptor in _descriptors)
+            {
+                snapshot.Add(Copy(descriptor));
+            }
+            return snapshot.GetEnumerator();
+        }
     }
 
     /// <summary>
@@ -353,15 +450,4 @@ public class ServiceCollectionPNP : IServiceCollection
         return GetEnumerator();
     }
     #endregion
-
-    private static LifetimeManager LifetimeManagerForServiceLifetime(ServiceLifetime lifetime)
-    {
-        return lifetime switch
-        {
-            ServiceLifetime.Transient => new TransientLifetimeManager(),
-            ServiceLifetime.Scoped => new ContainerControlledLifetimeManager(),
-            ServiceLifetime.Singleton => new ContainerControlledLifetimeManager(),
-            _ => new TransientLifetimeManager(),
-        };
-    }
 }

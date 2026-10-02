@@ -1,4 +1,4 @@
-﻿using Microsoft.Practices.Unity.Utility;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Data.Common;
 
@@ -24,8 +24,14 @@ public abstract class SQLServerCEMigration : IMigration
     /// <inheritdoc/>
     public void Run(DbConnection dbConnection)
     {
-        if (dbConnection == null) { throw new ArgumentNullException("dbConnection"); }
+        Guard.ArgumentNotNull(dbConnection, nameof(dbConnection));
 
+        if (Number > int.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(Number), "SQL CE migration numbers must fit an Int32.");
+        }
+        // TODO(database retirement): Coordinate the existence check, execution and insert in one
+        // transaction across processes; add a unique Number constraint and an upgrade path for old files.
         // Check if this migration number already exists.
         using (DbCommand checkCmd = dbConnection.CreateCommand())
         {
@@ -51,9 +57,15 @@ public abstract class SQLServerCEMigration : IMigration
             UpdateMigrationTable(dbConnection, transaction);
             transaction.Commit();
         }
-        catch
+        catch (Exception error)
         {
-            transaction.Rollback();
+            try
+            {
+                transaction.Rollback();
+            } catch (Exception rollbackError)
+            {
+                error.Data["RollbackException"] = rollbackError;
+            }
             throw;
         }
     }

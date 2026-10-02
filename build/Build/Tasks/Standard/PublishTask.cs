@@ -1,4 +1,4 @@
-﻿using Cake.Common.Tools.DotNet;
+using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Publish;
 using Cake.Common.Tools.MSBuild;
 using Cake.Frosting;
@@ -33,13 +33,6 @@ public sealed class PublishTask : FrostingTask<BuildContext>
                 Configuration = context.Config.ToString()
             });
         }
-        else
-        {
-            context.MSBuild(project.CsprojFilePathAbsolute, new MSBuildSettings
-            {
-                Target = "Publish",
-                Configuration = context.Config.ToString()
-            });
-        }
+        // Legacy class libraries are packaged directly from their build output.
     }
 }

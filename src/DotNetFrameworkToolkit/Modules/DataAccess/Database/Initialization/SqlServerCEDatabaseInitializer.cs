@@ -1,6 +1,7 @@
-﻿using DotNetFrameworkToolkit.Core;
+using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.DataAccess.FileSystem;
 using DotNetFrameworkToolkit.Modules.Logging;
+using Microsoft.Practices.Unity.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -62,6 +63,9 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
     /// <param name="fileSystemAccess">The utility for interacting with the operating system's files and directories.</param>
     public SqlServerCEDatabaseInitializer(ILogger logger, IFileSystemAccess fileSystemAccess)
     {
+        Guard.ArgumentNotNull(logger, nameof(logger));
+        Guard.ArgumentNotNull(fileSystemAccess, nameof(fileSystemAccess));
+
         _logger = logger;
         _fileSystemAccess = fileSystemAccess;
     }
@@ -85,7 +89,7 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
         {
             string appFolderPath = appDirectoryResult.Value;
             string appName = new DirectoryInfo(appFolderPath).Name;
-            string dbPath = Path.Combine(appFolderPath, $"{appName}.{DB_FILE_EXTENSION}"); ;
+            string dbPath = Path.Combine(appFolderPath, $"{appName}{DB_FILE_EXTENSION}");
             return ProcessResult<string>.Success(dbPath);
         }
         catch (Exception ex)
@@ -98,12 +102,15 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
     /// <inheritdoc/>
     public ProcessResult<bool> InitializeDatabase()
     {
+        // TODO(database retirement): Replace the process-wide lock with explicit per-database coordination.
+        // It currently runs migration constructors, migration code and logger callbacks under the lock;
+        // those callbacks must not wait for another initialization thread (UI/worker deadlock risk).
         lock (_initLock)
         {
             ProcessResult<string> dbPathResult = GetDBPath();
             if (!dbPathResult.IsSuccessful)
             {
-                ProcessResult<bool>.LogAndForwardException("Failed to initialize database.", dbPathResult.Error, _logger);
+                return ProcessResult<bool>.LogAndForwardException("Failed to initialize database.", dbPathResult.Error, _logger);
             }
 
             try
@@ -130,8 +137,14 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
 
     private static void CreateNewDB(string dbPath)
     {
-        string connectionString = $"Data Source=\"{dbPath}\";";
+        string connectionString = new SqlCeConnectionStringBuilder
+        {
+            DataSource = dbPath
+        }.ConnectionString;
 
+        // TODO(database retirement): Create and initialize a temporary database, then publish it.
+        // A crash after CreateDatabase currently leaves a file without a usable migration table.
+        // Recovery must distinguish an incomplete database from an existing application database.
         using (SqlCeEngine engine = new(connectionString))
         {
             engine.CreateDatabase();
@@ -150,32 +163,40 @@ public class SqlServerCEDatabaseInitializer : IDatabaseInitializer
 
     private static void UpdateExistingDB(string dbPath)
     {
-        using SqlCeConnection connection = new($"Data Source={dbPath}");
+        using SqlCeConnection connection = new(new SqlCeConnectionStringBuilder
+        {
+            DataSource = dbPath
+        }.ConnectionString);
         connection.Open();
 
-        uint lastMigrationNumber = 0;
+        uint startingNumber = 0;
         const string getMaxNumberSql = "SELECT MAX(Number) FROM Migration;";
         using (SqlCeCommand getMaxNumberCmd = new(getMaxNumberSql, connection))
         {
             object result = getMaxNumberCmd.ExecuteScalar();
             if (result != DBNull.Value && result != null)
             {
-                lastMigrationNumber = Convert.ToUInt32(result);
+                startingNumber = checked(Convert.ToUInt32(result) + 1);
             }
         }
 
-        RunMigrations(connection, ++lastMigrationNumber);
+        RunMigrations(connection, startingNumber);
     }
 
     private static void RunMigrations(DbConnection connection, uint startingNumber)
     {
         SortedList<uint, IMigration> migrations = [];
 
+        // TODO(database retirement): Accept an explicit ordered migration set from the application.
+        // Scanning only loaded assemblies may miss migrations, include unrelated migrations or fail
+        // on type loading, open generics, missing constructors and duplicate migration numbers.
+        // Validate migration continuity and reject unknown future versions before executing any changes.
         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             foreach (Type assemblyType in assembly.GetTypes())
             {
-                if (!assemblyType.IsAbstract
+                if (!assemblyType.ContainsGenericParameters
+                    && !assemblyType.IsAbstract
                     && !assemblyType.IsInterface
                     && typeof(IMigration).IsAssignableFrom(assemblyType)
                     && Activator.CreateInstance(assemblyType) is IMigration migration)

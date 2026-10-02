@@ -1,4 +1,4 @@
-﻿using DotNetFrameworkToolkit.Core;
+using DotNetFrameworkToolkit.Core;
 
 namespace DotNetFrameworkToolkit.Modules.DataAccess.Database;
 

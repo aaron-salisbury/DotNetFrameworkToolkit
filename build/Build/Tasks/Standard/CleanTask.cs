@@ -1,4 +1,4 @@
-﻿using Cake.Common.IO;
+using Cake.Common.IO;
 using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;

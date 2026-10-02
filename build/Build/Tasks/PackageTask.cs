@@ -1,4 +1,4 @@
-﻿using Build.Tasks.Standard;
+using Build.Tasks.Standard;
 using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Pack;
 using Cake.Common.Tools.NuGet;
@@ -16,6 +16,7 @@ namespace Build.Tasks;
 
 [TaskName("Package")]
 [IsDependentOn(typeof(PublishTask))]
+[IsDependentOn(typeof(ProcessImagesTask))]
 [TaskDescription("Generates the NuGet packages using previously processed images and project properties. Legacy projects should have a nuspec file, named after and next to the .csproj, to use as a template.")]
 public sealed class PackageTask : AsyncFrostingTask<BuildContext>
 {
@@ -62,7 +63,10 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
             {
                 ToolPath = nugetExePath,
                 OutputDirectory = nuGetOutputPath,
-                Properties = new Dictionary<string, string> { { "Configuration", context.Config.ToString() } },
+                Properties = new Dictionary<string, string>
+                {
+                    { "Configuration", context.Config.ToString() }
+                },
                 NoPackageAnalysis = true,
                 IncludeReferencedProjects = true,
                 Symbols = true,
@@ -73,19 +77,33 @@ public sealed class PackageTask : AsyncFrostingTask<BuildContext>
 
     private static async Task<string> VerifyNuGetToolAsync(BuildContext context, string toolsDirectory)
     {
-        string nugetExePath = System.IO.Path.Combine(toolsDirectory, "nuget.exe");
+        string nugetExePath = System.IO.Path.Combine(toolsDirectory, "nuget-6.14.0.exe");
 
         if (!System.IO.File.Exists(nugetExePath))
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            context.Log.Information("NuGet tool not found. Downloading latest version...");
+            context.Log.Information("NuGet tool not found. Downloading NuGet 6.14.0...");
 
             System.IO.Directory.CreateDirectory(toolsDirectory);
             using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe");
+            using var response = await httpClient.GetAsync("https://dist.nuget.org/win-x86-commandline/v6.14.0/nuget.exe");
             response.EnsureSuccessStatusCode();
-            using var fs = new System.IO.FileStream(nugetExePath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None);
-            await response.Content.CopyToAsync(fs);
+            string temporaryPath = nugetExePath + "." + Guid.NewGuid().ToString("N") + ".download";
+            try
+            {
+                using (var fs = new System.IO.FileStream(temporaryPath, System.IO.FileMode.CreateNew, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                {
+                    await response.Content.CopyToAsync(fs);
+                }
+                System.IO.File.Move(temporaryPath, nugetExePath);
+            }
+            finally
+            {
+                if (System.IO.File.Exists(temporaryPath))
+                {
+                    System.IO.File.Delete(temporaryPath);
+                }
+            }
 
             stopwatch.Stop();
             double completionTime = Math.Round(stopwatch.Elapsed.TotalSeconds, 1);

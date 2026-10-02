@@ -1,4 +1,4 @@
-﻿using Microsoft.Practices.EnterpriseLibrary.Logging;
+using Microsoft.Practices.EnterpriseLibrary.Logging;
 using System;
 
 namespace DotNetFrameworkToolkit.Modules.Logging;

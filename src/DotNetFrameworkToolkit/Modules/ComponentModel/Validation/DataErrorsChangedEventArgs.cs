@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DotNetFrameworkToolkit.Modules.ComponentModel.Validation;
 
@@ -13,7 +13,10 @@ public class DataErrorsChangedEventArgs : EventArgs
     /// </summary>
     public virtual string PropertyName
     {
-        get { return _propertyName; }
+        get
+        {
+            return _propertyName;
+        }
     }
 
     /// <summary>

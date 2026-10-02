@@ -1,4 +1,4 @@
-﻿using Microsoft.Practices.EnterpriseLibrary.Common.Configuration;
+using Microsoft.Practices.EnterpriseLibrary.Common.Configuration;
 using Microsoft.Practices.EnterpriseLibrary.Logging;
 using Microsoft.Practices.EnterpriseLibrary.Logging.Configuration;
 using Microsoft.Practices.EnterpriseLibrary.Logging.Formatters;
@@ -21,17 +21,61 @@ public class InMemorySinkPNP : CustomTraceListener
     /// </summary>
     public event EventHandler<LogEmitEventArgs> LogEmitted;
 
-    private readonly IList<string> _logs;
+    private readonly List<string> _logs;
+    private readonly object _sync = new();
+    private int _maxLogsCount;
+
     /// <summary>
     /// Gets the collection of log messages currently stored in memory.
     /// </summary>
-    public IList<string> Logs { get { return _logs; } }
+    public IList<string> Logs
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return new List<string>(_logs).AsReadOnly();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the maximum number of log messages to retain in memory.
     /// When the limit is reached, the oldest log entry is removed.
     /// </summary>
-    public int MaxLogsCount { get; set; }
+    public int MaxLogsCount
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _maxLogsCount;
+            }
+        }
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+            lock (_sync)
+            {
+                _maxLogsCount = value;
+                Trim();
+            }
+        }
+    }
+
+    private void Trim()
+    {
+        while (_maxLogsCount > 0 && _logs.Count > _maxLogsCount)
+        {
+            _logs.RemoveAt(0);
+        }
+    }
+
+    /// <inheritdoc/>
+    public override bool IsThreadSafe => true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InMemorySinkPNP"/> class.
@@ -52,12 +96,11 @@ public class InMemorySinkPNP : CustomTraceListener
     /// <param name="message">The log message to write.</param>
     public override void Write(string message)
     {
-        if (MaxLogsCount > 0 && Logs.Count >= MaxLogsCount)
+        lock (_sync)
         {
-            Logs.RemoveAt(0);
+            _logs.Add(message);
+            Trim();
         }
-
-        Logs.Add(message);
     }
 
     /// <summary>
@@ -80,14 +123,15 @@ public class InMemorySinkPNP : CustomTraceListener
     public override void TraceData(TraceEventCache eventCache, string source, TraceEventType eventType, int id, object data)
     {
         DateTime timeStamp = DateTime.UtcNow;
-        string message = data.ToString();
+        string message = data == null ? string.Empty : data.ToString();
         LogLevel level = LogLevel.None;
         Exception exception = null;
 
         if (data is LogEntry logEntry)
         {
             timeStamp = logEntry.TimeStamp;
-            level = MapTraceEventTypeToLogLevel(logEntry.Severity); // If not the LogEntryException subclass, then LogLevel wasn't explicitly saved.
+            level = MapTraceEventTypeToLogLevel(logEntry.Severity);
+            // If not the LogEntryException subclass, then LogLevel wasn't explicitly saved.
 
             if (Formatter != null)
             {
@@ -103,16 +147,35 @@ public class InMemorySinkPNP : CustomTraceListener
 
         WriteLine(message);
 
-        LogEmitted?.Invoke(this, new LogEmitEventArgs()
+        EventHandler<LogEmitEventArgs> handlers = LogEmitted;
+        if (handlers == null)
         {
-            LogEvent = new()
+            return;
+        }
+
+        // Callbacks execute outside the buffer lock. A failing observer must not abort the application operation.
+        Delegate[] array = handlers.GetInvocationList();
+        for (int i = 0; i < array.Length; i++)
+        {
+            EventHandler<LogEmitEventArgs> handler = (EventHandler<LogEmitEventArgs>)array[i];
+            try
             {
-                TimeStamp = timeStamp,
-                Message = message,
-                Level = level,
-                Exception = exception
+                handler(this, new LogEmitEventArgs
+                {
+                    LogEvent = new LogEvent
+                    {
+                        TimeStamp = timeStamp,
+                        Message = message,
+                        Level = level,
+                        Exception = exception
+                    }
+                });
             }
-        });
+            catch (Exception)
+            {
+                /* Observational notifications are best-effort. */
+            }
+        }
     }
 
     private static ILogFormatter DefaultFormatter()

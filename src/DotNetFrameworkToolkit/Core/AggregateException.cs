@@ -1,4 +1,5 @@
-﻿using System;
+using Microsoft.Practices.Unity.Utility;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
@@ -22,46 +23,61 @@ public class AggregateException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class.
     /// </summary>
-    public AggregateException() : this("One or more errors occurred.") { }
+    public AggregateException() : this("One or more errors occurred.")
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with a specified error message.
     /// </summary>
     /// <param name="message">The message that describes the exception.</param>
-    public AggregateException(string message) : base(message) => this.InnerExceptions = new([]);
+    public AggregateException(string message) : base(message)
+    {
+        this.InnerExceptions = new([]);
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
     /// </summary>
     /// <param name="message">The message that describes the exception.</param>
     /// <param name="innerException">The exception that is the cause of the current exception.</param>
-    public AggregateException(string message, Exception innerException) : this(message, CreateSingleInnerExceptionList(innerException)) { }
+    public AggregateException(string message, Exception innerException) : this(message, CreateSingleInnerExceptionList(innerException))
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with references to the inner exceptions that are the cause of this exception.
     /// </summary>
     /// <param name="innerExceptions">The exceptions that are the cause of the current exception.</param>
-    public AggregateException(IEnumerable<Exception> innerExceptions) : this("One or more errors occurred.", innerExceptions) { }
+    public AggregateException(IEnumerable<Exception> innerExceptions) : this("One or more errors occurred.", innerExceptions)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with references to the inner exceptions that are the cause of this exception.
     /// </summary>
     /// <param name="innerExceptions">The exceptions that are the cause of the current exception.</param>
-    public AggregateException(params Exception[] innerExceptions) : this("One or more errors occurred.", (IEnumerable<Exception>)innerExceptions) { }
+    public AggregateException(params Exception[] innerExceptions) : this("One or more errors occurred.", (IEnumerable<Exception>)innerExceptions)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with a specified error message and references to the inner exceptions that are the cause of this exception.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     /// <param name="innerExceptions">The exceptions that are the cause of the current exception.</param>
-    public AggregateException(string message, IEnumerable<Exception> innerExceptions) : this(message, ValidateAndCopyInnerExceptions(innerExceptions)) { }
+    public AggregateException(string message, IEnumerable<Exception> innerExceptions) : this(message, ValidateAndCopyInnerExceptions(innerExceptions))
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class with a specified error message and references to the inner exceptions that are the cause of this exception.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     /// <param name="innerExceptions">The exceptions that are the cause of the current exception.</param>
-    public AggregateException(string message, params Exception[] innerExceptions) : this(message, (IEnumerable<Exception>)innerExceptions) { }
+    public AggregateException(string message, params Exception[] innerExceptions) : this(message, (IEnumerable<Exception>)innerExceptions)
+    {
+    }
 
     protected AggregateException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
@@ -78,10 +94,7 @@ public class AggregateException : Exception
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="info"/> is <see langword="null"/>.</exception>
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        if (info is null)
-        {
-            throw new ArgumentNullException(nameof(info));
-        }
+        Guard.ArgumentNotNull(info, nameof(info));
 
         base.GetObjectData(info, context);
 
@@ -95,7 +108,7 @@ public class AggregateException : Exception
     }
 
     private AggregateException(string message, List<Exception> innerExceptions)
-        : base(message, GetFirstException(innerExceptions))
+    : base(message, GetFirstException(innerExceptions))
     {
         this.InnerExceptions = new(innerExceptions);
     }
@@ -112,20 +125,14 @@ public class AggregateException : Exception
 
     private static List<Exception> CreateSingleInnerExceptionList(Exception innerException)
     {
-        if (innerException is null)
-        {
-            throw new ArgumentNullException(nameof(innerException));
-        }
+        Guard.ArgumentNotNull(innerException, nameof(innerException));
 
         return [innerException];
     }
 
     private static List<Exception> ValidateAndCopyInnerExceptions(IEnumerable<Exception> innerExceptions)
     {
-        if (innerExceptions is null)
-        {
-            throw new ArgumentNullException(nameof(innerExceptions));
-        }
+        Guard.ArgumentNotNull(innerExceptions, nameof(innerExceptions));
 
         List<Exception> list = [];
         foreach (Exception ex in innerExceptions)
@@ -197,10 +204,7 @@ public class AggregateException : Exception
     /// <param name="predicate">The predicate to execute for each exception.</param>
     public void Handle(Predicate<Exception> predicate)
     {
-        if (predicate is null)
-        {
-            throw new ArgumentNullException(nameof(predicate));
-        }
+        Guard.ArgumentNotNull(predicate, nameof(predicate));
 
         List<Exception> unhandled = [];
         foreach (var inner in this.InnerExceptions)

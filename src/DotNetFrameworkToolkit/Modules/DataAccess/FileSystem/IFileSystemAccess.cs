@@ -1,4 +1,4 @@
-﻿using DotNetFrameworkToolkit.Core;
+using DotNetFrameworkToolkit.Core;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -35,7 +35,7 @@ public interface IFileSystemAccess
     /// The directory in which to write the file. If <c>null</c>, the application directory is used.
     /// </param>
     /// <returns>
-    /// A <see cref="ProcessResult{T}"/> whose <c>Value</c> property is <c>true</c> if the file was written successfully; 
+    /// A <see cref="ProcessResult{T}"/> whose <c>Value</c> property is <c>true</c> if the file was written successfully;
     /// otherwise, <c>false</c>. If the operation fails, <see cref="ProcessResult{T}.Error"/> contains the exception.
     /// </returns>
     ProcessResult<bool> WriteFile(IEnumerable<string> contentLines, string fileName, string directoryPath = null);

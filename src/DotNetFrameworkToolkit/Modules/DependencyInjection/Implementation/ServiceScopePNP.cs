@@ -1,4 +1,4 @@
-﻿using Microsoft.Practices.Unity.Utility;
+using Microsoft.Practices.Unity.Utility;
 using System;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
@@ -10,7 +10,6 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 public class ServiceScopePNP : IServiceScope, IDisposable
 {
     private readonly ServiceProviderPNP _serviceProvider;
-    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServiceScopePNP"/> class.
@@ -31,12 +30,6 @@ public class ServiceScopePNP : IServiceScope, IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-        {
-            return;
-        }
-
-        _isDisposed = true;
         _serviceProvider.Dispose();
     }
 }

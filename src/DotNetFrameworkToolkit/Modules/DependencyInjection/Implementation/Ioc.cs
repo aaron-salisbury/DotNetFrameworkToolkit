@@ -1,4 +1,5 @@
-﻿using System;
+using Microsoft.Practices.Unity.Utility;
+using System;
 using System.Threading;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
@@ -9,7 +10,7 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// service provider instance, which can then be used to resolve service instances.
 /// </summary>
 /// <remarks>
-/// Modeled after the CommunityToolkit offering 
+/// Modeled after the CommunityToolkit offering
 /// <see href="https://github.com/CommunityToolkit/dotnet/blob/main/src/CommunityToolkit.Mvvm/DependencyInjection/Ioc.cs">here</see>.
 /// </remarks>
 public sealed class Ioc : IServiceProvider, IDisposable
@@ -20,30 +21,31 @@ public sealed class Ioc : IServiceProvider, IDisposable
     public static Ioc Default { get; } = new();
 
     private volatile IServiceProvider serviceProvider;
+    private readonly Core.OperationLifetime lifetime = new();
 
     /// <summary>
     /// Gets the service object of the specified type from the service container.
     /// </summary>
     /// <param name="serviceType">The type of service object to get.</param>
     /// <returns>
-    /// A service object of type <paramref name="serviceType"/>. 
+    /// A service object of type <paramref name="serviceType"/>.
     /// Returns <c>null</c> if the service is not found.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="serviceType"/> is <see langword="null"/>.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
     public object GetService(Type serviceType)
     {
-        if (serviceType is null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
-        if (this.serviceProvider is null)
+        using (lifetime.Enter())
         {
-            ThrowInvalidOperationExceptionForMissingInitialization();
+            IServiceProvider provider = serviceProvider;
+            if (provider == null)
+            {
+                ThrowInvalidOperationExceptionForMissingInitialization();
+            }
+            return provider.GetService(serviceType);
         }
-
-        return this.serviceProvider.GetService(serviceType);
     }
 
     /// <summary>
@@ -54,12 +56,7 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// <exception cref="InvalidOperationException">Thrown if the service provider has not been configured.</exception>
     public T GetService<T>()
     {
-        if (this.serviceProvider is null)
-        {
-            ThrowInvalidOperationExceptionForMissingInitialization();
-        }
-
-        return (T)this.serviceProvider.GetService(typeof(T));
+        return (T)GetService(typeof(T));
     }
 
     /// <summary>
@@ -90,11 +87,9 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
     public void ConfigureServices(IServiceProvider serviceProvider)
     {
-        if (serviceProvider is null)
-        {
-            throw new ArgumentNullException(nameof(serviceProvider));
-        }
+        Guard.ArgumentNotNull(serviceProvider, nameof(serviceProvider));
 
+        using IDisposable operation = lifetime.Enter();
         IServiceProvider oldServices = Interlocked.CompareExchange(ref this.serviceProvider, serviceProvider, null);
 
         if (oldServices is not null)
@@ -109,12 +104,14 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// </summary>
     public void Dispose()
     {
-        IServiceProvider currentServiceProvider = Interlocked.Exchange(ref this.serviceProvider, null);
-
-        if (currentServiceProvider is IDisposable disposableServiceProvider)
+        lifetime.Dispose(() =>
         {
-            disposableServiceProvider.Dispose();
-        }
+            IServiceProvider provider = Interlocked.Exchange(ref serviceProvider, null);
+            if (provider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        });
     }
 
     /// <summary>

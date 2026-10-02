@@ -1,5 +1,5 @@
-﻿using Microsoft.Practices.Unity;
-using System;
+using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.Utility;
 using System.Collections.Generic;
 
 namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
@@ -7,53 +7,42 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// <inheritdoc/>
 public class ServiceScopeFactoryPNP : IServiceScopeFactory
 {
-    private readonly IUnityContainer _unityProvider;
-    private readonly List<ServiceDescriptor> _scopedServiceDescriptors;
+    private readonly ServiceProviderPNP _root;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class.
+    /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class from an existing root provider.
     /// </summary>
-    /// <param name="unityProvider">The root Unity container used to create scoped child containers.</param>
-    /// <param name="scopedServiceDescriptors">The scoped service registrations to apply within each new scope.</param>
+    /// <param name="root">The root service provider.</param>
+    /// <remarks>
+    /// The provider creates and registers this factory so scopes share its root lifetime.
+    /// Consumers should resolve IServiceScopeFactory from the provider.
+    /// </remarks>
+    internal ServiceScopeFactoryPNP(ServiceProviderPNP root)
+    {
+        Guard.ArgumentNotNull(root, nameof(root));
+
+        _root = root;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceScopeFactoryPNP"/> class,
+    /// owning a provider over the supplied container and registrations.
+    /// </summary>
+    /// <param name="unityProvider">The Unity container used to resolve services.</param>
+    /// <param name="scopedServiceDescriptors">The scoped service descriptors used to create the root provider.</param>
+    /// <remarks>
+    /// Prefer resolving this factory from a ServiceCollectionPNP-built provider.
+    /// </remarks>
     public ServiceScopeFactoryPNP(IUnityContainer unityProvider, IEnumerable<ServiceDescriptor> scopedServiceDescriptors)
     {
-        if (unityProvider is null)
-        {
-            throw new ArgumentNullException(nameof(unityProvider));
-        }
+        Guard.ArgumentNotNull(scopedServiceDescriptors, nameof(scopedServiceDescriptors));
 
-        if (scopedServiceDescriptors is null)
-        {
-            throw new ArgumentNullException(nameof(scopedServiceDescriptors));
-        }
-
-        _unityProvider = unityProvider;
-        _scopedServiceDescriptors = [.. scopedServiceDescriptors];
+        _root = new ServiceProviderPNP(unityProvider, scopedServiceDescriptors);
     }
 
     /// <inheritdoc/>
     public IServiceScope CreateScope()
     {
-        IUnityContainer scopedContainer = _unityProvider.CreateChildContainer();
-        RegisterScopedServices(scopedContainer);
-
-        ServiceProviderPNP scopedProvider = new(scopedContainer, _scopedServiceDescriptors);
-
-        return new ServiceScopePNP(scopedProvider);
-    }
-
-    private void RegisterScopedServices(IUnityContainer scopedContainer)
-    {
-        foreach (ServiceDescriptor scopedDescriptor in _scopedServiceDescriptors)
-        {
-            if (scopedDescriptor.ImplementationInstance != null)
-            {
-                scopedContainer.RegisterInstance(scopedDescriptor.ServiceType, scopedDescriptor.ImplementationInstance);
-            }
-            else
-            {
-                scopedContainer.RegisterType(scopedDescriptor.ServiceType, scopedDescriptor.ImplementationType, new ContainerControlledLifetimeManager());
-            }
-        }
+        return _root.CreateScope();
     }
 }

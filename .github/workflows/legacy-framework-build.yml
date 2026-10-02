@@ -1,0 +1,43 @@
+name: .NET Framework 2.0 build
+on:
+  push:
+    branches: [master, review-fixes-net20-tests]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+      - uses: microsoft/setup-msbuild@v3
+      - uses: NuGet/setup-nuget@v3
+        with:
+          nuget-version: '6.14.0'
+      # .NET 8 runs Cake; VS MSBuild/Roslyn compile against the restored net20 reference assemblies.
+      # No .NET 4.x retargeting or Mono runtime substitution is used.
+      - name: Build legacy solution through Cake.Frosting
+        shell: pwsh
+        run: ./build/build.ps1 --target="Compile Projects" --configuration=${{ matrix.configuration }}
+      - name: Verify CLR 2.0 assembly metadata
+        shell: pwsh
+        run: |
+          $dll = "src/DotNetFrameworkToolkit/bin/${{ matrix.configuration }}/net20/DotNetFrameworkToolkit.dll"
+          $env:TOOLKIT_ASSEMBLY = (Resolve-Path $dll).Path
+          powershell -NoProfile -Command '$assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom($env:TOOLKIT_ASSEMBLY); if ($assembly.ImageRuntimeVersion -ne "v2.0.50727") { throw "Unexpected runtime: $($assembly.ImageRuntimeVersion)" }; Write-Host $assembly.ImageRuntimeVersion'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v6
+        with:
+          name: net20-${{ matrix.configuration }}
+          path: src/DotNetFrameworkToolkit/bin/${{ matrix.configuration }}/net20/
+          if-no-files-found: error

@@ -1,4 +1,4 @@
-﻿using Cake.Common.IO;
+using Cake.Common.IO;
 using Cake.Common.IO.Paths;
 using Cake.Common.Xml;
 using Cake.Core;
@@ -40,9 +40,12 @@ public sealed class BuildContext : FrostingContext
             _ => BuildConfigurations.Debug,
         };
 
-        SerializerOptions = new() { PropertyNameCaseInsensitive = true };
+        SerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
         AbsolutePathToRepo = GetRepoAbsolutePath(REPO_NAME, this);
-        SourceDirectory = AbsolutePathToRepo + context.Directory("src");
+        SourceDirectory = this.Directory(System.IO.Path.Combine(AbsolutePathToRepo, "src"));
         ReleaseProjects = [.. RELEASE_PROJECT_NAMES.Select(name => CreateReleaseProject(this, name))];
     }
 
@@ -51,15 +54,15 @@ public sealed class BuildContext : FrostingContext
         // Start from the working directory.
         DirectoryPath dir = context.Environment.WorkingDirectory;
 
-        // Traverse up until we find the directory named after the repository name.
-        while (dir != null && !dir.GetDirectoryName().Equals(repoName, StringComparison.OrdinalIgnoreCase))
+        // Find the source solution even when the checkout directory has a different name.
+        while (dir != null && !System.IO.File.Exists(System.IO.Path.Combine(dir.FullPath, "src", "DotNetFrameworkToolkit.sln")))
         {
             dir = dir.GetParent();
         }
 
         if (dir == null)
         {
-            throw new InvalidOperationException($"Could not find repository root directory named '{repoName}' in parent chain.");
+            throw new InvalidOperationException($"Could not find src/DotNetFrameworkToolkit.sln in the parent directory chain.");
         }
 
         return dir.FullPath;
