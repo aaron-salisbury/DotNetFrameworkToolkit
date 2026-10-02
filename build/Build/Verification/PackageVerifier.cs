@@ -82,11 +82,15 @@ internal static class PackageVerifier
             XElement metadata = root.Element(ns + "metadata") ?? throw new InvalidDataException("Missing package metadata.");
             Require(metadata.Element(ns + "id")?.Value == PACKAGE_ID, "Package ID mismatch.");
             Require(metadata.Element(ns + "version")?.Value == version.PackageVersion, "Package version mismatch.");
-            Require(metadata.Element(ns + "license")?.Value == "MIT", "Package license mismatch.");
-            if (!symbols)
+            // NuGet emits a minimal symbol manifest; dependency/license/repository
+            // metadata belongs to the consumer package, not the .snupkg.
+            if (symbols)
             {
-                Require(metadata.Element(ns + "icon")?.Value == "package-icon.png" && metadata.Element(ns + "readme")?.Value == "readme.md", "Package icon/readme metadata mismatch.");
+                Require(metadata.Element(ns + "packageTypes")?.Elements(ns + "packageType").Any(item => item.Attribute("name")?.Value == "SymbolsPackage") == true, "Symbol package type is missing.");
+                return;
             }
+            Require(metadata.Element(ns + "license")?.Value == "MIT", "Package license mismatch.");
+            Require(metadata.Element(ns + "icon")?.Value == "package-icon.png" && metadata.Element(ns + "readme")?.Value == "readme.md", "Package icon/readme metadata mismatch.");
             XElement? source = metadata.Element(ns + "repository");
             Require(source?.Attribute("type")?.Value == "git" && source.Attribute("url")?.Value == "https://github.com/aaron-salisbury/DotNetFrameworkToolkit" && source.Attribute("commit")?.Value == GetSourceCommit(repository), "Repository metadata must identify the current source commit.");
             List<XElement> groups = metadata.Element(ns + "dependencies")?.Elements(ns + "group").ToList() ?? new();
@@ -96,10 +100,7 @@ internal static class PackageVerifier
             Dictionary<string, string> runtime = config.Elements("package").Where(item => item.Attribute("developmentDependency")?.Value != "true").ToDictionary(item => item.Attribute("id")!.Value, item => "[" + item.Attribute("version")!.Value + "]", StringComparer.OrdinalIgnoreCase);
             Require(runtime.Count == dependencies.Count && runtime.All(pair => dependencies.TryGetValue(pair.Key, out string? value) && value == pair.Value), "Package dependencies must exactly match restored runtime dependencies, excluding development tools.");
             Require(dependencies.ContainsKey("SqlServerCompact") && !dependencies.ContainsKey("System.Data.SqlServerCe_unofficial"), "The package must reference Microsoft's SQL CE package.");
-            if (symbols)
-            {
-                Require(metadata.Element(ns + "packageTypes")?.Elements(ns + "packageType").Any(item => item.Attribute("name")?.Value == "SymbolsPackage") == true, "Symbol package type is missing.");
-            }
+
         }
     }
 
