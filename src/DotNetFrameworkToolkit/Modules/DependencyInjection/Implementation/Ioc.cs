@@ -84,6 +84,10 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// Initializes the shared <see cref="IServiceProvider"/> instance.
     /// </summary>
     /// <param name="serviceProvider">The input <see cref="IServiceProvider"/> instance to use.</param>
+    /// <remarks>
+    /// Successful configuration transfers ownership of a disposable provider to this instance.
+    /// A provider rejected because configuration already occurred or shutdown began remains caller-owned.
+    /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="serviceProvider"/> is <see langword="null"/>.</exception>
     public void ConfigureServices(IServiceProvider serviceProvider)
     {

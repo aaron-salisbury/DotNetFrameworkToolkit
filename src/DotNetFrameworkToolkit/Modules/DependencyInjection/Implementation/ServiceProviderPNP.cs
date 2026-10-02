@@ -10,10 +10,13 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// A Unity-backed provider.
 /// </summary>
 /// <remarks>
+/// For providers constructed from service descriptors:
 /// <list type="bullet">
 /// <item>Container-created disposables belong to their resolving lifetime</item>
 /// <item>Supplied singleton instances remain owned by the caller</item>
 /// </list>
+/// Successfully created dependencies of a failed resolution remain owned by the resolving
+/// provider until shutdown; resolution failure does not roll back their lifetime.
 /// </remarks>
 public class ServiceProviderPNP : IServiceProvider, IDisposable
 {
@@ -33,6 +36,8 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// </summary>
     /// <remarks>
     /// This provider owns the supplied container; do not modify it after wrapping.
+    /// Native Unity transients are not tracked by this wrapper. Dispose them according to
+    /// the container's native ownership contract, or use ServiceCollectionPNP for tracked transients.
     /// </remarks>
     /// <param name="services">The Unity container to use for service resolution.</param>
     public ServiceProviderPNP(IUnityContainer services) : this(services, new List<ServiceDescriptor>(), null, true)
@@ -50,15 +55,15 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         externalContainer = external;
         descriptors = [];
 
-        foreach (ServiceDescriptor descriptor in servicesToRegister)
-        {
-            descriptors.Add(ServiceCollectionPNP.Copy(descriptor));
-        }
-
-        scopeFactory = new ServiceScopeFactoryPNP(this.root);
-
         try
         {
+            foreach (ServiceDescriptor descriptor in servicesToRegister)
+            {
+                descriptors.Add(ServiceCollectionPNP.Copy(descriptor));
+            }
+
+            scopeFactory = new ServiceScopeFactoryPNP(this.root);
+
             foreach (ServiceDescriptor descriptor in descriptors)
             {
                 if (descriptor.ImplementationInstance != null)
@@ -83,9 +88,17 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
             container.RegisterInstance<IServiceProvider>(this, new ExternallyControlledLifetimeManager());
             container.RegisterInstance<IServiceScopeFactory>(scopeFactory, new ExternallyControlledLifetimeManager());
         }
-        catch
+        catch (Exception constructionError)
         {
-            container.Dispose();
+            try
+            {
+                container.Dispose();
+            }
+            catch (Exception cleanupError)
+            {
+                throw new Core.AggregateException("Provider construction and container cleanup failed.", constructionError, cleanupError);
+            }
+
             throw;
         }
     }
@@ -174,6 +187,10 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// </summary>
     /// <remarks>
     /// Do not dispose from a constructor or synchronously wait for disposal from an active resolution.
+    /// The first disposal caller closes admission, drains resolutions, and performs cleanup.
+    /// Repeated or concurrent calls are no-ops and may return before that caller finishes.
+    /// Only the cleanup caller receives aggregated disposal errors; shutdown remains terminal after failure.
+    /// Disposing a parent from a child's independent cleanup is rejected because the child holds a parent operation.
     /// </remarks>
     public void Dispose()
     {
