@@ -18,7 +18,7 @@ Run the complete Release pipeline (also the default Release target):
 ./build/build.ps1 --configuration=Release
 ```
 
-`Package` creates artifacts; `Verify Package` additionally validates them. Packaging rejects Debug configuration. `Verify Consumer` adds package installation and x86/x64 CLR 2.0 execution. GitHub Actions uses `Verify Consumer` and uploads validated artifacts; it does not publish to NuGet.
+`Package` creates artifacts; `Verify Package` additionally validates them. Packaging rejects Debug configuration. `Verify Consumer` adds package installation and x86/x64 CLR 2.0 execution. The build workflow uses `Verify Consumer` and uploads validated artifacts. The separate [release workflow](releasing.md) publishes only after an intentional GitHub Release.
 
 | Stage | Checks and behavior |
 | --- | --- |
@@ -52,8 +52,8 @@ CI also uploads generated images, the library output, and TRX test results. The 
 | `AssemblyFileVersion` | The package's numeric `major.minor.patch` plus `.0`, including for prereleases. |
 | Informational version | Full `PackageVersion`, including its prerelease suffix. |
 | Dependency versions | Exact ranges matching restored runtime package versions. Upgrade deliberately and validate before distribution. |
-| Release tag | Exactly `v<PackageVersion>`. A GitHub tag checkout validates its tag automatically; a local check can supply `--release-tag=v0.2.9`. A mismatch fails before compilation/packaging. |
+| Release tag | Exactly `v<PackageVersion>`. A GitHub tag checkout validates its tag automatically; a local check can supply `--release-tag=v0.3.0`. A mismatch fails before compilation/packaging. |
 
-Update the package and file versions together in `version.props`. Assembly/file components must fit the compiler's 0–65534 range. Updating version metadata does not publish anything or automatically create a tag. Release automation remains phase 7.
+Update the package and file versions together in `version.props`. Assembly/file components must fit the compiler's 0–65534 range. Updating version metadata does not publish anything or automatically create a tag. See [releasing](releasing.md) for trusted publishing setup and the release procedure.
 
 NuGet's official [pack command](https://learn.microsoft.com/en-us/nuget/reference/cli-reference/cli-ref-pack) and [portable symbol package requirements](https://learn.microsoft.com/en-us/nuget/create-packages/symbol-packages-snupkg) describe the CLI analysis and symbol format used here.

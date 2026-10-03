@@ -18,6 +18,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - uses: microsoft/setup-msbuild@v3
+      - name: Test release artifact guards
+        shell: pwsh
+        run: python -m unittest discover -s build -p test_verify_release.py -v
       - uses: NuGet/setup-nuget@v3
         with:
           nuget-version: '6.14.0'
@@ -37,6 +40,19 @@ jobs:
       - name: Build, test and verify packages through Cake.Frosting
         shell: pwsh
         run: ./build/build.ps1 --target="Verify Consumer" --configuration=Release
+      - name: Verify the release artifact handoff without publishing
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item artifacts/release-check -ItemType Directory -Force | Out-Null
+          Copy-Item artifacts/packages/Release/* artifacts/release-check/
+          Copy-Item artifacts/consumer/validation.json artifacts/release-check/consumer-validation.json
+          Set-Content artifacts/release-check/release-notes.md 'CI validation only; no publication.'
+          $report = Get-Content artifacts/release-check/validation.json -Raw | ConvertFrom-Json
+          $commit = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python build/verify_release.py artifacts/release-check "v$($report.PackageVersion)" $commit
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify CLR 2.0 assembly metadata
         shell: pwsh
         run: |
