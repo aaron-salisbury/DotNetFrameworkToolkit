@@ -41,7 +41,7 @@ The default Release build also generates and verifies images, creates NuGet/symb
 ./build/build.ps1 --configuration=Release
 ```
 
-Validated packages and a hash/version report are written to `artifacts/packages/Release/`. See [build and packaging](docs/build_and_packaging.md) for checks and version/tag rules.
+Validated packages and a hash/version report are written to `artifacts/packages/Release/`. See [build and packaging](docs/build_and_packaging.md) for checks and version/tag rules, and [releasing](docs/releasing.md) for GitHub Release and NuGet publishing.
 
 Tests cover managed behavior and the pinned SQL CE provider/native runtime on CLR 4. The full Release pipeline also installs the built package and runs x86/x64 net20 consumers on CLR 2.0; enable the .NET Framework 3.5 Windows feature to run it locally. See [consumer examples and compatibility](docs/consumer_usage.md) for installation, migration guidance and the remaining platform limits.
 

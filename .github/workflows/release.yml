@@ -1,0 +1,118 @@
+name: Publish release to NuGet
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: nuget-release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    outputs:
+      commit: ${{ steps.source.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - uses: microsoft/setup-msbuild@v3
+      - name: Test release artifact guards
+        shell: pwsh
+        run: python -m unittest discover -s build -p test_verify_release.py -v
+      - uses: NuGet/setup-nuget@v3
+        with:
+          nuget-version: '6.14.0'
+      - name: Ensure CLR 2.0 is available
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $feature = Get-WindowsFeature NET-Framework-Core
+          if (-not $feature.Installed) {
+            $result = Install-WindowsFeature NET-Framework-Core
+            if (-not $result.Success -or $result.RestartNeeded -eq 'Yes') {
+              throw 'CLR 2.0 installation failed or requires a restart.'
+            }
+          }
+      # .NET 10 runs Cake; VS MSBuild/Roslyn compile against the restored net20 reference assemblies.
+      # No .NET 4.x retargeting or Mono runtime substitution is used.
+      - name: Build, test and verify packages through Cake.Frosting
+        shell: pwsh
+        run: ./build/build.ps1 --target="Verify Consumer" --configuration=Release
+      - name: Prepare and verify the release handoff
+        id: source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $event = Get-Content $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
+          if ([string]::IsNullOrWhiteSpace($event.release.body)) {
+            throw 'Supply release notes before publishing the GitHub Release.'
+          }
+          $commit = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "commit=$commit" >> $env:GITHUB_OUTPUT
+          Copy-Item artifacts/consumer/validation.json artifacts/packages/Release/consumer-validation.json
+          [IO.File]::WriteAllText((Join-Path $PWD 'artifacts/packages/Release/release-notes.md'), $event.release.body)
+          python build/verify_release.py artifacts/packages/Release $event.release.tag_name $commit
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v6
+        with:
+          name: verified-release
+          path: artifacts/packages/Release/
+          if-no-files-found: error
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-test-results
+          path: artifacts/test-results/Release/
+          if-no-files-found: warn
+  publish:
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 10
+    environment: nuget
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.build.outputs.commit }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: verified-release
+          path: artifacts/release
+      - uses: NuGet/setup-nuget@v3
+        with:
+          nuget-version: '6.14.0'
+      - name: Verify and attach the exact release artifacts
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          SOURCE_COMMIT: ${{ needs.build.outputs.commit }}
+        run: |
+          python build/verify_release.py artifacts/release $env:RELEASE_TAG $env:SOURCE_COMMIT --attach $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Obtain a temporary NuGet publishing key
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish package and portable symbols
+        shell: pwsh
+        env:
+          NUGET_RELEASE_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $package = Get-ChildItem artifacts/release/*.nupkg -File
+          $symbols = Get-ChildItem artifacts/release/*.snupkg -File
+          nuget push $package.FullName -Source https://api.nuget.org/v3/index.json -ApiKey $env:NUGET_RELEASE_KEY -NoSymbols -SkipDuplicate -NonInteractive
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          nuget push $symbols.FullName -Source https://api.nuget.org/v3/index.json -ApiKey $env:NUGET_RELEASE_KEY -SkipDuplicate -NonInteractive
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

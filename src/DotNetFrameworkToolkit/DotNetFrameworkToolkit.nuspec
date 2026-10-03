@@ -10,7 +10,7 @@
     <readme>readme.md</readme>
     <projectUrl>https://github.com/aaron-salisbury/DotNetFrameworkToolkit</projectUrl>
     <description>Common C# app development and shim code for legacy .Net Framework 2.0 projects.</description>
-    <releaseNotes>In-development / pre-alpha.</releaseNotes>
+    <releaseNotes>See https://github.com/aaron-salisbury/DotNetFrameworkToolkit/releases/tag/v$version$ for release notes.</releaseNotes>
     <copyright>© Aaron Salisbury</copyright>
     <tags>app helpers legacy netframework</tags>
     <repository type="git" url="https://github.com/aaron-salisbury/DotNetFrameworkToolkit" commit="$commit$" />

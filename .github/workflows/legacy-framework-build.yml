@@ -18,6 +18,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - uses: microsoft/setup-msbuild@v3
+      - name: Test release artifact guards
+        shell: pwsh
+        run: python -m unittest discover -s build -p test_verify_release.py -v
       - uses: NuGet/setup-nuget@v3
         with:
           nuget-version: '6.14.0'
