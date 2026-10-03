@@ -12,7 +12,8 @@ public sealed class VerifyConsumerTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)
     {
-        ProcessStartInfo start = new ProcessStartInfo("pwsh")
+        string powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+        ProcessStartInfo start = new ProcessStartInfo(powershell)
         {
             UseShellExecute = false,
             WorkingDirectory = context.AbsolutePathToRepo

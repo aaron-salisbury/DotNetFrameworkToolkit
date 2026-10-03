@@ -70,14 +70,14 @@ public sealed class Ioc : IServiceProvider, IDisposable
     /// </exception>
     public T GetRequiredService<T>() where T : notnull
     {
-        T service = GetService<T>();
+        object service = GetService(typeof(T));
 
         if (service is null)
         {
             ThrowInvalidOperationExceptionForUnregisteredType();
         }
 
-        return service;
+        return (T)service;
     }
 
     /// <summary>

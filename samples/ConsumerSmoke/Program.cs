@@ -2,6 +2,7 @@ using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.ComponentModel;
 using DotNetFrameworkToolkit.Modules.DataAccess;
 using DotNetFrameworkToolkit.Modules.DependencyInjection;
+using DotNetFrameworkToolkit.Modules.FileSystem;
 using DotNetFrameworkToolkit.Modules.Logging;
 using DotNetFrameworkToolkit.Modules.UserAccess;
 using System;
@@ -27,8 +28,9 @@ internal static class Program
             ResultsAndValidation();
             Logging();
             Credentials();
+            FileSystem();
             Database();
-            Console.WriteLine("PASS: DI, results, validation, logging scopes, credential persistence and SQL CE.");
+            Console.WriteLine("PASS: DI, results, validation, logging scopes, credential persistence, filesystem writes and SQL CE.");
             return 0;
         }
         catch (Exception error)
@@ -117,6 +119,31 @@ internal static class Program
         };
         Require(authenticator.VerifyCredentials(restored, "pässword"), "Stored credentials did not round trip.");
         Require(!authenticator.VerifyCredentials(restored, "wrong"), "An incorrect password was accepted.");
+    }
+
+    private static void FileSystem()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "toolkit-files-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            using (LoggerPNP logger = new LoggerPNP(LogLevel.None))
+            {
+                FileSystemAccess files = new FileSystemAccess(logger);
+                Require(files.WriteFile(new string[] { "first" }, "content.txt", directory).IsSuccessful, "Initial file write failed.");
+                Require(files.WriteFile(new string[] { "replacement" }, "content.txt", directory).IsSuccessful, "File overwrite failed.");
+                string path = Path.Combine(directory, "content.txt");
+                string[] lines = File.ReadAllLines(path);
+                Require(lines.Length == 1 && lines[0] == "replacement", "File overwrite lost content.");
+                Require(Directory.GetFiles(directory).Length == 1, "File write left staging files.");
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, true);
+            }
+        }
     }
 
     private static void Database()
