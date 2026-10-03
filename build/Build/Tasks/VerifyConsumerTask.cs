@@ -18,6 +18,9 @@ public sealed class VerifyConsumerTask : FrostingTask<BuildContext>
             UseShellExecute = false,
             WorkingDirectory = context.AbsolutePathToRepo
         };
+        // Let Windows PowerShell initialize its own module paths rather than inheriting
+        // PowerShell 7's incompatible module directories from the invoking build shell.
+        start.Environment.Remove("PSModulePath");
         start.ArgumentList.Add("-NoProfile");
         start.ArgumentList.Add("-ExecutionPolicy");
         start.ArgumentList.Add("Bypass");
