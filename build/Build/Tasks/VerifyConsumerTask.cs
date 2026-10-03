@@ -19,6 +19,8 @@ public sealed class VerifyConsumerTask : FrostingTask<BuildContext>
             WorkingDirectory = context.AbsolutePathToRepo
         };
         start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-ExecutionPolicy");
+        start.ArgumentList.Add("Bypass");
         start.ArgumentList.Add("-File");
         start.ArgumentList.Add(Path.Combine(context.AbsolutePathToRepo, "build", "verify-consumer.ps1"));
         using (Process process = Process.Start(start) ?? throw new InvalidOperationException("Could not start consumer verification."))
