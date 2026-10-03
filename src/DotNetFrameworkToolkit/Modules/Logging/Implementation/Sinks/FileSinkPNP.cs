@@ -113,6 +113,14 @@ public class FileSinkPNP : CustomTraceListener
     }
 
     /// <summary>
+    /// Flushes and closes the underlying file listener. Repeated calls are harmless.
+    /// </summary>
+    public override void Close()
+    {
+        Dispose();
+    }
+
+    /// <summary>
     /// Releases managed resources used by this listener.
     /// </summary>
     /// <param name="disposing"><see langword="true"/> to dispose managed resources; otherwise, <see langword="false"/>.</param>

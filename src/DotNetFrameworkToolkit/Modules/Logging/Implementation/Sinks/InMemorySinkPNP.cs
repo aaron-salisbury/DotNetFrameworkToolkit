@@ -116,6 +116,8 @@ public class InMemorySinkPNP : CustomTraceListener
     /// <param name="message">The log message to write.</param>
     public override void WriteLine(string message)
     {
+        message ??= string.Empty;
+
         int length = message.Length;
         int num = CoreNewLine.Length;
         char[] array = new char[length + num];

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -179,6 +180,80 @@ public class LoggingTests
         logger.Dispose();
         Assert.ThrowsException<ObjectDisposedException>(() => logger.LogInformation("message"));
         Assert.ThrowsException<ObjectDisposedException>(() => logger.BeginScope("scope"));
+    }
+
+    [DataTestMethod]
+    [DataRow(null, "\r\n", "\r\n")]
+    [DataRow("", "\r\n", "\r\n")]
+    [DataRow("message", "\r\n", "message\r\n")]
+    [DataRow(null, "\n", "\n")]
+    public void MemorySinkWriteLinePreservesTerminatorForNullAndNonNullMessages(string message, string newLine, string expected)
+    {
+        using ConfigurableMemorySink sink = new(newLine);
+        sink.WriteLine(message);
+        CollectionAssert.AreEqual(new[] { expected }, sink.Logs.ToArray());
+    }
+
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    public void FileSinkShutdownFlushesReleasesFileAndRejectsFurtherWrites(int shutdownMode)
+    {
+        string path = Path.GetTempFileName();
+        try
+        {
+            using FileSinkPNP sink = new(path);
+            TraceSource source = new("FileSinkShutdown", SourceLevels.All);
+            source.Listeners.Clear();
+            source.Listeners.Add(sink);
+            try
+            {
+                sink.WriteLine("message");
+                switch (shutdownMode)
+                {
+                    case 0:
+                        sink.Close();
+                        break;
+                    case 1:
+                        source.Close();
+                        break;
+                    default:
+                        sink.Dispose();
+                        break;
+                }
+
+                // Exclusive access verifies shutdown released the file, not just its buffer.
+                using (FileStream stream = new(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using StreamReader reader = new(stream);
+                    Assert.AreEqual("message" + Environment.NewLine, reader.ReadToEnd());
+                }
+
+                sink.Close();
+                sink.Dispose();
+                Assert.ThrowsException<ObjectDisposedException>(() => sink.Write("late"));
+                Assert.ThrowsException<ObjectDisposedException>(() => sink.WriteLine("late"));
+                Assert.ThrowsException<ObjectDisposedException>(() => sink.Flush());
+                Assert.ThrowsException<ObjectDisposedException>(() => sink.TraceData(null, "test", TraceEventType.Information, 0, "late"));
+            }
+            finally
+            {
+                source.Close();
+            }
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    private sealed class ConfigurableMemorySink : InMemorySinkPNP
+    {
+        public ConfigurableMemorySink(string newLine)
+        {
+            CoreNewLine = newLine.ToCharArray();
+        }
     }
 
     private sealed class CapturingSink : CustomTraceListener
