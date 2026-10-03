@@ -1,6 +1,6 @@
 using DotNetFrameworkToolkit.Core;
 using DotNetFrameworkToolkit.Modules.ComponentModel;
-using DotNetFrameworkToolkit.Modules.DataAccess.Database;
+using DotNetFrameworkToolkit.Modules.DataAccess;
 using DotNetFrameworkToolkit.Modules.DependencyInjection;
 using DotNetFrameworkToolkit.Modules.Logging;
 using DotNetFrameworkToolkit.Modules.UserAccess;

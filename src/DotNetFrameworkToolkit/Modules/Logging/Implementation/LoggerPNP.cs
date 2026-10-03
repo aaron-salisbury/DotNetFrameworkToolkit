@@ -24,7 +24,10 @@ public class LoggerPNP : ILogger, IDisposable
     /// <summary>
     /// Gets the minimum <see cref="LogLevel"/> that will be logged by this logger.
     /// </summary>
-    public LogLevel MinimumLevel { get; private set; }
+    public LogLevel MinimumLevel
+    {
+        get; private set;
+    }
 
     [ThreadStatic] private static Dictionary<LoggerPNP, LoggerPNPScope> scopes;
     private readonly Core.OperationLifetime lifetime = new();

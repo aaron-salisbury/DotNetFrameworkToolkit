@@ -12,15 +12,24 @@ public class CryptographyCredential
     /// <summary>
     /// Cryptographic salt used for hashing the user's login credentials.
     /// </summary>
-    public byte[] LoginSalt { get; set; }
+    public byte[] LoginSalt
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Hashed value of the user's login credentials.
     /// </summary>
-    public byte[] LoginHash { get; set; }
+    public byte[] LoginHash
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Work factor (e.g., cost parameter) used in the password hashing algorithm.
     /// </summary>
-    public int LoginWorkFactor { get; set; }
+    public int LoginWorkFactor
+    {
+        get; set;
+    }
 }

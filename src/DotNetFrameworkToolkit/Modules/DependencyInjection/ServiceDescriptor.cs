@@ -10,22 +10,34 @@ public class ServiceDescriptor : IEquatable<ServiceDescriptor>
     /// <summary>
     /// Gets or sets the lifetime of the service.
     /// </summary>
-    public ServiceLifetime Lifetime { get; set; }
+    public ServiceLifetime Lifetime
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the type of the service.
     /// </summary>
-    public Type ServiceType { get; set; }
+    public Type ServiceType
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the type that implements the service.
     /// </summary>
-    public Type ImplementationType { get; set; }
+    public Type ImplementationType
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the instance that implements the service.
     /// </summary>
-    public object ImplementationInstance { get; set; }
+    public object ImplementationInstance
+    {
+        get; set;
+    }
 
     /// <inheritdoc/>
     public override bool Equals(object obj)

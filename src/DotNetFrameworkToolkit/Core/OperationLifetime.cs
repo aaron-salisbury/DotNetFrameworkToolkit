@@ -9,77 +9,82 @@ internal delegate void DisposalAction();
 
 internal sealed class OperationLifetime
 {
-    private readonly object sync = new();
-    private readonly Dictionary<int, int> threads = [];
-    private int active;
-    private bool closing;
+    private readonly object _sync = new();
+    private readonly Dictionary<int, int> _threads = [];
+    private int _active;
+    private bool _closing;
+
     internal IDisposable Enter()
     {
-        lock (sync)
+        lock (_sync)
         {
-            if (closing)
+            if (_closing)
             {
                 throw new ObjectDisposedException("Service lifetime");
             }
 
             int id = Thread.CurrentThread.ManagedThreadId;
-            threads.TryGetValue(id, out int count);
-            threads[id] = count + 1;
-            active++;
+            _threads.TryGetValue(id, out int count);
+            _threads[id] = count + 1;
+            _active++;
             return new Lease(this, id);
         }
     }
+
     internal void Dispose(DisposalAction dispose)
     {
         int id = Thread.CurrentThread.ManagedThreadId;
-        lock (sync)
+        lock (_sync)
         {
-            if (threads.ContainsKey(id))
+            if (_threads.ContainsKey(id))
             {
                 throw new InvalidOperationException("Cannot dispose a lifetime from one of its active operations.");
             }
 
             // Repeated concurrent disposal is a no-op, not another blocking dependency.
-            if (closing)
+            if (_closing)
             {
                 return;
             }
 
-            closing = true;
+            _closing = true;
 
-            while (active != 0)
+            while (_active != 0)
             {
-                Monitor.Wait(sync);
+                Monitor.Wait(_sync);
             }
         }
         dispose();
     }
+
     private sealed class Lease : IDisposable
     {
-        private OperationLifetime owner;
-        private readonly int id;
+        private OperationLifetime _owner;
+        private readonly int _id;
+
         internal Lease(OperationLifetime owner, int id)
         {
-            this.owner = owner;
-            this.id = id;
+            this._owner = owner;
+            this._id = id;
         }
+
         public void Dispose()
         {
-            OperationLifetime current = Interlocked.Exchange(ref owner, null);
+            OperationLifetime current = Interlocked.Exchange(ref _owner, null);
             if (current == null)
             {
                 return;
             }
 
-            lock (current.sync)
+            lock (current._sync)
             {
-                if (--current.threads[id] == 0)
+                if (--current._threads[_id] == 0)
                 {
-                    current.threads.Remove(id);
+                    current._threads.Remove(_id);
                 }
 
-                current.active--;
-                Monitor.PulseAll(current.sync);
+                current._active--;
+                Monitor.PulseAll(current._sync);
             }
         }
     }

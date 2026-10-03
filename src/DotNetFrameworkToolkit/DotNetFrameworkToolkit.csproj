@@ -80,9 +80,9 @@
     <Compile Include="Modules\ComponentModel\ObservableValidator.cs" />
     <Compile Include="Modules\ComponentModel\Validation\DataErrorsChangedEventArgs.cs" />
     <Compile Include="Modules\ComponentModel\Validation\INotifyDataErrorInfo.cs" />
-    <Compile Include="Modules\DataAccess\Database\SqlServerCeDatabase.cs" />
-    <Compile Include="Modules\DataAccess\FileSystem\FileSystemAccess.cs" />
-    <Compile Include="Modules\DataAccess\FileSystem\IFileSystemAccess.cs" />
+    <Compile Include="Modules\DataAccess\SqlServerCeDatabase.cs" />
+    <Compile Include="Modules\FileSystem\FileSystemAccess.cs" />
+    <Compile Include="Modules\FileSystem\IFileSystemAccess.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\Ioc.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceScopePNP.cs" />
     <Compile Include="Modules\DependencyInjection\Implementation\ServiceScopeFactoryPNP.cs" />

@@ -11,7 +11,10 @@ public interface INotifyDataErrorInfo
     /// <summary>
     /// Gets a value indicating whether the object has validation errors.
     /// </summary>
-    bool HasErrors { get; }
+    bool HasErrors
+    {
+        get;
+    }
 
     /// <summary>
     /// Occurs when the validation errors have changed for a property or for the entire object.
