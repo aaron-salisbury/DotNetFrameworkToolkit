@@ -38,6 +38,13 @@ public interface IFileSystemAccess
     /// A <see cref="ProcessResult{T}"/> whose <c>Value</c> property is <c>true</c> if the file was written successfully;
     /// otherwise, <c>false</c>. If the operation fails, <see cref="ProcessResult{T}.Error"/> contains the exception.
     /// </returns>
+    /// <remarks>
+    /// Content is staged before publication. Existing files use atomic replacement where supported.
+    /// On platforms without replacement support, a backup-and-restore fallback is used; it is not
+    /// atomic and concurrent writers must be coordinated by the application. If restoration fails,
+    /// the original backup is retained and its path is included in the error. Backup cleanup failure
+    /// after a committed write leaves the backup and does not change the successful result.
+    /// </remarks>
     ProcessResult<bool> WriteFile(IEnumerable<string> contentLines, string fileName, string directoryPath = null);
 
     /// <summary>

@@ -201,6 +201,34 @@ public class DependencyInjectionTests
         Assert.ThrowsException<ObjectDisposedException>(() => ioc.ConfigureServices(root));
     }
 
+    [TestMethod]
+    public void MissingRequiredValueTypesUseTheRequiredServiceDiagnostic()
+    {
+        using Ioc ioc = new();
+        ServiceCollectionPNP services = [];
+        ioc.ConfigureServices(services.BuildServiceProvider());
+
+        Assert.ThrowsException<InvalidOperationException>(() => ioc.GetRequiredService<int>());
+        Assert.ThrowsException<InvalidOperationException>(() => ioc.GetRequiredService<Guid>());
+    }
+
+    [TestMethod]
+    public void RequiredServiceReturnsRegisteredValueTypes()
+    {
+        using Ioc ioc = new();
+        ioc.ConfigureServices(new IntegerProvider());
+
+        Assert.AreEqual(42, ioc.GetRequiredService<int>());
+    }
+
+    private sealed class IntegerProvider : IServiceProvider
+    {
+        public object GetService(Type serviceType)
+        {
+            return serviceType == typeof(int) ? (object)42 : null;
+        }
+    }
+
     public class Transient
     {
     }

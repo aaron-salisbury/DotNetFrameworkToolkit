@@ -14,16 +14,26 @@ namespace DotNetFrameworkToolkit.Modules.FileSystem;
 public sealed class FileSystemAccess : IFileSystemAccess
 {
     private readonly ILogger _logger;
+    private readonly FileReplaceOperation _replace;
+    private readonly FileMoveOperation _move;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileSystemAccess"/> class with the specified logger.
     /// </summary>
     /// <param name="logger">The logger used to record informational messages, warnings, and errors related to file system operations.</param>
-    public FileSystemAccess(ILogger logger)
+    public FileSystemAccess(ILogger logger) : this(logger, File.Replace, File.Move)
+    {
+    }
+
+    internal FileSystemAccess(ILogger logger, FileReplaceOperation replace, FileMoveOperation move)
     {
         Guard.ArgumentNotNull(logger, nameof(logger));
+        Guard.ArgumentNotNull(replace, nameof(replace));
+        Guard.ArgumentNotNull(move, nameof(move));
 
         _logger = logger;
+        _replace = replace;
+        _move = move;
     }
 
     /// <inheritdoc/>
@@ -128,11 +138,11 @@ public sealed class FileSystemAccess : IFileSystemAccess
 
             if (File.Exists(fullPath))
             {
-                File.Replace(temporaryPath, fullPath, null);
+                ReplaceExistingFile(temporaryPath, fullPath);
             }
             else
             {
-                File.Move(temporaryPath, fullPath);
+                _move(temporaryPath, fullPath);
             }
 
             temporaryPath = null;
@@ -155,6 +165,57 @@ public sealed class FileSystemAccess : IFileSystemAccess
                 {
                     /* Preserve the write failure. */
                 }
+            }
+        }
+    }
+
+    private void ReplaceExistingFile(string temporaryPath, string fullPath)
+    {
+        try
+        {
+            _replace(temporaryPath, fullPath, null);
+            return;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // The fallback is intentionally limited to unavailable platform support.
+            // Sharing violations, access errors and other I/O failures must propagate.
+        }
+
+        string backupPath = temporaryPath + ".bak";
+        _move(fullPath, backupPath);
+        try
+        {
+            _move(temporaryPath, fullPath);
+        }
+        catch (Exception writeError)
+        {
+            try
+            {
+                _move(backupPath, fullPath);
+            }
+            catch (Exception restoreError)
+            {
+                // Keep the backup for recovery; never delete the last original copy.
+                throw new Core.AggregateException("Writing and restoring the file failed. The original remains at: " + backupPath, writeError, restoreError);
+            }
+            throw;
+        }
+
+        try
+        {
+            File.Delete(backupPath);
+        }
+        catch (Exception cleanupError)
+        {
+            // The new file was committed. A leftover backup does not undo that success.
+            try
+            {
+                _logger.LogWarning(cleanupError, "File written, but its original backup could not be removed: {BackupPath}", backupPath);
+            }
+            catch (Exception)
+            {
+                /* Logging must not turn a committed write into a reported failure. */
             }
         }
     }
@@ -187,3 +248,7 @@ public sealed class FileSystemAccess : IFileSystemAccess
         }
     }
 }
+
+// Internal fault-injection seams exercise filesystem failure paths with real files.
+internal delegate void FileReplaceOperation(string source, string destination, string backup);
+internal delegate void FileMoveOperation(string source, string destination);

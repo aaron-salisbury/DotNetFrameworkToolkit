@@ -12,12 +12,18 @@ public sealed class VerifyConsumerTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)
     {
-        ProcessStartInfo start = new ProcessStartInfo("pwsh")
+        string powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+        ProcessStartInfo start = new ProcessStartInfo(powershell)
         {
             UseShellExecute = false,
             WorkingDirectory = context.AbsolutePathToRepo
         };
+        // Let Windows PowerShell initialize its own module paths rather than inheriting
+        // PowerShell 7's incompatible module directories from the invoking build shell.
+        start.Environment.Remove("PSModulePath");
         start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-ExecutionPolicy");
+        start.ArgumentList.Add("Bypass");
         start.ArgumentList.Add("-File");
         start.ArgumentList.Add(Path.Combine(context.AbsolutePathToRepo, "build", "verify-consumer.ps1"));
         using (Process process = Process.Start(start) ?? throw new InvalidOperationException("Could not start consumer verification."))

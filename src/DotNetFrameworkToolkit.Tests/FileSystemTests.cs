@@ -64,6 +64,154 @@ public class FileSystemTests
     }
 
     [TestMethod]
+    public void UnsupportedReplacementPublishesNewContentAndRemovesBackup()
+    {
+        FileSystemAccess files = new(_logger, UnsupportedReplace, File.Move);
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+
+        Assert.IsTrue(files.WriteFile(["replacement"], "content.txt", _directory).Value);
+        CollectionAssert.AreEqual(new[] { "replacement" }, File.ReadAllLines(path));
+        Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
+    public void FailedFallbackPublicationRestoresOriginalAndPreservesWriteError()
+    {
+        IOException writeError = new("Publication failed.");
+        int moves = 0;
+        FileSystemAccess files = new(_logger, UnsupportedReplace, (source, destination) =>
+        {
+            moves++;
+            if (moves == 2)
+            {
+                throw writeError;
+            }
+            File.Move(source, destination);
+        });
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+
+        ProcessResult<bool> result = files.WriteFile(["replacement"], "content.txt", _directory);
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreSame(writeError, result.Error.InnerException);
+        Assert.AreEqual("original", File.ReadAllText(path));
+        Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
+    public void FailedBackupMoveLeavesOriginalUntouched()
+    {
+        IOException moveError = new("Backup move failed.");
+        FileSystemAccess files = new(_logger, UnsupportedReplace, (source, destination) =>
+        {
+            throw moveError;
+        });
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+
+        ProcessResult<bool> result = files.WriteFile(["replacement"], "content.txt", _directory);
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreSame(moveError, result.Error.InnerException);
+        Assert.AreEqual("original", File.ReadAllText(path));
+        Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
+    public void FailedFallbackRestorationRetainsOriginalBackupAndBothErrors()
+    {
+        IOException writeError = new("Publication failed.");
+        IOException restoreError = new("Restoration failed.");
+        int moves = 0;
+        FileSystemAccess files = new(_logger, UnsupportedReplace, (source, destination) =>
+        {
+            moves++;
+            if (moves == 2)
+            {
+                throw writeError;
+            }
+            if (moves == 3)
+            {
+                throw restoreError;
+            }
+            File.Move(source, destination);
+        });
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+
+        ProcessResult<bool> result = files.WriteFile(["replacement"], "content.txt", _directory);
+
+        Assert.IsFalse(result.IsSuccessful);
+        DotNetFrameworkToolkit.Core.AggregateException error = (DotNetFrameworkToolkit.Core.AggregateException)result.Error.InnerException;
+        Assert.AreEqual(2, error.InnerExceptions.Count);
+        Assert.AreSame(writeError, error.InnerExceptions[0]);
+        Assert.AreSame(restoreError, error.InnerExceptions[1]);
+        string[] backups = Directory.GetFiles(_directory, "*.bak");
+        Assert.AreEqual(1, backups.Length);
+        Assert.AreEqual("original", File.ReadAllText(backups[0]));
+        StringAssert.Contains(error.Message, backups[0]);
+        Assert.IsFalse(File.Exists(path));
+        Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
+    public void OrdinaryReplacementErrorDoesNotAttemptFallback()
+    {
+        IOException replaceError = new("Sharing violation.");
+        int moves = 0;
+        FileSystemAccess files = new(_logger, (source, destination, backup) =>
+        {
+            throw replaceError;
+        }, (source, destination) =>
+        {
+            moves++;
+            File.Move(source, destination);
+        });
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+
+        ProcessResult<bool> result = files.WriteFile(["replacement"], "content.txt", _directory);
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreSame(replaceError, result.Error.InnerException);
+        Assert.AreEqual(0, moves);
+        Assert.AreEqual("original", File.ReadAllText(path));
+        Assert.AreEqual(1, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
+    public void BackupCleanupAndLoggingFailuresDoNotReverseCommittedWrite()
+    {
+        string backup = null;
+        int moves = 0;
+        FileSystemAccess files = new(_logger, UnsupportedReplace, (source, destination) =>
+        {
+            moves++;
+            File.Move(source, destination);
+            if (moves == 1)
+            {
+                backup = destination;
+            }
+            else if (moves == 2)
+            {
+                File.SetAttributes(backup, FileAttributes.ReadOnly);
+            }
+        });
+        string path = Path.Combine(_directory, "content.txt");
+        File.WriteAllText(path, "original");
+        _logger.Dispose();
+
+        ProcessResult<bool> result = files.WriteFile(["replacement"], "content.txt", _directory);
+
+        Assert.IsTrue(result.IsSuccessful);
+        CollectionAssert.AreEqual(new[] { "replacement" }, File.ReadAllLines(path));
+        Assert.AreEqual("original", File.ReadAllText(backup));
+        Assert.AreEqual(2, Directory.GetFiles(_directory).Length);
+    }
+
+    [TestMethod]
     public void FailedEnumerationPreservesOriginalAndCleansTemporaryFile()
     {
         string path = Path.Combine(_directory, "content.txt");
@@ -95,6 +243,11 @@ public class FileSystemTests
         ProcessResult<string> missing = _files.GetEmbeddedResourceText(assembly, "missing.resource");
         Assert.IsFalse(missing.IsSuccessful);
         StringAssert.Contains(missing.Error.ToString(), "missing.resource");
+    }
+
+    private static void UnsupportedReplace(string source, string destination, string backup)
+    {
+        throw new PlatformNotSupportedException("File replacement is unavailable.");
     }
 
     private static IEnumerable<string> ThrowingLines()
