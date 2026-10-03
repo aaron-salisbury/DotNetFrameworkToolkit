@@ -134,7 +134,7 @@ public class InMemorySinkPNP : CustomTraceListener
                 break;
         }
 
-        Write(array);
+        Write(new string(array));
     }
 
     /// <summary>

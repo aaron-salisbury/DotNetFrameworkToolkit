@@ -96,7 +96,8 @@
     <Compile Include="Modules\Logging\EventId.cs" />
     <Compile Include="Modules\Logging\FormattedLogValues.cs" />
     <Compile Include="Modules\Logging\ILogger.cs" />
-    <Compile Include="Modules\Logging\Implementation\InMemorySinkPNP.cs" />
+    <Compile Include="Modules\Logging\Implementation\Sinks\FileSinkPNP.cs" />
+    <Compile Include="Modules\Logging\Implementation\Sinks\InMemorySinkPNP.cs" />
     <Compile Include="Modules\Logging\Implementation\LogEntryException.cs" />
     <Compile Include="Modules\Logging\Implementation\LoggerPNP.cs" />
     <Compile Include="Modules\Logging\Implementation\LoggerPNPScope.cs" />

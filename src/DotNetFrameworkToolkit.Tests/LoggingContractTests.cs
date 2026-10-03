@@ -327,14 +327,14 @@ public class LoggingContractTests
         int calls = 0;
         sink.LogEmitted += (sender, args) =>
         {
-            Assert.AreEqual("message", sink.Logs.Single());
+            Assert.AreEqual("message\r\n", sink.Logs.Single());
             Task writer = Task.Run(() => sink.Write("worker"));
             Assert.IsTrue(writer.Wait(5000), "Observer ran while the buffer lock was held.");
             calls++;
         };
         sink.TraceData(null, "test", TraceEventType.Information, 0, "message");
         Assert.AreEqual(1, calls, "Observer assertion was swallowed by the best-effort event contract.");
-        CollectionAssert.AreEqual(new[] { "message", "worker" }, sink.Logs.ToArray());
+        CollectionAssert.AreEqual(new[] { "message\r\n", "worker" }, sink.Logs.ToArray());
     }
 
     [TestMethod]
