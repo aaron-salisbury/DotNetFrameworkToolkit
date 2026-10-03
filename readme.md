@@ -5,6 +5,9 @@
 # .Net Framework Toolkit
 Common C# app development and shim code for legacy .Net Framework 2.0 projects.
 
+> [!WARNING]
+> This library is in pre-alpha development and subject to significant change.
+
 ## Purpose
 I occasionally find myself in restricted deployment scenarios where I target legacy Windows platforms limited to .Net Framework. So I created this library to aid in maintenance and rapid development under those constraints.
 
