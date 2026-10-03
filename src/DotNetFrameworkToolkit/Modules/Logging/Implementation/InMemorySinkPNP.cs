@@ -28,6 +28,11 @@ public class InMemorySinkPNP : CustomTraceListener
     private int _maxLogsCount;
 
     /// <summary>
+    /// Gets or sets the newline characters appended by <see cref="WriteLine(string)"/>.
+    /// </summary>
+    protected char[] CoreNewLine = ['\r', '\n'];
+
+    /// <summary>
     /// Gets the collection of log messages currently stored in memory.
     /// </summary>
     public IList<string> Logs
@@ -111,7 +116,25 @@ public class InMemorySinkPNP : CustomTraceListener
     /// <param name="message">The log message to write.</param>
     public override void WriteLine(string message)
     {
-        Write(message);
+        int length = message.Length;
+        int num = CoreNewLine.Length;
+        char[] array = new char[length + num];
+        message.CopyTo(0, array, 0, length);
+        switch (num)
+        {
+            case 2:
+                array[length] = CoreNewLine[0];
+                array[length + 1] = CoreNewLine[1];
+                break;
+            case 1:
+                array[length] = CoreNewLine[0];
+                break;
+            default:
+                Array.Copy(CoreNewLine, 0, array, length, num);
+                break;
+        }
+
+        Write(array);
     }
 
     /// <summary>
