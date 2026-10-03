@@ -13,7 +13,10 @@ public class ValidationResult<T>
     /// <summary>
     /// Gets the validated object.
     /// </summary>
-    public T Value { get; private set; }
+    public T Value
+    {
+        get; private set;
+    }
 
     /// <summary>
     /// Gets a value indicating whether the validation was successful.

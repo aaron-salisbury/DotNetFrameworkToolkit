@@ -12,10 +12,16 @@ public class LogEntryException : LogEntry
     /// <summary>
     /// Gets or sets the exception associated with this log entry.
     /// </summary>
-    public Exception Exception { get; set; }
+    public Exception Exception
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the severity level of this log entry.
     /// </summary>
-    public LogLevel LogLevel { get; set; }
+    public LogLevel LogLevel
+    {
+        get; set;
+    }
 }

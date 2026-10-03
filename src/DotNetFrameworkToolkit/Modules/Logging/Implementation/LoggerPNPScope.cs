@@ -12,10 +12,19 @@ namespace DotNetFrameworkToolkit.Modules.Logging;
 public class LoggerPNPScope : IDisposable
 {
     /// <summary>Gets the enclosing scope.</summary>
-    public LoggerPNPScope Parent { get; }
+    public LoggerPNPScope Parent
+    {
+        get;
+    }
 
-    internal object State { get; }
-    internal bool IsDisposed { get; private set; }
+    internal object State
+    {
+        get;
+    }
+    internal bool IsDisposed
+    {
+        get; private set;
+    }
 
     private readonly LoggerPNP _provider;
     private readonly int _threadId;

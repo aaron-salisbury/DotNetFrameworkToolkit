@@ -20,15 +20,15 @@ namespace DotNetFrameworkToolkit.Modules.DependencyInjection;
 /// </remarks>
 public class ServiceProviderPNP : IServiceProvider, IDisposable
 {
-    private readonly IUnityContainer container;
-    private readonly ServiceProviderPNP root;
-    private readonly List<ServiceDescriptor> descriptors;
-    private readonly OperationLifetime lifetime = new();
-    private readonly List<IDisposable> owned = new();
-    private readonly List<ServiceProviderPNP> children = new();
-    private readonly object sync = new();
-    private readonly bool externalContainer;
-    private readonly ServiceScopeFactoryPNP scopeFactory;
+    private readonly IUnityContainer _container;
+    private readonly ServiceProviderPNP _root;
+    private readonly List<ServiceDescriptor> _descriptors;
+    private readonly OperationLifetime _lifetime = new();
+    private readonly List<IDisposable> _owned = new();
+    private readonly List<ServiceProviderPNP> _children = new();
+    private readonly object _sync = new();
+    private readonly bool _externalContainer;
+    private readonly ServiceScopeFactoryPNP _scopeFactory;
 
     /// <summary>
     /// Wraps an externally configured Unity container, retaining native Unity auto-construction
@@ -50,33 +50,33 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     {
         Guard.ArgumentNotNull(services, nameof(services));
 
-        container = services;
-        this.root = root ?? this;
-        externalContainer = external;
-        descriptors = [];
+        _container = services;
+        this._root = root ?? this;
+        _externalContainer = external;
+        _descriptors = [];
 
         try
         {
             foreach (ServiceDescriptor descriptor in servicesToRegister)
             {
-                descriptors.Add(ServiceCollectionPNP.Copy(descriptor));
+                _descriptors.Add(ServiceCollectionPNP.Copy(descriptor));
             }
 
-            scopeFactory = new ServiceScopeFactoryPNP(this.root);
+            _scopeFactory = new ServiceScopeFactoryPNP(this._root);
 
-            foreach (ServiceDescriptor descriptor in descriptors)
+            foreach (ServiceDescriptor descriptor in _descriptors)
             {
                 if (descriptor.ImplementationInstance != null)
                 {
-                    container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance, new ExternallyControlledLifetimeManager());
+                    _container.RegisterInstance(descriptor.ServiceType, descriptor.ImplementationInstance, new ExternallyControlledLifetimeManager());
                 }
                 else if (root != null && descriptor.Lifetime == ServiceLifetime.Singleton)
                 {
-                    container.RegisterType(descriptor.ServiceType, descriptor.ImplementationType, new RootLifetime(root, descriptor.ServiceType));
+                    _container.RegisterType(descriptor.ServiceType, descriptor.ImplementationType, new RootLifetime(root, descriptor.ServiceType));
                 }
                 else
                 {
-                    container.RegisterType(
+                    _container.RegisterType(
                     descriptor.ServiceType,
                     descriptor.ImplementationType,
                     descriptor.Lifetime == ServiceLifetime.Transient
@@ -85,14 +85,14 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
                 }
             }
 
-            container.RegisterInstance<IServiceProvider>(this, new ExternallyControlledLifetimeManager());
-            container.RegisterInstance<IServiceScopeFactory>(scopeFactory, new ExternallyControlledLifetimeManager());
+            _container.RegisterInstance<IServiceProvider>(this, new ExternallyControlledLifetimeManager());
+            _container.RegisterInstance<IServiceScopeFactory>(_scopeFactory, new ExternallyControlledLifetimeManager());
         }
         catch (Exception constructionError)
         {
             try
             {
-                container.Dispose();
+                _container.Dispose();
             }
             catch (Exception cleanupError)
             {
@@ -121,23 +121,23 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     {
         Guard.ArgumentNotNull(serviceType, nameof(serviceType));
 
-        using (root.lifetime.Enter())
+        using (_root._lifetime.Enter())
         {
-            using (ReferenceEquals(root, this) ? null : lifetime.Enter())
+            using (ReferenceEquals(_root, this) ? null : _lifetime.Enter())
             {
-                if (serviceType != typeof(IServiceProvider) && serviceType != typeof(IServiceScopeFactory) && !externalContainer && !Registered(serviceType))
+                if (serviceType != typeof(IServiceProvider) && serviceType != typeof(IServiceScopeFactory) && !_externalContainer && !Registered(serviceType))
                 {
                     return null;
                 }
 
-                return container.Resolve(serviceType);
+                return _container.Resolve(serviceType);
             }
         }
     }
 
     private bool Registered(Type type)
     {
-        foreach (ServiceDescriptor d in descriptors)
+        foreach (ServiceDescriptor d in _descriptors)
         {
             if (d.ServiceType == type || (type.IsGenericType && d.ServiceType.IsGenericTypeDefinition && type.GetGenericTypeDefinition() == d.ServiceType))
             {
@@ -150,12 +150,12 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
 
     internal IServiceScope CreateScope()
     {
-        using (root.lifetime.Enter())
+        using (_root._lifetime.Enter())
         {
-            ServiceProviderPNP child = new(root.container.CreateChildContainer(), root.descriptors, root, externalContainer);
-            lock (root.sync)
+            ServiceProviderPNP child = new(_root._container.CreateChildContainer(), _root._descriptors, _root, _externalContainer);
+            lock (_root._sync)
             {
-                root.children.Add(child);
+                _root._children.Add(child);
             }
             return new ServiceScopePNP(child);
         }
@@ -168,9 +168,9 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
             return;
         }
 
-        lock (sync)
+        lock (_sync)
         {
-            foreach (IDisposable existing in owned)
+            foreach (IDisposable existing in _owned)
             {
                 if (ReferenceEquals(existing, disposable))
                 {
@@ -178,7 +178,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
                 }
             }
 
-            owned.Add(disposable);
+            _owned.Add(disposable);
         }
     }
 
@@ -194,7 +194,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
     /// </remarks>
     public void Dispose()
     {
-        if (ReferenceEquals(root, this))
+        if (ReferenceEquals(_root, this))
         {
             DisposeCore();
             return;
@@ -203,7 +203,7 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
         IDisposable rootOperation;
         try
         {
-            rootOperation = root.lifetime.Enter();
+            rootOperation = _root._lifetime.Enter();
         }
         catch (ObjectDisposedException)
         {
@@ -219,13 +219,13 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
 
     private void DisposeCore()
     {
-        lifetime.Dispose(() =>
+        _lifetime.Dispose(() =>
         {
             List<Exception> errors = new();
             ServiceProviderPNP[] scopes;
-            lock (sync)
+            lock (_sync)
             {
-                scopes = children.ToArray();
+                scopes = _children.ToArray();
             }
 
             foreach (ServiceProviderPNP child in scopes)
@@ -241,11 +241,11 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
             }
 
             IDisposable[] instances;
-            lock (sync)
+            lock (_sync)
             {
-                instances = owned.ToArray();
-                owned.Clear();
-                children.Clear();
+                instances = _owned.ToArray();
+                _owned.Clear();
+                _children.Clear();
             }
 
             for (int i = instances.Length - 1; i >= 0; --i)
@@ -262,18 +262,18 @@ public class ServiceProviderPNP : IServiceProvider, IDisposable
 
             try
             {
-                container.Dispose();
+                _container.Dispose();
             }
             catch (Exception e)
             {
                 errors.Add(e);
             }
 
-            if (!ReferenceEquals(root, this))
+            if (!ReferenceEquals(_root, this))
             {
-                lock (root.sync)
+                lock (_root._sync)
                 {
-                    root.children.Remove(this);
+                    _root._children.Remove(this);
                 }
             }
 

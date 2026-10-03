@@ -16,5 +16,8 @@ public interface IServiceScope : IDisposable
     /// <summary>
     /// Gets the <see cref="IServiceProvider"/> used to resolve dependencies from the scope.
     /// </summary>
-    IServiceProvider ServiceProvider { get; }
+    IServiceProvider ServiceProvider
+    {
+        get;
+    }
 }

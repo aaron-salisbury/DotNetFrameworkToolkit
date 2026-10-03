@@ -11,17 +11,26 @@ public class LoggerState
     /// <summary>
     /// Gets or sets the name of a single property associated with the logger state.
     /// </summary>
-    public string SinglePropertyName { get; set; }
+    public string SinglePropertyName
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the value of the single property associated with the logger state.
     /// </summary>
-    public object SinglePropertyValue { get; set; }
+    public object SinglePropertyValue
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets a dictionary containing multiple property names and their corresponding values for the logger state.
     /// </summary>
-    public Dictionary<string, object> PropertyValuesByNames { get; set; }
+    public Dictionary<string, object> PropertyValuesByNames
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets a value indicating whether the logger state represents a single property (both name and value are set).

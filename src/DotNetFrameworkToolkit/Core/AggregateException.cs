@@ -18,7 +18,10 @@ public class AggregateException : Exception
     /// <summary>
     /// Gets a read-only collection of the <see cref="Exception"/> instances that caused the current exception.
     /// </summary>
-    public ReadOnlyCollection<Exception> InnerExceptions { get; }
+    public ReadOnlyCollection<Exception> InnerExceptions
+    {
+        get;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateException"/> class.

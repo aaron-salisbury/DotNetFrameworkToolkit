@@ -11,20 +11,32 @@ public class LogEvent
     /// <summary>
     /// Gets or sets the date and time when the log event occurred.
     /// </summary>
-    public DateTime TimeStamp { get; set; }
+    public DateTime TimeStamp
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the log message describing the event.
     /// </summary>
-    public string Message { get; set; }
+    public string Message
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the severity level of the log event.
     /// </summary>
-    public LogLevel Level { get; set; }
+    public LogLevel Level
+    {
+        get; set;
+    }
 
     /// <summary>
     /// Gets or sets the exception associated with the log event, if any.
     /// </summary>
-    public Exception Exception { get; set; }
+    public Exception Exception
+    {
+        get; set;
+    }
 }

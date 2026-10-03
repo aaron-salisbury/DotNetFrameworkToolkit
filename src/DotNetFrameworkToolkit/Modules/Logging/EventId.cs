@@ -52,12 +52,18 @@ public readonly struct EventId : IEquatable<EventId>
     /// <summary>
     /// Gets the numeric identifier for this event.
     /// </summary>
-    public int Id { get; }
+    public int Id
+    {
+        get;
+    }
 
     /// <summary>
     /// Gets the name of this event.
     /// </summary>
-    public string Name { get; }
+    public string Name
+    {
+        get;
+    }
 
     /// <inheritdoc />
     public override string ToString()

@@ -209,5 +209,8 @@ public class LogEmitEventArgs : EventArgs
     /// <summary>
     /// Gets or sets the <see cref="LogEvent"/> associated with the emitted log entry.
     /// </summary>
-    public LogEvent LogEvent { get; set; }
+    public LogEvent LogEvent
+    {
+        get; set;
+    }
 }
