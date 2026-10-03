@@ -3,7 +3,7 @@ using System;
 using System.Data.SqlServerCe;
 using System.IO;
 
-namespace DotNetFrameworkToolkit.Modules.DataAccess.Database;
+namespace DotNetFrameworkToolkit.Modules.DataAccess;
 
 /// <summary>
 /// Provides explicit-path creation and connection helpers for SQL Server Compact.

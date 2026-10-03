@@ -1,4 +1,4 @@
-using DotNetFrameworkToolkit.Modules.DataAccess.Database;
+using DotNetFrameworkToolkit.Modules.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Data;

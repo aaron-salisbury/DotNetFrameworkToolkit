@@ -1,5 +1,5 @@
 using DotNetFrameworkToolkit.Core;
-using DotNetFrameworkToolkit.Modules.DataAccess.FileSystem;
+using DotNetFrameworkToolkit.Modules.FileSystem;
 using DotNetFrameworkToolkit.Modules.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

@@ -1,6 +1,6 @@
 # SQL Server Compact helpers
 
-`SqlServerCeDatabase` in `DotNetFrameworkToolkit.Modules.DataAccess.Database` provides three operations:
+`SqlServerCeDatabase` in `DotNetFrameworkToolkit.Modules.DataAccess` provides three operations:
 
 | Operation | Contract |
 | --- | --- |

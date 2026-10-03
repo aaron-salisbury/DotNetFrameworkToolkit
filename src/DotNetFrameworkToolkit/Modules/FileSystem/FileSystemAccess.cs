@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace DotNetFrameworkToolkit.Modules.DataAccess.FileSystem;
+namespace DotNetFrameworkToolkit.Modules.FileSystem;
 
 /// <summary>
 /// Provides utility methods for interacting with an operating system's files and directories.
